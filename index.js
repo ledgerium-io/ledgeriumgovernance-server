@@ -1,37 +1,21 @@
+const fs = require('fs');
 const Web3 = require('web3');
 const utils =  require('./web3util');
 const async =  require('async');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
-var privateKey = ['ad354fec0c128d11fff746a2f464ecabb7a5a03f8934540ac71ca2350d707a6d',
-                  'f392eaad836eea3f6b8a59d0b84d4ca349976b35ab05ded71115de567c2034e1',
-                  '4fd0dadcba3f9e9ecea32d362a31bca2e3733aa05c26b880e7a477df53c9a501'];
-
-//var keyStorePath = __dirname;
-//const password = "password";
-
-// privateKey[0] = utils.getPrivateKeyFromKeyStore(accountAddress[0], keyStorePath, password);
-// console.log(privateKey[0]);
-
-// privateKey[1] = utils.getPrivateKeyFromKeyStore(accountAddress[1], keyStorePath, password);
-// console.log(privateKey[1]);
-
-// privateKey[2] = utils.getPrivateKeyFromKeyStore(accountAddress[2], keyStorePath, password);
-// console.log(privateKey[2]);
-
-// privateKey[3] = utils.getPrivateKeyFromKeyStore(accountAddress[3], keyStorePath, password);
-// console.log(privateKey[3]);
-
 var host = "http://localhost:20100";
-web3 = new Web3(new Web3.providers.HttpProvider(host));
+var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 // var host = "ws://localhost:9000";
 // web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
+var privateKey = {};
 var main = async function () {
+
     var accountAddress = [];
     accountAddress = await web3.eth.getAccounts();
     console.log("There are accounts in the blockchain ", accountAddress.length);
@@ -41,6 +25,8 @@ var main = async function () {
     accountAddress.forEach(eachElement => {
         console.log(i++,"th account", eachElement);
     });
+    readWritePrivateKeys(accountAddress);
+    
     result = await web3.eth.net.getId();
     console.log("Network ID", web3.utils.toHex(result));
     
@@ -48,25 +34,26 @@ var main = async function () {
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
     var otherAdminsList = [];
+    var ethAccountToUse = accountAddress[0];
     otherAdminsList.push(accountAddress[1]);
     otherAdminsList.push(accountAddress[2]);
-    const adminValidatorSetAddress = await deployNewAdminSetValidatorContract(accountAddress[0],otherAdminsList);
+    const adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-    adminValidatorSet.setOwnersParameters(accountAddress[0],privateKey[0],adminValidatorSetAddress);
+    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress);
     
-    const simpleValidatorSetAddress = await deployNewSingleSetValidatorContract(accountAddress[0],adminValidatorSetAddress);
+    const simpleValidatorSetAddress = await deployNewSingleSetValidatorContract(ethAccountToUse,adminValidatorSetAddress);
     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
-    simpleValidatorSet.setOwnersParameters(accountAddress[0],privateKey[0],simpleValidatorSetAddress);
+    simpleValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],simpleValidatorSetAddress);
 
     var flag = await getListOfActiveValidators();
 
-    flag = await addSimpleSetContractValidatorsForAdmin(accountAddress[0]);
+    flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
     console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
     flag = await getListOfActiveValidators();
     console.log("return flag for getListOfActiveValidators",flag);
 
-    flag = await removeSimpleSetContractValidatorsForAdmin(accountAddress[0]);
+    flag = await removeSimpleSetContractValidatorsForAdmin(ethAccountToUse);
     console.log("return flag for removeSimpleSetContractValidatorsForAdmin",flag);
 
     flag = await getListOfActiveValidators();
@@ -186,5 +173,52 @@ async function getListOfActiveValidators()
     catch (error) {
         console.log("Error in removeSimpleSetContractValidatorsForAdmin(): " + error);
         return false;
+    }
+}
+
+function readWritePrivateKeys(accountAddressList){
+    
+    try{
+        var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+        var keyStorePath = __dirname;
+        const password = "password";
+        var keyData = {};
+        if(fs.existsSync(privateKeyFileName)){
+            keyData = fs.readFileSync(privateKeyFileName,"utf8");
+            keyData = JSON.parse(keyData);
+        }    
+        var key;
+        console.log("no of ethereum accounts", accountAddressList.length);
+        if(accountAddressList.length > 0){
+            accountAddressList.forEach(eachElement => {
+            if(keyData[eachElement] != undefined)
+                key = keyData[eachElement];
+            else
+            {    
+                try{
+                    key = utils.getPrivateKeyFromKeyStore(eachElement, keyStorePath, password);
+                }
+                catch (error) {
+                    console.log(error);
+                    return;
+                }
+            }    
+            privateKey[eachElement] = key;
+            console.log(key);
+            });
+        }    
+        data = JSON.stringify(privateKey,null, 2);
+        fs.writeFileSync(privateKeyFileName,data);
+
+        console.log("No of private keys", Object.keys(privateKey).length);
+
+        // var newAccount = await web3.eth.personal.newAccount(password);
+        // console.log("accountaddress ", newAccount);
+
+        //var account = web3.eth.accounts.privateKeyToAccount(privateKey[accountAddressList[0]]);
+        //console.log("accountaddress ", accountAddressList[0], "recovered account with private key is", privateKey[accountAddressList[0]], account.address);
+    }
+    catch (error) {
+        console.log("Error in readWritePrivateKeys: " + error);
     }
 }
