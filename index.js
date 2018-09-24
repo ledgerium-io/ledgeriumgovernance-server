@@ -16,44 +16,26 @@ var web3 = new Web3(new Web3.providers.HttpProvider(host));
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
 var privateKey = {};
+var accountAddressList = [];
 
 var main = async function () {
 
-    var accountAddress = [];
-    accountAddress = await web3.eth.getAccounts();
-    console.log("There are accounts in the blockchain ", accountAddress.length);
-    if(accountAddress.length <= 0)
-        return;
-    var i = 0;
-    accountAddress.forEach(eachElement => {
-        console.log(i++,"th account", eachElement);
-    });
-    readWritePrivateKeys(accountAddress);
+    //await generateKeysAndCreateAccounts(accountAddressList);
+    await readWritePrivateKeys(accountAddressList);
     
     result = await web3.eth.net.getId();
     console.log("Network ID", web3.utils.toHex(result));
     
-    try{
-        result = await web3.eth.personal.unlockAccount(accountAddress[0],"password",3000000);
-        result = await web3.eth.personal.unlockAccount(accountAddress[1],"password",3000000);
-        result = await web3.eth.personal.unlockAccount(accountAddress[2],"password",3000000);
-    }
-    catch(error)
-    {
-        console.log("error", error);
-    }
-
-    var ethAccountToUse = accountAddress[0];
-    accessEarlierGreeting(ethAccountToUse);
-    //return;
+    var ethAccountToUse = accountAddressList[0];
+    await accessEarlierGreeting(ethAccountToUse);
     
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
     var otherAdminsList = [];
-    ethAccountToUse = accountAddress[0];
-    otherAdminsList.push(accountAddress[1]);
-    otherAdminsList.push(accountAddress[2]);
+    ethAccountToUse = accountAddressList[0];
+    otherAdminsList.push(accountAddressList[1]);
+    otherAdminsList.push(accountAddressList[2]);
     const adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress);
@@ -192,23 +174,79 @@ async function getListOfActiveValidators()
     }
 }
 
-function readWritePrivateKeys(accountAddressList){
-    
+async function generateKeysAndCreateAccounts(){
     try{
+        accountAddressList.length = 0;
+        
+        var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+        var keyData = {};
+        if(fs.existsSync(privateKeyFileName)){
+            keyData = fs.readFileSync(privateKeyFileName,"utf8");
+            privateKey = JSON.parse(keyData);
+            Object.keys(privateKey).forEach(eachElement => {
+                accountAddressList.push(eachElement);
+                console.log(eachElement);
+            });
+        }
+        else{
+            const password = "password";
+            for(index = 0; index < 3; index++){
+                var newAccount = await web3.eth.accounts.create(password);
+                console.log("newAccount Address", newAccount.address);
+                console.log("newAccount privateKey", newAccount.privateKey);
+                privateKey[newAccount.address] = newAccount.privateKey;
+                
+                //var key=Buffer.from(newAccount.privateKey,'hex');
+                var result = await web3.eth.personal.importRawKey(newAccount.privateKey, password);
+                console.log("result ", result);
+            }
+            data = JSON.stringify(privateKey,null, 2);
+            fs.writeFileSync(privateKeyFileName,data);
+            console.log("No of private keys", Object.keys(privateKey).length);
+        }
+    }
+    catch (error) {
+        console.log("Error in generateKeysAndCreateAccounts: " + error);
+    }    
+}
+
+async function readWritePrivateKeys(){
+    try{
+        const password = "password";
+        accountAddressList.length = 0;
+        accountAddressList = await web3.eth.getAccounts();
+        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
+        if(accountAddressList.length <= 0)
+            return;
+        
+        // try{
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
+        // }
+        // catch(error)
+        // {
+        //     console.log("error", error);
+        // }
+        
         var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
         var keyStorePath = __dirname;
-        const password = "password";
+        
         var keyData = {};
         if(fs.existsSync(privateKeyFileName)){
             keyData = fs.readFileSync(privateKeyFileName,"utf8");
             keyData = JSON.parse(keyData);
         }    
         var key;
-        console.log("no of ethereum accounts", accountAddressList.length);
         if(accountAddressList.length > 0){
+            var i = 0;
             accountAddressList.forEach(eachElement => {
-            if(keyData[eachElement] != undefined)
+            console.log(i++,"th account",eachElement);
+            
+            if(keyData[eachElement] != undefined){
                 key = keyData[eachElement];
+
+            }    
             else
             {    
                 try{
@@ -228,7 +266,7 @@ function readWritePrivateKeys(accountAddressList){
         console.log("No of private keys", Object.keys(privateKey).length);
 
         // var newAccount = await web3.eth.personal.newAccount(password);
-        // console.log("accountaddress ", newAccount);
+        // console.log("accountAddressList ", newAccount);
 
         //var account = web3.eth.accounts.privateKeyToAccount(privateKey[accountAddressList[0]]);
         //console.log("accountaddress ", accountAddressList[0], "recovered account with private key is", privateKey[accountAddressList[0]], account.address);
@@ -277,7 +315,7 @@ async function accessEarlierGreeting(ethAccountToUse){
     var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,deployedAddress, encodedABI,web3);
     console.log("estimatedGas",estimatedGas);
     
-    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,estimatedGas);
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,200000);
     console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
 
     greeting1.methods.getMyNumber().call().then(result => {
