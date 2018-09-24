@@ -33,8 +33,18 @@ var main = async function () {
     result = await web3.eth.net.getId();
     console.log("Network ID", web3.utils.toHex(result));
     
+    try{
+        result = await web3.eth.personal.unlockAccount(accountAddress[0],"password",3000000);
+        result = await web3.eth.personal.unlockAccount(accountAddress[1],"password",3000000);
+        result = await web3.eth.personal.unlockAccount(accountAddress[2],"password",3000000);
+    }
+    catch(error)
+    {
+        console.log("error", error);
+    }
+
     var ethAccountToUse = accountAddress[0];
-    //accessEarlierGreeting(ethAccountToUse);
+    accessEarlierGreeting(ethAccountToUse);
     //return;
     
     adminValidatorSet = new AdminValidatorSet(web3);
