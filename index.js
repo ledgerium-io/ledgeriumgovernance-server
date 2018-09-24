@@ -6,8 +6,8 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 // const utils = require('./web3util');
 
-var host = "http://localhost:20100";
-//var host = "http://localhost:8545";
+//var host = "http://localhost:20100";
+var host = "http://localhost:8545";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 // var host = "ws://localhost:9000";

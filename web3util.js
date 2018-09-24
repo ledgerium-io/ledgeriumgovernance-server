@@ -65,7 +65,7 @@ const utils = {
             const txParams = {
                 nonce: nonceToUse,
                 gasPrice: '0x00',
-                gasLimit: estimatedGas, //20000000, // Todo, estimate gas
+                gasLimit: 4700000, //estimatedGas, //20000000, // Todo, estimate gas
                 from: fromAccountAddress,
                 to: toContractAddress,
                 value: '0x00',
