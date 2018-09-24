@@ -17,7 +17,7 @@ module.exports = class AdminValidatorSet {
         this.ownerAccountAddress = ownerAccountAddress;
         this.privateKey = privateKey;
         this.adminValidatorSetAddress = adminValidatorSetAddress;
-        this.contract = new web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
+        this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
         
         //subscribeForPastEvents();
         //listenForContractObjectEvents(this.contract);  
@@ -25,100 +25,14 @@ module.exports = class AdminValidatorSet {
 
     async deployNewAdminSetValidatorContract(ethAccountToUse, otherAdminsList) {
         try {
-            var validatorSetThis = this.getThis;
-            var deployedAddress = await utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList);//, function(returnTypeString, result){
-            validatorSetThis.adminValidatorSetAddress = deployedAddress;
-            return validatorSetThis.adminValidatorSetAddress;
+            var deployedAddress = await utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);//, function(returnTypeString, result){
+            this.adminValidatorSetAddress = deployedAddress;
+            return this.adminValidatorSetAddress;
         } catch (error) {
             console.log("Error in AdminValidatorSet.deployNewAdminSetValidatorContract(): " + error);
         }
     }
 
-    async getValidatorsAsync() {
-        try {
-            console.log("GetValidatorsAsync:this.adminValidatorSetAddress ",this.adminValidatorSetAddress);
-            this.contract = new web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
-            resultList = await this.contract.methods.getValidators().call().then(function(resultList){
-                console.log("GetValidatorsAsync resultList ",resultList.length);
-                if (resultList.length > 0) {
-                    resultList.forEach(eachElement => {
-                        console.log(eachElement, "\n");
-                    });
-                }
-            });
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.GetValidatorsAsync(): " + error);
-        }
-    }
-
-    async getAdminValidatorsAsync(adminAddress) {
-        try {
-            console.log("GetAdminValidatorsAsync:this.adminValidatorSetAddress ",this.adminValidatorSetAddress);
-            this.contract.methods.getAdminValidators(adminAddress).call().then(function(resultList){
-                console.log("GetAdminValidatorsAsync resultList for ",adminAddress, resultList.length);
-                if (resultList.length > 0) {
-                    resultList.forEach(eachElement => {
-                        console.log(eachElement, "\n");
-                    });
-                }
-            });
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.GetAdminValidatorsAsync(): " + error);
-        }
-    }
-
-    async addValidator(adminAccount, newValidatorList, adminAccountToadd, fromContractConstructor) {
-        try {
-            console.log("AddValidator:this.adminValidatorSetAddress ",this.adminValidatorSetAddress);
-            var validatorSetThis = this.getThis;
-            var encodedABI = this.contract.methods.addValidators(newValidatorList, adminAccountToadd, fromContractConstructor).encodeABI();
-            utils.estimateGasTransaction(adminAccount,this.contract._address, encodedABI,web3,"AdminValidatorSet:AddValidator",function (estimatedGas) {
-               console.log("estimatedGas",estimatedGas);
-                utils.sendMethodTransaction(adminAccount,validatorSetThis.contract._address,encodedABI,validatorSetThis.privateKey,web3,estimatedGas,"AdminValidatorSet:AddValidator",
-                    function(returnTypeString){
-                        if (returnTypeString == "success") {
-                            validatorSetThis.GetValidatorsAsync();
-                        }
-                        else {
-                            console.log('error', `ERROR:\n${error.message}:${error.stack}`);
-                        }
-                });
-            });    
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.AddValidator(): " + error);
-        }    
-    }
-
-    async finaliseChange(adminAccount) {
-        try {
-            var encodedABI = this.contract.methods.finalizeChange().encodeABI();
-            utils.sendMethodTransaction(adminAccount,this.contract._address, encodedABI,this.privateKey,web3,"SimpleSetContract:finaliseChange");
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.finaliseChange(): " + error);
-        }
-    }
-
-    async removeValidator(adminAccount, validatorToRemoveList, adminAccountToRemoveFrom) {
-        try {
-            var validatorSetThis = this.getThis;
-            var encodedABI = this.contract.methods.removeValidators(validatorToRemoveList, adminAccountToRemoveFrom).encodeABI();
-            utils.estimateGasTransaction(adminAccount,this.contract._address, encodedABI,web3,"AdminValidatorSet:RemoveValidator",function (estimatedGas) {
-                    utils.sendMethodTransaction(adminAccount,adminAccountToRemoveFrom,encodedABI,validatorSetThis.privateKey,web3,estimatedGas,"AdminValidatorSet:RemoveValidator",
-                    function(returnTypeString){
-                        if (returnTypeString == "success") {
-                            validatorSetThis.GetValidatorsAsync();
-                        }
-                        else {
-                            console.log('error', `ERROR:\n${error.message}:${error.stack}`);
-                        }
-                });
-            });
-            
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.RemoveValidator(): " + error);
-        }
-    }
-   
     subscribeForPastEvents(){
         var options = {
             fromBlock: "latest",
@@ -158,7 +72,7 @@ module.exports = class AdminValidatorSet {
      }     
         
      listenForContractObjectEvents(contractObject){
-        utils.listen(contractObject,(events)=>{
+        utils.listen(contractObject, (events)=>{
             console.log('SimpleValidatorSet Event Received');
             switch(events.event){
                 case "addvalidator":
@@ -177,7 +91,7 @@ module.exports = class AdminValidatorSet {
             }
         });
 
-        // utils.subscribe("SimpleValidatorSet", (events)=>{
+        // utils.subscribe("SimpleValidatorSet", this.web3, (events)=>{
         //     console.log('SimpleValidatorSet Event Received');
         //     switch(events.event){
         //         case "InitiateChange":
@@ -197,8 +111,4 @@ module.exports = class AdminValidatorSet {
         //     }
         // });
     }  
-    
-    get getThis() {
-        return this;
-    }
 }

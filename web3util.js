@@ -22,7 +22,7 @@ const utils = {
         }
     },
 
-    async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, callback) {
+    async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, web3 /*callback*/) {
         console.log("deployContract");
         try{
             var deployedAddress;
@@ -127,7 +127,7 @@ const utils = {
         return privateKey.toString('hex');
     },
 
-    async subscribe (string,callback) {
+    async subscribe (string,web3,callback) {
         web3.eth.subscribe(string,(error,transaction)=>{
             if(error){
                 console.log("error",`SUBSCRIBE:\n${error.message}\n${error.stack}`);

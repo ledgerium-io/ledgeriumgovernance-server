@@ -4,8 +4,10 @@ const utils =  require('./web3util');
 const async =  require('async');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
+// const utils = require('./web3util');
 
 var host = "http://localhost:20100";
+//var host = "http://localhost:8545";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 // var host = "ws://localhost:9000";
@@ -14,6 +16,7 @@ var web3 = new Web3(new Web3.providers.HttpProvider(host));
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
 var privateKey = {};
+
 var main = async function () {
 
     var accountAddress = [];
@@ -30,11 +33,15 @@ var main = async function () {
     result = await web3.eth.net.getId();
     console.log("Network ID", web3.utils.toHex(result));
     
+    var ethAccountToUse = accountAddress[0];
+    //accessEarlierGreeting(ethAccountToUse);
+    //return;
+    
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
     var otherAdminsList = [];
-    var ethAccountToUse = accountAddress[0];
+    ethAccountToUse = accountAddress[0];
     otherAdminsList.push(accountAddress[1]);
     otherAdminsList.push(accountAddress[2]);
     const adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
@@ -70,7 +77,6 @@ async function deployNewAdminSetValidatorContract(ownerAccountAddress,otherAdmin
 
 async function deployNewSingleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress)
 {
-    
     var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress);
     return singleValidatorSetAddress;
 }
@@ -159,7 +165,7 @@ async function getListOfActiveValidators()
         var noOfActiveValidator = 0;
         var validatorList = [];
         validatorList = await simpleValidatorSet.getAllValidatorsAsync();
-        if (validatorList.length > 0) {
+        if (validatorList != undefined && validatorList.length > 0) {
             validatorList.forEach(eachElement => {
                 if(simpleValidatorSet.isActiveValidator(eachElement)){
                     noOfActiveValidator++;
@@ -171,7 +177,7 @@ async function getListOfActiveValidators()
         return true;
     }
     catch (error) {
-        console.log("Error in removeSimpleSetContractValidatorsForAdmin(): " + error);
+        console.log("Error in getListOfActiveValidators(): " + error);
         return false;
     }
 }
@@ -199,7 +205,6 @@ function readWritePrivateKeys(accountAddressList){
                     key = utils.getPrivateKeyFromKeyStore(eachElement, keyStorePath, password);
                 }
                 catch (error) {
-                    console.log(error);
                     return;
                 }
             }    
@@ -221,4 +226,51 @@ function readWritePrivateKeys(accountAddressList){
     catch (error) {
         console.log("Error in readWritePrivateKeys: " + error);
     }
+}
+
+async function accessEarlierGreeting(ethAccountToUse){
+    //var abi, bytecode;
+    var greeting1, greeting2;
+
+    // Todo: Read ABI from dynamic source.
+    var value = utils.readSolidityContractJSON("./build/contracts/Greeter.json");
+    if(value.length <= 0){
+        // this.adminValidatorSetAbi = value[0];
+        // this.adminValidatorSetByteCode = value[1];
+        return;
+    }
+
+    var constructorParameters = [];
+    constructorParameters.push("Hi Rahul");
+    var deployedAddress = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);//, function(returnTypeString, result){
+    console.log("Greeter deployedAddress ", deployedAddress);
+    greeting1 = new web3.eth.Contract(JSON.parse(value[0]),deployedAddress);
+    //greeting2 = new web3.eth.Contract(JSON.parse(value[0]),"0x1d794eCe857B3bc8f14b467040bB964DEC2aaf9e");
+    
+    greeting1.methods.greet().call().then(result => {
+        console.log("myvalue", result);
+    });
+
+    // greeting2.methods.greet().call().then(result => {
+    //     console.log("myvalue", result);
+    // });
+
+    greeting1.methods.getOwner().call().then(result => {
+        console.log("getOwner", result);
+    });
+
+    greeting1.methods.getMyNumber().call().then(result => {
+        console.log("getMyNumber", result);
+    });
+    
+    let encodedABI = greeting1.methods.setMyNumber(299).encodeABI();
+    var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,deployedAddress, encodedABI,web3);
+    console.log("estimatedGas",estimatedGas);
+    
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,estimatedGas);
+    console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
+
+    greeting1.methods.getMyNumber().call().then(result => {
+        console.log("getMyNumber", result);
+    });
 }
