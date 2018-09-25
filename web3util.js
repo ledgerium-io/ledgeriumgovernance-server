@@ -94,13 +94,25 @@ const utils = {
         }
     },
     
-    async estimateGasTransaction (fromAccountAddress, toContractAddress, methodData, web3) {
+    /** To get estimate of gas consumptio for the given transaction prior to actual
+     * execution on blockchain! Extremely useful feature however, giving issues on quorum
+    */
+   async estimateGasTransaction (fromAccountAddress, toContractAddress, methodData, web3) {
         return await web3.eth.estimateGas(
             {
                 from    : fromAccountAddress,
                 to      : toContractAddress,
                 data    : methodData
             });
+    },
+
+    /** to get receipt of the event raised from the blockchain
+    */ 
+    async getReceipt(transactionHash,web3){
+        var receipt = web3.eth.getTransactionReceipt(transactionHash);
+        if(!receipt)
+            console.log("Transaction",transactionHash,"did not get mined!");
+        return receipt;
     },
     
     readSolidityContractJSON (filename) {

@@ -1,14 +1,16 @@
 const fs = require('fs');
 const Web3 = require('web3');
+//const Web3 = require('web3-quorum');
 const utils =  require('./web3util');
 const async =  require('async');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 // const utils = require('./web3util');
 
-//var host = "http://localhost:20100";
-var host = "http://localhost:8545";
+var host = "http://localhost:20100";
+//var host = "http://localhost:8545";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
+//web3.setProvider(new web3(new web3.providers.HttpProvider(host)));
 
 // var host = "ws://localhost:9000";
 // web3 = new Web3(new Web3.providers.WebsocketProvider(host));
@@ -215,19 +217,18 @@ async function readWritePrivateKeys(){
         const password = "password";
         accountAddressList.length = 0;
         accountAddressList = await web3.eth.getAccounts();
-        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
         if(accountAddressList.length <= 0)
             return;
         
-        // try{
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
-        // }
-        // catch(error)
-        // {
-        //     console.log("error", error);
-        // }
+        try{
+            result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
+            // result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
+            // result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
+        }
+        catch(error)
+        {
+            console.log("error", error);
+        }
         
         var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
         var keyStorePath = __dirname;
@@ -238,6 +239,7 @@ async function readWritePrivateKeys(){
             keyData = JSON.parse(keyData);
         }    
         var key;
+        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
         if(accountAddressList.length > 0){
             var i = 0;
             accountAddressList.forEach(eachElement => {
