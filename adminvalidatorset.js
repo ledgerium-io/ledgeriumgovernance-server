@@ -58,6 +58,21 @@ module.exports = class AdminValidatorSet {
         }
     }
 
+    async voteAgainstAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
+        try{
+            var encodedABI = this.contract.methods.voteAgainstAddingAdmin(otherAdminToAdd).encodeABI();
+            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas;
+            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet.voteForAddingAdmin(): " + error);
+            return false;
+        }
+    }
+    
     async proposalToRemoveAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
             var encodedABI = this.contract.methods.proposalToRemoveAdmin(otherAdminToRemove).encodeABI();
@@ -76,6 +91,21 @@ module.exports = class AdminValidatorSet {
     async voteForRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
             var encodedABI = this.contract.methods.voteForRemovingAdmin(otherAdminToRemove).encodeABI();
+            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas;
+            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet.voteForRemovingAdmin(): " + error);
+            return false;
+        }
+    }
+    
+    async voteAgainstRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
+        try{
+            var encodedABI = this.contract.methods.voteAgainstRemovingAdmin(otherAdminToRemove).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas;

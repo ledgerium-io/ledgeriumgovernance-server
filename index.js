@@ -92,29 +92,54 @@ async function addNewAdmin(){
         if(flag)
            return true;
 
+        /* Testing the functionality of adding or removing a validator with votes FOR and votes AGAINST.
+        * There are 3 admin in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
+        * Sending Proposal means, adding one vote to the proposal
+        */
+        
+        /*We are testing ADD validator functionality here with one proposal FOR adding and one more vote FOR adding,
+        * makes more than 3/2 brings this a majority and validator will be added. And proposal will be cleared off!
+        * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
+        */
         var transactionhash = await adminValidatorSet.proposalToAddAdmin(ethAccountToPropose,validatorToAdd,privateKey[ethAccountToPropose]);
         console.log("submitted transactionhash ",transactionhash, "for proposal of adding ", validatorToAdd);
 
+        /* Since ADD the validator proposal is raised, checkProposal should return "add"*/
         var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToAdd);
         console.log(validatorToAdd, "checked proposal for the admin ?", whatProposal);
         
+        /* Lets see how voting looks at the moment! It should return 1,0*/
         var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
         console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
-        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote1,validatorToAdd,privateKey[ethAccountToVote1]);
-        console.log("submitted transactionhash ",transactionhash, "for voting of adding", validatorToAdd);
+        /*We are voting AGANST adding validator*/
+        transactionhash = await adminValidatorSet.voteAgainstAddingAdmin(ethAccountToVote1,validatorToAdd,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "against voting of adding", validatorToAdd);
 
+        /* Lets see how voting looks at the moment! It should be one FOR and one AGAINST so proposal is still not finalised
+        and voting is still ON. It should return 1,1*/
         var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
         console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
-        // transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
-        // console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
+        /* One more vote FOR adding validator, and so it makes 2 votes FOR and 1 vote AGAINST
+        The 3/2 is achieved FOR adding validator here. The proposal will be finalised here
+        */
+        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
+        console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
 
-        // var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
-        // console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+        /* Lets see how voting looks at the moment! It should return 0,0 */
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
+        /* Since the validator is added, checkAdmin against the validator should return "true"
+        */
         flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
         console.log(validatorToAdd, "got added as admin ?", flag);
+
+        /* Since the validator is already added, checkProposal should return "proposal not created"
+        */
+        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "checked proposal for the admin ?", whatProposal);
         return flag;
     }
     catch (error) {
@@ -130,33 +155,64 @@ async function removeOneAdmin(){
         var ethAccountToVote2 = accountAddressList[2];
         var validatorToRemove = accountAddressList[3];
 
+        /* Testing the functionality of adding or removing a validator with votes FOR and votes AGAINST.
+        * There are 3 admin in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
+        * Sending Proposal means, adding one vote to the proposal
+        */
+        /* Lets see whether this is admin or not already, if not, we can ignore else will proceed further*/
         var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "already an admin ?", flag);
-        if(!flag) return true;
+        if(!flag) 
+            return true;
 
+        /*We are testing REMOVE validator functionality here with one proposal FOR removing and one more vote FOR removing,
+        * makes more than 3/2 brings this a majority and validator will be removed. And proposal will be cleared off!
+        * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
+        */
         var transactionhash = await adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,validatorToRemove,privateKey[ethAccountToPropose]);
         console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", validatorToRemove);
 
+        /* Since REMOVE the validator proposal is raised, checkProposal should return "remove"*/
         var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "checked proposal for the admin ?", whatProposal);
         
-        transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote1,validatorToRemove,privateKey[ethAccountToVote1]);
-        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+        /* Lets see how voting looks at the moment! It should return 1,0*/
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
 
+        /*We are voting AGAINST removing validator now*/
+        transactionhash = await adminValidatorSet.voteAgainstRemovingAdmin(ethAccountToVote1,validatorToRemove,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "against voting  of removing", validatorToRemove);
+
+        /* Lets see how voting looks at the moment! It should return 1,1*/
         var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
         
+        /*We are now voting FOR removing validator*/
         transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote2,validatorToRemove,privateKey[ethAccountToVote2]);
         console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
 
-        votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
+        /* One more vote FOR removing validator, and so it makes 2 votes FOR and 1 vote AGAINST removing
+        The > 4/2 is not achieved FOR removing validator here. The proposal will not be finalised here
+        */
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
         
+        /*We are now voting FOR removing validator by 'SELF'
+        * The > 4/2 is now achieved FOR removing validator here. The proposal will be finalised here
+        */
+        transactionhash = await adminValidatorSet.voteForRemovingAdmin(validatorToRemove,validatorToRemove,privateKey[validatorToRemove]);
+        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+
+        /* Since the validator is removed, checkAdmin against the validator should return "false"
+        */
         flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "still an admin ?", flag);
 
-        votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        /* Since the validator is already removed, checkProposal should return "proposal not created"
+        */
+        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked proposal for admin ?", whatProposal);
         return flag;
     }
     catch (error) {
