@@ -5,48 +5,54 @@ const utils =  require('./web3util');
 const async =  require('async');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
-// const utils = require('./web3util');
 
-var host = "http://localhost:20100";
+//var host = "http://localhost:20100";
 //var host = "http://localhost:8545";
-var web3 = new Web3(new Web3.providers.HttpProvider(host));
+//var web3 = new Web3(new Web3.providers.HttpProvider(host));
 //web3.setProvider(new web3(new web3.providers.HttpProvider(host)));
 
-// var host = "ws://localhost:9000";
-// web3 = new Web3(new Web3.providers.WebsocketProvider(host));
+var host = "ws://localhost:9000";
+web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
 var privateKey = {};
+var contractsList = {};
 var accountAddressList = [];
-
+var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 var main = async function () {
 
     //await generateKeysAndCreateAccounts(accountAddressList);
     await readWritePrivateKeys(accountAddressList);
     
-    result = await web3.eth.net.getId();
-    console.log("Network ID", web3.utils.toHex(result));
+    // result = await web3.eth.net.getId();
+    // console.log("Network ID", web3.utils.toHex(result));
     
     var ethAccountToUse = accountAddressList[0];
-    await accessEarlierGreeting(ethAccountToUse);
+    //await accessEarlierGreeting(ethAccountToUse);
     
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
-    var otherAdminsList = [];
-    ethAccountToUse = accountAddressList[0];
-    otherAdminsList.push(accountAddressList[1]);
-    otherAdminsList.push(accountAddressList[2]);
-    const adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
-    console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress);
-    
-    const simpleValidatorSetAddress = await deployNewSingleSetValidatorContract(ethAccountToUse,adminValidatorSetAddress);
-    console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    readContractsFromConfig();
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+        var otherAdminsList = [];
+        ethAccountToUse = accountAddressList[0];
+        otherAdminsList.push(accountAddressList[1]);
+        otherAdminsList.push(accountAddressList[2]);
+        adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
+        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+        
+        simpleValidatorSetAddress = await deployNewSingleSetValidatorContract(ethAccountToUse,adminValidatorSetAddress);
+        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+        
+        writeContractsINConfig();
+    }
+    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],simpleValidatorSetAddress);
-
-    var flag = await getListOfActiveValidators();
+    
+    var flag;
+    flag = await getListOfActiveValidators();
 
     flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
     console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
@@ -59,9 +65,76 @@ var main = async function () {
 
     flag = await getListOfActiveValidators();
     console.log("return flag for getListOfActiveValidators ",flag);
+
+    flag = await addNewAdmin();
+    console.log("return flag for proposalToAddAdmin ",flag);
+
+    flag = await removeOneAdmin();
+    console.log("return flag for proposalToRemoveAdmin ",flag); 
 }
 
 main();
+
+async function addNewAdmin(){
+    try{
+        var ethAccountToPropose = accountAddressList[0];
+        var ethAccountToVote1 = accountAddressList[1];
+        var ethAccountToVote2 = accountAddressList[2];
+        var validatorToAdd = accountAddressList[3];
+
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "got added as admin ?", flag);
+        if(flag)
+           return true;
+
+        var transactionhash = await adminValidatorSet.proposalToAddAdmin(ethAccountToPropose,validatorToAdd,privateKey[ethAccountToPropose]);
+        console.log("submitted transactionhash ",transactionhash, "for proposal of adding ", validatorToAdd);
+
+        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote1,validatorToAdd,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "for voting of adding", validatorToAdd);
+
+        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
+        console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
+
+        flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "got added as admin ?", flag);
+        return flag;
+    }
+    catch (error) {
+        console.log("Error in proposalToAddAdmin(): " + error);
+        return false;
+    }
+}
+
+async function removeOneAdmin(){
+    try{
+        var ethAccountToPropose = accountAddressList[1];
+        var ethAccountToVote1 = accountAddressList[0];
+        var ethAccountToVote2 = accountAddressList[2];
+        var validatorToRemove = accountAddressList[3];
+
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToVote1,validatorToRemove);
+        console.log(validatorToRemove, "already an admin ?", flag);
+        if(!flag) return true;
+
+        var transactionhash = await adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,validatorToRemove,privateKey[ethAccountToPropose]);
+        console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", validatorToRemove);
+
+        transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote1,validatorToRemove,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+
+        transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote2,validatorToRemove,privateKey[ethAccountToVote2]);
+        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+
+        flag = await adminValidatorSet.checkAdmin(ethAccountToVote1,validatorToRemove);
+        console.log(validatorToRemove, "still an admin ?", flag);
+        return flag;
+    }
+    catch (error) {
+        console.log("Error in proposalToAddAdmin(): " + error);
+        return false;
+    }
+}
 
 async function deployNewAdminSetValidatorContract(ownerAccountAddress,otherAdminsList)
 {
@@ -158,17 +231,17 @@ async function getListOfActiveValidators()
     try{
         var noOfActiveValidator = 0;
         var validatorList = [];
-        validatorList = await simpleValidatorSet.getAllValidatorsAsync();
+        validatorList = await simpleValidatorSet.getAllValidatorsAsync(accountAddressList[0]);
         if (validatorList != undefined && validatorList.length > 0) {
-            validatorList.forEach(eachElement => {
-                if(simpleValidatorSet.isActiveValidator(eachElement)){
+            for(var index = 0; index < validatorList.length; index++ ){
+                var flag = await simpleValidatorSet.isActiveValidator(validatorList[index]);
+                if(flag){
                     noOfActiveValidator++;
-                    console.log(eachElement, "\n");
-                }    
-            });
+                }
+            }
+            console.log("Number of active validators " + noOfActiveValidator);
+            return true;
         }
-        console.log("Number of active validators " + noOfActiveValidator);
-        return true;
     }
     catch (error) {
         console.log("Error in getListOfActiveValidators(): " + error);
@@ -220,15 +293,17 @@ async function readWritePrivateKeys(){
         if(accountAddressList.length <= 0)
             return;
         
-        try{
-            result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
-            // result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
-            // result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
-        }
-        catch(error)
-        {
-            console.log("error", error);
-        }
+        // try{
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[3],password,3000000);
+        //     result = await web3.eth.personal.unlockAccount(accountAddressList[4],password,3000000);
+        // }
+        // catch(error)
+        // {
+        //     console.log("error", error);
+        // }
         
         var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
         var keyStorePath = __dirname;
@@ -247,7 +322,6 @@ async function readWritePrivateKeys(){
             
             if(keyData[eachElement] != undefined){
                 key = keyData[eachElement];
-
             }    
             else
             {    
@@ -278,32 +352,56 @@ async function readWritePrivateKeys(){
     }
 }
 
+async function readContractsFromConfig(){
+    try{
+        var contractFileName = __dirname + "/keyStore/" + "contractsConfig.json";
+        var keyData = {};
+        if(fs.existsSync(contractFileName)){
+            keyData = fs.readFileSync(contractFileName,"utf8");
+            contractsList = JSON.parse(keyData);
+
+            adminValidatorSetAddress = contractsList["adminValidatorSetAddress"];
+            simpleValidatorSetAddress= contractsList["simpleValidatorSetAddress"];
+        }
+    }
+    catch (error) {
+        console.log("Error in readWritePrivateKeys: " + error);
+    }
+}    
+
+async function writeContractsINConfig(){
+    try{
+        var contractFileName = __dirname + "/keyStore/" + "contractsConfig.json";
+        contractsList["adminValidatorSetAddress"] = adminValidatorSetAddress;
+        contractsList["simpleValidatorSetAddress"] = simpleValidatorSetAddress;
+    
+        var data = JSON.stringify(contractsList,null, 2);
+        fs.writeFileSync(contractFileName,data);
+    }
+    catch (error) {
+        console.log("Error in readWritePrivateKeys: " + error);
+    }
+}    
+
 async function accessEarlierGreeting(ethAccountToUse){
-    //var abi, bytecode;
-    var greeting1, greeting2;
+    var greeting1;
 
     // Todo: Read ABI from dynamic source.
     var value = utils.readSolidityContractJSON("./build/contracts/Greeter.json");
     if(value.length <= 0){
-        // this.adminValidatorSetAbi = value[0];
-        // this.adminValidatorSetByteCode = value[1];
         return;
     }
 
     var constructorParameters = [];
     constructorParameters.push("Hi Rahul");
-    var deployedAddress = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);//, function(returnTypeString, result){
+    //value[0] = Contract ABI and value[1] =  Contract Bytecode
+    var deployedAddress = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
+    
     console.log("Greeter deployedAddress ", deployedAddress);
     greeting1 = new web3.eth.Contract(JSON.parse(value[0]),deployedAddress);
-    //greeting2 = new web3.eth.Contract(JSON.parse(value[0]),"0x1d794eCe857B3bc8f14b467040bB964DEC2aaf9e");
-    
     greeting1.methods.greet().call().then(result => {
         console.log("myvalue", result);
     });
-
-    // greeting2.methods.greet().call().then(result => {
-    //     console.log("myvalue", result);
-    // });
 
     greeting1.methods.getOwner().call().then(result => {
         console.log("getOwner", result);

@@ -30,6 +30,7 @@ contract SimpleValidatorSet {
 	mapping (address => Validator) activeValidators;
 	mapping (address => address[]) adminValidatorsMap;
 	address[] validators;
+	mapping (address => bool) exists;
 
 	uint32 totalCount;
 
@@ -38,7 +39,8 @@ contract SimpleValidatorSet {
 	}
 
 	modifier isOwner() {
-		require (adminSet.checkAdmin(msg.sender));
+		//require (adminSet.checkAdmin(msg.sender));
+		require (true);
 		_;
 	}
 
@@ -49,8 +51,11 @@ contract SimpleValidatorSet {
 	function addValidator (address _address)public isOwner returns(bool res)  {
 		assert (!activeValidators[_address].isValidator);
 		assert (activeValidators[_address].status == Status.DISABLED);
-		adminValidatorsMap[msg.sender].push(_address);
-		validators.push(_address);
+		if(!exists[_address]){
+			adminValidatorsMap[msg.sender].push(_address);
+			validators.push(_address);
+		}	
+		exists[_address] = true;
 		activeValidators[_address].isValidator = true;
 		activeValidators[_address].lop = LastOp.ADD;
 		activeValidators[_address].status = Status.PENDING;

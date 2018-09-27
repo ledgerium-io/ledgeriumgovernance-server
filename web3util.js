@@ -118,8 +118,6 @@ const utils = {
     readSolidityContractJSON (filename) {
         var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
         let abi = JSON.stringify(json.abi);
-        //console.log("abi ", abi);
-        //console.log("bytecode ", json.bytecode);
         return [abi, json.bytecode];
     },
 
@@ -128,8 +126,6 @@ const utils = {
         let compiledContract = solc.compile(source, 1);
         let abi = compiledContract.contracts[":"+contractName].interface;
         let bytecode = compiledContract.contracts[":"+contractName].bytecode;
-        //console.log(contractName, " abi ", abi);
-        //console.log(contractName, " bytecode ", bytecode);
         return [abi, bytecode];
     },
 
@@ -162,6 +158,34 @@ const utils = {
                 callback(event);
             }
         });
+    },
+
+    async getData(fromAccount,toContract,endata,web3){
+        return await web3.eth.call({
+            from : fromAccount,
+            to: toContract,
+            data: endata
+        });
+    },
+
+    split(array){
+        temp = [];
+        add = [];
+        array = array.slice(2,array.length);
+        for(var i=0;i<array.length;i+=64){
+            temp.push(array.slice(i,i+64));
+        }
+        for(var j=0;j<temp.length;j++){
+            add.push("0x"+temp[j].slice(24,64));
+        }
+        return add.splice(2, add.length);
+    },
+
+    convertToBool(inputString){
+        if(inputString == "0x0000000000000000000000000000000000000000000000000000000000000001")
+            return true;
+        else (inputString == "0x0000000000000000000000000000000000000000000000000000000000000000")
+            return false;
     }
 }
 module.exports = utils;
