@@ -60,7 +60,7 @@ module.exports = class AdminValidatorSet {
 
     async proposalToRemoveAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
-            var encodedABI = this.contract.methods.proposalToAddAdmin(otherAdminToRemove).encodeABI();
+            var encodedABI = this.contract.methods.proposalToRemoveAdmin(otherAdminToRemove).encodeABI();
             //var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             //console.log("estimatedGas",estimatedGas);
             var estimatedGas;
@@ -90,13 +90,40 @@ module.exports = class AdminValidatorSet {
     
     async checkAdmin(ethAccountToUse, otherAdminToCheck){
         try {
-            //var flag = await this.contract.methods.checkAdmin(otherAdminToCheck).call();
-            var encodedABI = this.contract.methods.checkAdmin(otherAdminToCheck).encodeABI();
-            var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,web3);
-            return utils.convertToBool(data);
+            var flag = await this.contract.methods.checkAdmin(otherAdminToCheck).call({from : ethAccountToUse});
+            //var encodedABI = this.contract.methods.checkAdmin(otherAdminToCheck).encodeABI();
+            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return utils.convertToBool(data);
+            return flag;
         } catch (error) {
             console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
             return false;
+        }
+    }
+
+    async checkVotes(ethAccountToUse, otherAdminToCheck){
+        try {
+            var votes = await this.contract.methods.checkVotes(otherAdminToCheck).call({from : ethAccountToUse});
+            //var encodedABI = this.contract.methods.checkVotes(otherAdminToCheck).encodeABI();
+            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return utils.convertToBool(data);
+            return votes;
+        } catch (error) {
+            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            return false;
+        }
+    }
+
+    async checkProposal(ethAccountToUse, otherAdminToCheck){
+        try {
+            var whatProposal = await this.contract.methods.checkProposal(otherAdminToCheck).call({from : ethAccountToUse});
+            //var encodedABI = this.contract.methods.checkProposal(otherAdminToCheck).encodeABI();
+            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return utils.convertToBool(data);
+            return whatProposal;
+        } catch (error) {
+            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            return "none";
         }
     }
     

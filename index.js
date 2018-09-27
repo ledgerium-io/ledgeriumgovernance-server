@@ -7,12 +7,11 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
-//var host = "http://localhost:8545";
-//var web3 = new Web3(new Web3.providers.HttpProvider(host));
-//web3.setProvider(new web3(new web3.providers.HttpProvider(host)));
+var host = "http://localhost:8545";
+var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
-var host = "ws://localhost:9000";
-web3 = new Web3(new Web3.providers.WebsocketProvider(host));
+//var host = "ws://localhost:9000";
+//web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
@@ -48,29 +47,35 @@ var main = async function () {
         
         writeContractsINConfig();
     }
+    //If we dont have contracts to operate, abort!!
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+        return;
+    }
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],simpleValidatorSetAddress);
     
     var flag;
-    flag = await getListOfActiveValidators();
+    // flag = await getListOfActiveValidators();
 
-    flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
-    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+    // flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
+    // console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
-    flag = await getListOfActiveValidators();
-    console.log("return flag for getListOfActiveValidators",flag);
+    // flag = await getListOfActiveValidators();
+    // console.log("return flag for getListOfActiveValidators",flag);
 
-    flag = await removeSimpleSetContractValidatorsForAdmin(ethAccountToUse);
-    console.log("return flag for removeSimpleSetContractValidatorsForAdmin",flag);
+    // flag = await removeSimpleSetContractValidatorsForAdmin(ethAccountToUse);
+    // console.log("return flag for removeSimpleSetContractValidatorsForAdmin",flag);
 
-    flag = await getListOfActiveValidators();
-    console.log("return flag for getListOfActiveValidators ",flag);
+    // flag = await getListOfActiveValidators();
+    // console.log("return flag for getListOfActiveValidators ",flag);
 
     flag = await addNewAdmin();
     console.log("return flag for proposalToAddAdmin ",flag);
 
     flag = await removeOneAdmin();
-    console.log("return flag for proposalToRemoveAdmin ",flag); 
+    console.log("return flag for proposalToRemoveAdmin ",flag);
+
+    return;
 }
 
 main();
@@ -90,48 +95,72 @@ async function addNewAdmin(){
         var transactionhash = await adminValidatorSet.proposalToAddAdmin(ethAccountToPropose,validatorToAdd,privateKey[ethAccountToPropose]);
         console.log("submitted transactionhash ",transactionhash, "for proposal of adding ", validatorToAdd);
 
+        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "checked proposal for the admin ?", whatProposal);
+        
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+
         transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote1,validatorToAdd,privateKey[ethAccountToVote1]);
         console.log("submitted transactionhash ",transactionhash, "for voting of adding", validatorToAdd);
 
-        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
-        console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
+        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+
+        // transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
+        // console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
+
+        // var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
+        // console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
         flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
         console.log(validatorToAdd, "got added as admin ?", flag);
         return flag;
     }
     catch (error) {
-        console.log("Error in proposalToAddAdmin(): " + error);
+        console.log("Error in addNewAdmin(): " + error);
         return false;
     }
 }
 
 async function removeOneAdmin(){
     try{
-        var ethAccountToPropose = accountAddressList[1];
-        var ethAccountToVote1 = accountAddressList[0];
+        var ethAccountToPropose = accountAddressList[0];
+        var ethAccountToVote1 = accountAddressList[1];
         var ethAccountToVote2 = accountAddressList[2];
         var validatorToRemove = accountAddressList[3];
 
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToVote1,validatorToRemove);
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "already an admin ?", flag);
         if(!flag) return true;
 
         var transactionhash = await adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,validatorToRemove,privateKey[ethAccountToPropose]);
         console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", validatorToRemove);
 
+        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked proposal for the admin ?", whatProposal);
+        
         transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote1,validatorToRemove,privateKey[ethAccountToVote1]);
         console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
 
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        
         transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote2,validatorToRemove,privateKey[ethAccountToVote2]);
         console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
 
-        flag = await adminValidatorSet.checkAdmin(ethAccountToVote1,validatorToRemove);
+        votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        
+        flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToRemove);
         console.log(validatorToRemove, "still an admin ?", flag);
+
+        votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
+        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
         return flag;
     }
     catch (error) {
-        console.log("Error in proposalToAddAdmin(): " + error);
+        console.log("Error in removeOneAdmin(): " + error);
         return false;
     }
 }

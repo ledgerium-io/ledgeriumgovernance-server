@@ -45,16 +45,16 @@ module.exports = class SimpleValidatorSet {
         var resultList = [];
         try {
             var encodedABI = this.contract.methods.getAllValidators().encodeABI();
-            resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,web3);
+            resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,this.web3);
             console.log(resultList);
             return utils.split(resultList);
             // try{
             //     resultList  = await this.contract.methods.getAllValidators.call({from:ethAccountToUse});
-            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,myData,web3);
+            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,myData,this.web3);
             //     return resultList;
             // }
             // catch (error){
-            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,web3);
+            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,this.web3);
             //     return resultList;
             // }    
         } catch (error) {

@@ -17,8 +17,7 @@ const utils = {
             data    : data,
             value   : value,
             gasPrice: '0x00',
-            gas     : 4700000,
-            chainId : 1337
+            gas     : 4700000
         }
     },
 
