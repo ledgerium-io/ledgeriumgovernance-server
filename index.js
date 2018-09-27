@@ -55,19 +55,19 @@ var main = async function () {
     simpleValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],simpleValidatorSetAddress);
     
     var flag;
-    // flag = await getListOfActiveValidators();
+    flag = await getListOfActiveValidators();
 
-    // flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
-    // console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+    flag = await addSimpleSetContractValidatorsForAdmin(ethAccountToUse);
+    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
-    // flag = await getListOfActiveValidators();
-    // console.log("return flag for getListOfActiveValidators",flag);
+    flag = await getListOfActiveValidators();
+    console.log("return flag for getListOfActiveValidators",flag);
 
-    // flag = await removeSimpleSetContractValidatorsForAdmin(ethAccountToUse);
-    // console.log("return flag for removeSimpleSetContractValidatorsForAdmin",flag);
+    flag = await removeSimpleSetContractValidatorsForAdmin(ethAccountToUse);
+    console.log("return flag for removeSimpleSetContractValidatorsForAdmin",flag);
 
-    // flag = await getListOfActiveValidators();
-    // console.log("return flag for getListOfActiveValidators ",flag);
+    flag = await getListOfActiveValidators();
+    console.log("return flag for getListOfActiveValidators ",flag);
 
     flag = await addNewAdmin();
     console.log("return flag for proposalToAddAdmin ",flag);

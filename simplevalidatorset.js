@@ -125,7 +125,7 @@ module.exports = class SimpleValidatorSet {
     async isActiveValidator(validatorAddress) {
         try {
             var data = await this.contract.methods.isValidator(validatorAddress).call();
-            return utils.convertToBool(data);
+            return data;
         } catch (error) {
             console.log("Error in SimpleValidatorSet.isActiveValidator(): " + error);
             return false;
