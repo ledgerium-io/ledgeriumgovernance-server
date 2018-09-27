@@ -6,8 +6,8 @@ const async =  require('async');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
-//var host = "http://localhost:20100";
-var host = "http://localhost:8545";
+var host = "http://localhost:20100";
+//var host = "http://localhost:8545";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 //var host = "ws://localhost:9000";
@@ -48,7 +48,8 @@ var main = async function () {
         writeContractsINConfig();
     }
     //If we dont have contracts to operate, abort!!
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
+    || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
         return;
     }
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
@@ -444,9 +445,10 @@ async function readContractsFromConfig(){
         if(fs.existsSync(contractFileName)){
             keyData = fs.readFileSync(contractFileName,"utf8");
             contractsList = JSON.parse(keyData);
-
-            adminValidatorSetAddress = contractsList["adminValidatorSetAddress"];
-            simpleValidatorSetAddress= contractsList["simpleValidatorSetAddress"];
+            if(contractsList["adminValidatorSetAddress"] != undefined)
+                adminValidatorSetAddress = contractsList["adminValidatorSetAddress"];
+            if(contractsList["simpleValidatorSetAddress"] != undefined)    
+                simpleValidatorSetAddress= contractsList["simpleValidatorSetAddress"];
         }
     }
     catch (error) {
