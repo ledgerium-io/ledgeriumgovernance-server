@@ -4,6 +4,7 @@ const solc = require('solc');
 const fs = require('fs');
 var keythereum = require('keythereum');
 const async =  require('async');
+const ethUtil         = require('ethereumjs-util');
 
 const utils = {
     async getCurrentTime () {
@@ -21,10 +22,18 @@ const utils = {
         }
     },
 
+    async getContractEncodeABI(abi,bytecode,web3,arg){
+        try{
+            let contract = new web3.eth.Contract(JSON.parse(abi));
+            return await contract.deploy({ data : bytecode, arguments : arg }).encodeABI();
+        } catch (error) {
+            console.log("Exception in utils.getContractEncodeABI(): " + error);
+        } 
+    },
+    
     async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, web3 /*callback*/) {
         console.log("deployContract");
         try{
-            var deployedAddress;
             let deployedContract = new web3.eth.Contract(JSON.parse(contractAbi));
             deployedAddress = await deployedContract.deploy({
                 data : bytecode, 
@@ -126,6 +135,18 @@ const utils = {
         let abi = compiledContract.contracts[":"+contractName].interface;
         let bytecode = compiledContract.contracts[":"+contractName].bytecode;
         return [abi, bytecode];
+    },
+
+    keccak (web3,text){
+        return web3.utils.keccak256(text);
+    },
+
+    async sendTransaction(web3,transaction){
+        return await web3.eth.sendTransaction(transaction);
+    },
+
+    generatePublicKey (privateKey) {
+        return '0x'+ethUtil.privateToAddress(privateKey).toString('hex');
     },
 
     getPrivateKeyFromKeyStore (accountAddress, keyStorePath, password) {

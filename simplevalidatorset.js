@@ -28,6 +28,21 @@ module.exports = class SimpleValidatorSet {
         }  
     }    
     
+    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
+        try {
+            var constructorParameters = [];
+            constructorParameters.push(adminValidatorAddress);
+            var estimatedGas = 0;
+            var encodedABI = await utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
+            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            this.simpleValidatorSetAddress = deployedAddress.contractAddress;    
+            return this.simpleValidatorSetAddress;
+        } catch (error) {
+            console.log("Error in SimpleValidatorSet.deployNewSimpleSetValidatorContract(): " + error);
+            return "";
+        }
+    }
+    
     async deployNewSimpleSetValidatorContract(ethAccountToUse, adminValidatorAddress) {
         try {
             var constructorParameters = [];
@@ -64,7 +79,6 @@ module.exports = class SimpleValidatorSet {
     }
 
     async getAdminValidatorsAsync(ethAccountToUse) {
-        // var resultList = [];
         try {
             this.contract.methods.getValidatorsForAdmin().call({from: ethAccountToUse}).then(function(resultList){
                 console.log("GetAdminValidatorsAsync resultList for ",adminAddress, resultList.length);
@@ -85,7 +99,7 @@ module.exports = class SimpleValidatorSet {
             var encodedABI = this.contract.methods.addValidator(newValidator).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,this.privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         } catch (error) {
@@ -99,7 +113,7 @@ module.exports = class SimpleValidatorSet {
             var encodedABI = this.contract.methods.finalize(newValidator).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address, encodedABI,this.privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         } catch (error) {
@@ -113,7 +127,7 @@ module.exports = class SimpleValidatorSet {
             var encodedABI = this.contract.methods.removeValidator(validatorToRemove).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,this.privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;        
         } catch (error) {
@@ -122,9 +136,9 @@ module.exports = class SimpleValidatorSet {
         }
     }
    
-    async isActiveValidator(validatorAddress) {
+    async isActiveValidator(ethAccountToUse, validatorAddress) {
         try {
-            var data = await this.contract.methods.isValidator(validatorAddress).call();
+            var data = await this.contract.methods.isValidator(validatorAddress).call({from : ethAccountToUse});
             return data;
         } catch (error) {
             console.log("Error in SimpleValidatorSet.isActiveValidator(): " + error);
@@ -209,9 +223,5 @@ module.exports = class SimpleValidatorSet {
         //             break;
         //     }
         // });
-    }
-
-    get getThis() {
-        return this;
     }
 }

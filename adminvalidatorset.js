@@ -33,7 +33,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.proposalToAddAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -48,7 +48,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.voteForAddingAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -63,7 +63,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.voteAgainstAddingAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -78,7 +78,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.proposalToRemoveAdmin(otherAdminToRemove).encodeABI();
             //var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             //console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -93,7 +93,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.voteForRemovingAdmin(otherAdminToRemove).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -108,7 +108,7 @@ module.exports = class AdminValidatorSet {
             var encodedABI = this.contract.methods.voteAgainstRemovingAdmin(otherAdminToRemove).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
-            var estimatedGas;
+            var estimatedGas = 0;
             var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -157,9 +157,22 @@ module.exports = class AdminValidatorSet {
         }
     }
     
+    async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
+        try {
+            var estimatedGas = 0;
+            var encodedABI = await utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminValidatorAddress);
+            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            this.adminValidatorSetAddress = deployedAddress.contractAddress;
+            return this.adminValidatorSetAddress;
+        } catch (error) {
+            console.log("Error in SimpleValidatorSet.deployNewSimpleSetValidatorContract(): " + error);
+            return "";
+        }
+    }
+    
     async deployNewAdminSetValidatorContract(ethAccountToUse, otherAdminsList) {
         try {
-            var deployedAddress = await utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);//, function(returnTypeString, result){
+            var deployedAddress = await utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);
             this.adminValidatorSetAddress = deployedAddress;
             return this.adminValidatorSetAddress;
         } catch (error) {

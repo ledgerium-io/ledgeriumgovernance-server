@@ -3,15 +3,16 @@ const Web3 = require('web3');
 //const Web3 = require('web3-quorum');
 const utils =  require('./web3util');
 const async =  require('async');
+const mnemonic = require('./mnemonic');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
-var host = "http://localhost:20100";
+//var host = "http://localhost:20100";
 //var host = "http://localhost:8545";
-var web3 = new Web3(new Web3.providers.HttpProvider(host));
+//var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
-//var host = "ws://localhost:9000";
-//web3 = new Web3(new Web3.providers.WebsocketProvider(host));
+var host = "ws://localhost:9000";
+web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
@@ -22,13 +23,15 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 var main = async function () {
 
     //await generateKeysAndCreateAccounts(accountAddressList);
-    await readWritePrivateKeys(accountAddressList);
-    
+    //await readWritePrivateKeys(accountAddressList);
+    await createAccountsAndManageKeys();
+
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
     
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
+    //return;
     
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
@@ -39,10 +42,12 @@ var main = async function () {
         ethAccountToUse = accountAddressList[0];
         otherAdminsList.push(accountAddressList[1]);
         otherAdminsList.push(accountAddressList[2]);
-        adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
+        //adminValidatorSetAddress = await deployNewAdminSetValidatorContract(ethAccountToUse,otherAdminsList);
+        adminValidatorSetAddress = await deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],otherAdminsList);
         console.log("adminValidatorSetAddress",adminValidatorSetAddress);
         
-        simpleValidatorSetAddress = await deployNewSingleSetValidatorContract(ethAccountToUse,adminValidatorSetAddress);
+        //simpleValidatorSetAddress = await deployNewSimpleSetValidatorContract(ethAccountToUse,adminValidatorSetAddress);
+        simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress);
         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
         writeContractsINConfig();
@@ -228,9 +233,21 @@ async function deployNewAdminSetValidatorContract(ownerAccountAddress,otherAdmin
     return adminValidatorSetAddress;
 }
 
-async function deployNewSingleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress)
+async function deployNewAdminSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,otherAdminsList)
+{
+    var adminValidatorSetAddress = await adminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,otherAdminsList);
+    return adminValidatorSetAddress;
+}
+
+async function deployNewSimpleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress)
 {
     var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress);
+    return singleValidatorSetAddress;
+}
+
+async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress, privateKeyOwner, adminValidatorSetAddress)
+{
+    var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,adminValidatorSetAddress);
     return singleValidatorSetAddress;
 }
 
@@ -320,7 +337,7 @@ async function getListOfActiveValidators()
         validatorList = await simpleValidatorSet.getAllValidatorsAsync(accountAddressList[0]);
         if (validatorList != undefined && validatorList.length > 0) {
             for(var index = 0; index < validatorList.length; index++ ){
-                var flag = await simpleValidatorSet.isActiveValidator(validatorList[index]);
+                var flag = await simpleValidatorSet.isActiveValidator(accountAddressList[0],validatorList[index]);
                 if(flag){
                     noOfActiveValidator++;
                 }
@@ -371,6 +388,47 @@ async function generateKeysAndCreateAccounts(){
     }    
 }
 
+async function createAccountsAndManageKeys(){
+    
+    var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+    if(fs.existsSync(privateKeyFileName)){
+        var keyData = fs.readFileSync(privateKeyFileName,"utf8");
+        privateKey = JSON.parse(keyData);
+        accountAddressList = Object.keys(privateKey);
+    }    
+    else{    
+        var prvkey1 = utils.keccak(web3,mnemonic['account1']);
+        var prvkey2 = utils.keccak(web3,mnemonic['account2']);
+        var prvkey3 = utils.keccak(web3,mnemonic['account3']);
+        var prvkey4 = utils.keccak(web3,mnemonic['account4']);
+
+        pubkey1 = utils.generatePublicKey(prvkey1);
+        pubkey2 = utils.generatePublicKey(prvkey2);
+        pubkey3 = utils.generatePublicKey(prvkey3);
+        pubkey4 = utils.generatePublicKey(prvkey4);
+        
+        accountAddressList.length = 0;
+        accountAddressList.push(pubkey1);
+        accountAddressList.push(pubkey2);
+        accountAddressList.push(pubkey3);
+        accountAddressList.push(pubkey4);
+
+        privateKey[pubkey1] = prvkey1.slice(2,66);
+        privateKey[pubkey2] = prvkey2.slice(2,66);
+        privateKey[pubkey3] = prvkey3.slice(2,66);
+        privateKey[pubkey4] = prvkey4.slice(2,66);
+
+        var data = JSON.stringify(privateKey,null, 2);
+        fs.writeFileSync(privateKeyFileName,data);
+    }
+    var noOfPrivateKeys = Object.keys(privateKey).length;
+    var noOfAccounts = accountAddressList.length;
+    if(noOfAccounts > 0 && noOfPrivateKeys > 0 && (noOfAccounts == noOfPrivateKeys)){
+        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
+    }
+    return;
+}
+
 async function readWritePrivateKeys(){
     try{
         const password = "password";
@@ -378,18 +436,6 @@ async function readWritePrivateKeys(){
         accountAddressList = await web3.eth.getAccounts();
         if(accountAddressList.length <= 0)
             return;
-        
-        // try{
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[0],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[1],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[2],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[3],password,3000000);
-        //     result = await web3.eth.personal.unlockAccount(accountAddressList[4],password,3000000);
-        // }
-        // catch(error)
-        // {
-        //     console.log("error", error);
-        // }
         
         var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
         var keyStorePath = __dirname;
@@ -426,7 +472,7 @@ async function readWritePrivateKeys(){
         fs.writeFileSync(privateKeyFileName,data);
 
         console.log("No of private keys", Object.keys(privateKey).length);
-
+        
         // var newAccount = await web3.eth.personal.newAccount(password);
         // console.log("accountAddressList ", newAccount);
 
@@ -452,7 +498,7 @@ async function readContractsFromConfig(){
         }
     }
     catch (error) {
-        console.log("Error in readWritePrivateKeys: " + error);
+        console.log("Error in readContractsFromConfig: " + error);
     }
 }    
 
@@ -466,7 +512,7 @@ async function writeContractsINConfig(){
         fs.writeFileSync(contractFileName,data);
     }
     catch (error) {
-        console.log("Error in readWritePrivateKeys: " + error);
+        console.log("Error in writeContractsINConfig: " + error);
     }
 }    
 
@@ -482,30 +528,58 @@ async function accessEarlierGreeting(ethAccountToUse){
     var constructorParameters = [];
     constructorParameters.push("Hi Rahul");
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
-    var deployedAddress = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
+    var deployedAddressGreeter = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     
-    console.log("Greeter deployedAddress ", deployedAddress);
-    greeting1 = new web3.eth.Contract(JSON.parse(value[0]),deployedAddress);
-    greeting1.methods.greet().call().then(result => {
-        console.log("myvalue", result);
-    });
+    console.log("Greeter deployedAddress ", deployedAddressGreeter);
+    greeting1 = new web3.eth.Contract(JSON.parse(value[0]),deployedAddressGreeter);
 
-    greeting1.methods.getOwner().call().then(result => {
-        console.log("getOwner", result);
-    });
+    ///////////////////////////////////////////////////////////////
+    // Todo: Read ABI from dynamic source.
+    var value1 = utils.readSolidityContractJSON("./build/contracts/TestGreeter.json");
+    if(value1.length <= 0){
+        return;
+    }
+
+    constructorParameters = [];
+    constructorParameters.push(deployedAddressGreeter);
+    //value1[0] = Contract ABI and value1[1] =  Contract Bytecode
+    var deployedAddressTesterGreeter = await utils.deployContract(value1[0], value1[1], ethAccountToUse, constructorParameters, web3);
+    
+    console.log("TestGreeter deployedAddress ", deployedAddressTesterGreeter);
+    testGreeting = new web3.eth.Contract(JSON.parse(value1[0]),deployedAddressTesterGreeter);
+
+    let encodedABI = testGreeting.methods.add(23,54).encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressTesterGreeter,encodedABI,privateKey[ethAccountToUse],web3,200000);
+    console.log("TransactionLog for TestGreeter Setvalue -", transactionObject.transactionHash);
 
     greeting1.methods.getMyNumber().call().then(result => {
         console.log("getMyNumber", result);
     });
-    
-    let encodedABI = greeting1.methods.setMyNumber(299).encodeABI();
-    var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,deployedAddress, encodedABI,web3);
-    console.log("estimatedGas",estimatedGas);
-    
-    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,200000);
-    console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
 
-    greeting1.methods.getMyNumber().call().then(result => {
-        console.log("getMyNumber", result);
+    testGreeting.methods.result().call().then(result => {
+        console.log("result", result);
     });
+
+    // greeting1.methods.greet().call().then(result => {
+    //     console.log("myvalue", result);
+    // });
+
+    // greeting1.methods.getOwner().call().then(result => {
+    //     console.log("getOwner", result);
+    // });
+
+    // greeting1.methods.getMyNumber().call().then(result => {
+    //     console.log("getMyNumber", result);
+    // });
+    
+    // let encodedABI = greeting1.methods.setMyNumber(299).encodeABI();
+    // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,deployedAddress, encodedABI,web3);
+    // console.log("estimatedGas",estimatedGas);
+    
+    // var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,200000);
+    // console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
+
+    // greeting1.methods.getMyNumber().call().then(result => {
+    //     console.log("getMyNumber", result);
+    // });
 }

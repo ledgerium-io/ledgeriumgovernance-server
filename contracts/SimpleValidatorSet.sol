@@ -39,8 +39,8 @@ contract SimpleValidatorSet {
 	}
 
 	modifier isOwner() {
-		//require (adminSet.checkAdmin(msg.sender));
-		require (true);
+		require (adminSet.checkAdmin(msg.sender));
+		//require (true);
 		_;
 	}
 
