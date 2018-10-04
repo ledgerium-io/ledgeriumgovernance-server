@@ -8,11 +8,11 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
-//var host = "http://localhost:8545";
-//var web3 = new Web3(new Web3.providers.HttpProvider(host));
+var host = "http://localhost:8545";
+var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
-var host = "ws://localhost:9000";
-web3 = new Web3(new Web3.providers.WebsocketProvider(host));
+//var host = "ws://localhost:9000";
+//web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidatorSet,simpleValidatorSet;
@@ -20,6 +20,7 @@ var privateKey = {};
 var contractsList = {};
 var accountAddressList = [];
 var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
+
 var main = async function () {
 
     //await generateKeysAndCreateAccounts(accountAddressList);
@@ -31,7 +32,6 @@ var main = async function () {
     
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
-    //return;
     
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
@@ -78,13 +78,42 @@ var main = async function () {
     flag = await addNewAdmin();
     console.log("return flag for proposalToAddAdmin ",flag);
 
+    flag = await getAllAdmins();
+    console.log("return flag for getAllAdmins",flag);
+
     flag = await removeOneAdmin();
     console.log("return flag for proposalToRemoveAdmin ",flag);
 
+    flag = await getAllAdmins();
+    console.log("return flag for getAllAdmins",flag);
+    
     return;
 }
 
 main();
+
+async function getAllAdmins(){
+    try{
+        var noOfActiveAdmin = 0;
+        var adminList = [];
+        adminList = await adminValidatorSet.getAllAdmins(accountAddressList[0]);
+        if (adminList != undefined && adminList.length > 0) {
+            for(var index = 0; index < adminList.length; index++ ){
+                var flag = await adminValidatorSet.checkAdmin(accountAddressList[0],adminList[index]);
+                if(flag){
+                    noOfActiveAdmin++;
+                    console.log("admin[", index,"] ",adminList[index]);
+                }
+            }
+            console.log("Number of active admins " + noOfActiveAdmin);
+            return true;
+        }
+    }
+    catch (error) {
+        console.log("Error in getAllAdmins(): " + error);
+        return false;
+    }
+} 
 
 async function addNewAdmin(){
     try{

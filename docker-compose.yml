@@ -61,7 +61,7 @@ services:
     restart: always
   constellation-0:
     hostname: constellation-0
-    image: quay.io/amis/constellation:latest
+    image: quorumengineering/constellation:latest
     ports:
       - '10000:10000'
     volumes:
@@ -139,7 +139,7 @@ services:
     restart: always
   constellation-1:
     hostname: constellation-1
-    image: quay.io/amis/constellation:latest
+    image: quorumengineering/constellation:latest
     ports:
       - '10001:10001'
     volumes:
@@ -217,7 +217,7 @@ services:
     restart: always
   constellation-2:
     hostname: constellation-2
-    image: quay.io/amis/constellation:latest
+    image: quorumengineering/constellation:latest
     ports:
       - '10002:10002'
     volumes:
@@ -295,7 +295,7 @@ services:
     restart: always
   constellation-3:
     hostname: constellation-3
-    image: quay.io/amis/constellation:latest
+    image: quorumengineering/constellation:latest
     ports:
       - '10003:10003'
     volumes:

@@ -32,6 +32,8 @@ contract AdminValidatorSet {
 	mapping (address => bool) owners;
 	uint32 totalCount;
 	mapping (address => Vote) votes;
+	address[] admins;
+	mapping (address => bool) exists;
 
 	modifier isOwner() {
 		// make sure only owner can add or remove admins
@@ -44,6 +46,12 @@ contract AdminValidatorSet {
 		owners[msg.sender] = true;
 		owners[owner1] = true;
 		owners[owner2] = true;
+		admins.push(msg.sender);
+		admins.push(owner1);
+		admins.push(owner2);
+		exists[msg.sender] = true;
+		exists[owner1] = true;
+		exists[owner2] = true;
 		totalCount = 3;
 	}
 
@@ -102,6 +110,10 @@ contract AdminValidatorSet {
 		if(votes[_address].countFor >= totalCount / 2 + 1){
 			owners[_address] = true;
 			totalCount++;
+			if(!exists[_address]){
+				exists[_address] = true;
+				admins.push(_address);
+			}	
 			require(clearVotes(_address));
 		}
 		return true;
@@ -136,22 +148,6 @@ contract AdminValidatorSet {
 		return true;
 	}
 
-	function checkVotes (address _address) public view isOwner returns(uint32[2] res){
-		uint32[2] memory a;
-		a[0] = votes[_address].countFor;
-		a[1] = votes[_address].countAgainst;
-		return a;
-	}
-
-	function checkProposal (address _address) public view isOwner returns(string res){
-		if(votes[_address].proposal == Proposal.ADD)
-			return "add";
-		else if(votes[_address].proposal == Proposal.REMOVE)
-			return "remove";
-		else
-			return "proposal not created";
-	}
-
 	function changeVote (address _address) public isOwner returns(bool res){
 		require (votes[_address].vote[msg.sender] != Decision.NOT_DECIDED);
 		require (votes[_address].proposal != Proposal.NOT_CREATED);
@@ -179,7 +175,22 @@ contract AdminValidatorSet {
 			}
 		}
 		return true;
+	}
 
+	function checkVotes (address _address) public view isOwner returns(uint32[2] res){
+		uint32[2] memory a;
+		a[0] = votes[_address].countFor;
+		a[1] = votes[_address].countAgainst;
+		return a;
+	}
+
+	function checkProposal (address _address) public view isOwner returns(string res){
+		if(votes[_address].proposal == Proposal.ADD)
+			return "add";
+		else if(votes[_address].proposal == Proposal.REMOVE)
+			return "remove";
+		else
+			return "proposal not created";
 	}
 
 	function checkAdmin(address _address) public view returns(bool){
@@ -190,4 +201,9 @@ contract AdminValidatorSet {
 	    address[] memory arr = votes[_address].voted;
 	    return arr;
 	}
+
+	function getAllAdmins () public view returns(address[] res){
+		return admins;
+	}
+	
 }

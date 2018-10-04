@@ -25,7 +25,8 @@ const utils = {
     async getContractEncodeABI(abi,bytecode,web3,arg){
         try{
             let contract = new web3.eth.Contract(JSON.parse(abi));
-            return await contract.deploy({ data : bytecode, arguments : arg }).encodeABI();
+            return await contract.deploy({ data : bytecode, arguments : arg}).encodeABI();
+            //return await contract.deploy({ data : bytecode, arguments : arg, "privateFor" : privateFor }).encodeABI();
         } catch (error) {
             console.log("Exception in utils.getContractEncodeABI(): " + error);
         } 
@@ -42,6 +43,7 @@ const utils = {
             .send({
                 from : deployedAddress,
                 gas : 5500000
+                //"privateFor" : privateFor
             });
             // .on('error', function(error){ 
             //     if(!error)
@@ -78,6 +80,7 @@ const utils = {
                 to: toContractAddress,
                 value: '0x00',
                 data: methodData
+                //"privateFor" : privateFor
             }
             const tx = new EthereumTx(txParams)
             const privateKeyBuffer = new Buffer(privateKey, 'hex');
