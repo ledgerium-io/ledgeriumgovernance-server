@@ -8,7 +8,7 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
-var host = "http://localhost:8545";
+var host = "http://localhost:8548";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 //var host = "ws://localhost:9000";
@@ -27,12 +27,30 @@ var main = async function () {
     //await readWritePrivateKeys(accountAddressList);
     await createAccountsAndManageKeys();
 
+    var coinbase = await web3.eth.getCoinbase();
+    console.log(coinbase);
+
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
     
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
-    
+
+    var message = {
+    method: "istanbul_propose",
+    params: [coinbase,false],
+    jsonrpc: "2.0",
+    id: new Date().getTime()
+    };
+
+    web3.currentProvider.send(message,(result,err)=>{
+        console.log("send");
+        if(err)
+            console.log("print error", err);
+        else
+        console.log("print result", result);
+    });
+    return;
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
