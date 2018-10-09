@@ -8,7 +8,7 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
-var host = "http://localhost:8548";
+var host = "http://localhost:8545";
 var web3 = new Web3(new Web3.providers.HttpProvider(host));
 
 //var host = "ws://localhost:9000";
@@ -27,30 +27,16 @@ var main = async function () {
     //await readWritePrivateKeys(accountAddressList);
     await createAccountsAndManageKeys();
 
-    var coinbase = await web3.eth.getCoinbase();
-    console.log(coinbase);
-
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
-    
+
+    istanbulAddValidatorTest();
+    await delay(10000); //wait for 10 seconds!
+    istanbulRemoveValidatorTest();
+
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
 
-    var message = {
-    method: "istanbul_propose",
-    params: [coinbase,false],
-    jsonrpc: "2.0",
-    id: new Date().getTime()
-    };
-
-    web3.currentProvider.send(message,(result,err)=>{
-        console.log("send");
-        if(err)
-            console.log("print error", err);
-        else
-        console.log("print result", result);
-    });
-    return;
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
@@ -109,6 +95,108 @@ var main = async function () {
 }
 
 main();
+
+async function istanbulAddValidatorTest()
+{
+    listIstanbulValidator();
+    
+    addIstanbulValidator(8545,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8546,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8547,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8548,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8549,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8550,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+
+    await delay(10000); //wait for 10 seconds!
+    listIstanbulValidator();
+    return;
+}    
+
+async function istanbulRemoveValidatorTest(){
+    listIstanbulValidator();
+
+    removeIstanbulValidator(8545,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    removeIstanbulValidator(8546,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    removeIstanbulValidator(8547,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    removeIstanbulValidator(8548,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    removeIstanbulValidator(8549,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+
+    await delay(10000); //wait for 10 seconds!
+    listIstanbulValidator();
+    return;
+}
+
+async function removeIstanbulValidator(port,validator)
+{
+    var host = "http://localhost:" + port;
+    console.log("removeIstanbulValidator pointing to", host);
+    var web3 = new Web3(new Web3.providers.HttpProvider(host));
+    var coinbase = await web3.eth.getCoinbase();
+    console.log(coinbase);
+    var message = {
+        method: "istanbul_propose",
+        params: [validator,false],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+        };
+    
+    web3.currentProvider.send(message,(err,result)=>{
+        console.log("received results:removeIstanbulValidator");
+        if(result)
+            console.log("results", result.result);
+        else if(err)
+        console.log("print result", err);
+    });
+    return;
+}
+
+async function addIstanbulValidator(port,validator)
+{
+    var host = "http://localhost:" + port;
+    console.log("addIstanbulValidator pointing to", host);
+    var web3 = new Web3(new Web3.providers.HttpProvider(host));
+    var coinbase = await web3.eth.getCoinbase();
+    console.log(coinbase);
+    var message = {
+        method: "istanbul_propose",
+        params: [validator,true],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+        };
+    
+    web3.currentProvider.send(message,(err,result)=>{
+        console.log("received results:addIstanbulValidator");
+        if(result)
+            console.log("results", result.result);
+        else if(err)
+        console.log("print result", err);
+    });
+    return;
+}
+
+const delay = ms => new Promise(res => {console.log(new Date().getTime()); setTimeout(res, ms); console.log(new Date().getTime());});
+
+async function listIstanbulValidator()
+{
+    var host = "http://localhost:" + "8545";
+    console.log("listIstanbulValidator pointing to", host);
+    var web3 = new Web3(new Web3.providers.HttpProvider(host));
+    var message = {
+        method: "istanbul_getValidators",
+        params: [],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+        };
+    
+    web3.currentProvider.send(message,(err,result)=>{
+        console.log("received results:listIstanbulValidator");
+        if(result)
+            console.log("results", result.result);
+        else if(err)
+        console.log("print result", err);
+    });
+    return;
+}
 
 async function getAllAdmins(){
     try{
