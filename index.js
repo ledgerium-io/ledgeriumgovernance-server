@@ -30,9 +30,9 @@ var main = async function () {
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
 
-    istanbulAddValidatorTest();
-    await delay(10000); //wait for 10 seconds!
-    istanbulRemoveValidatorTest();
+    //istanbulAddValidatorTest();
+    //await delay(10000); //wait for 10 seconds!
+    //istanbulRemoveValidatorTest();
 
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
@@ -388,31 +388,48 @@ async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAdd
 
 async function addSimpleSetContractValidatorsForAdmin(ethAccountToUse){
     try{
-        var newValidator = "0x71f7e738fd932ec2f577adb34b45444a0dcca7a2";
+        //var newValidator = "0x71f7e738fd932ec2f577adb34b45444a0dcca7a2";
+        var newValidator = accountAddressList[0];
         var transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
 
-        newValidator = "0xeb4df8096836a9a93462c2057b07bddaea1964b1";
+        //newValidator = "0xeb4df8096836a9a93462c2057b07bddaea1964b1";
+        newValidator = accountAddressList[1];
         transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
 
-        newValidator = "0x56a2288dec7538345484c18414d6f8bd3e9a530e";
+        //newValidator = "0x56a2288dec7538345484c18414d6f8bd3e9a530e";
+        newValidator = accountAddressList[2];
         transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
 
-        newValidator = "0x92dc52c980c7c93bd33e94a2d001fb02ef552ab7";
+        //newValidator = "0x92dc52c980c7c93bd33e94a2d001fb02ef552ab7";
+        newValidator = accountAddressList[3];
         transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
 
-        newValidator = "0x629d1e30bc3b81024941e20c648895d6dc2e858d";
+        //newValidator = "0x629d1e30bc3b81024941e20c648895d6dc2e858d";
+        newValidator = accountAddressList[4];
+        transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
+        transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
+
+        newValidator = accountAddressList[5];
+        transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
+        transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for finalising ", newValidator);
+
+        newValidator = accountAddressList[6];
         transactionhash = await simpleValidatorSet.addValidator(ethAccountToUse,newValidator);
         console.log("submitted transactionhash ",transactionhash, "for adding ", newValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,newValidator);
@@ -427,31 +444,48 @@ async function addSimpleSetContractValidatorsForAdmin(ethAccountToUse){
 
 async function removeSimpleSetContractValidatorsForAdmin(ethAccountToUse){
     try{
-        var removeValidator = "0x71f7e738fd932ec2f577adb34b45444a0dcca7a2";
+        //var removeValidator = "0x71f7e738fd932ec2f577adb34b45444a0dcca7a2";
+        var removeValidator = accountAddressList[0];
         var transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
 
-        removeValidator = "0xeb4df8096836a9a93462c2057b07bddaea1964b1";
+        //removeValidator = "0xeb4df8096836a9a93462c2057b07bddaea1964b1";
+        removeValidator = accountAddressList[1];
         transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
 
-        removeValidator = "0x56a2288dec7538345484c18414d6f8bd3e9a530e";
+        //removeValidator = "0x56a2288dec7538345484c18414d6f8bd3e9a530e";
+        removeValidator = accountAddressList[2];
         transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
 
-        removeValidator = "0x92dc52c980c7c93bd33e94a2d001fb02ef552ab7";
+        //removeValidator = "0x92dc52c980c7c93bd33e94a2d001fb02ef552ab7";
+        removeValidator = accountAddressList[3];
         transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
 
-        removeValidator = "0x629d1e30bc3b81024941e20c648895d6dc2e858d";
+        //removeValidator = "0x629d1e30bc3b81024941e20c648895d6dc2e858d";
+        removeValidator = accountAddressList[4];
+        transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
+        console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
+        transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
+        console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
+
+        removeValidator = accountAddressList[5];
+        transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
+        console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
+        transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
+        console.log("submitted transactionhash ",transactionhash, "for finalising ", removeValidator);
+
+        removeValidator = accountAddressList[6];
         transactionhash = await simpleValidatorSet.removeValidator(ethAccountToUse,removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for removing ", removeValidator);
         transactionhash = await simpleValidatorSet.finaliseChange(ethAccountToUse,removeValidator);
