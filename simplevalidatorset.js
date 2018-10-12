@@ -12,10 +12,8 @@ module.exports = class SimpleValidatorSet {
         }
     }
     
-    setOwnersParameters(ownerAccountAddress,privateKey,simpleValidatorSetAddress){
+    setOwnersParameters(simpleValidatorSetAddress){
         try{
-            this.ownerAccountAddress = ownerAccountAddress;
-            this.privateKey = privateKey;
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
 
@@ -28,13 +26,13 @@ module.exports = class SimpleValidatorSet {
         }  
     }    
     
-    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
+    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorAddress) {
         try {
             var constructorParameters = [];
             constructorParameters.push(adminValidatorAddress);
             var estimatedGas = 0;
             var encodedABI = await utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
-            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
             this.simpleValidatorSetAddress = deployedAddress.contractAddress;    
             return this.simpleValidatorSetAddress;
         } catch (error) {
@@ -94,13 +92,13 @@ module.exports = class SimpleValidatorSet {
         }
     }
 
-    async addValidator(ethAccountToUse, newValidator) {
+    async addValidator(ethAccountToUse, privateKey, newValidator) {
         try {
             var encodedABI = this.contract.methods.addValidator(newValidator).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,this.privateKey,this.web3,estimatedGas);
+            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         } catch (error) {
             console.log("Error in SimpleValidatorSet.addValidator(): " + error);
@@ -108,27 +106,13 @@ module.exports = class SimpleValidatorSet {
         }    
     }
 
-    async finaliseChange(ethAccountToUse, newValidator) {
-        try {
-            var encodedABI = this.contract.methods.finalize(newValidator).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
-            var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address, encodedABI,this.privateKey,this.web3,estimatedGas);
-            return transactionObject.transactionHash;
-        } catch (error) {
-            console.log("Error in SimpleValidatorSet.finaliseChange(): " + error);
-            return "";
-        }
-    }
-
-    async removeValidator(ethAccountToUse, validatorToRemove) {
+    async removeValidator(ethAccountToUse, privateKey, validatorToRemove) {
         try {
             var encodedABI = this.contract.methods.removeValidator(validatorToRemove).encodeABI();
             // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,this.privateKey,this.web3,estimatedGas);
+            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;        
         } catch (error) {
             console.log("Error in SimpleValidatorSet.removeValidator(): " + error);
@@ -172,12 +156,6 @@ module.exports = class SimpleValidatorSet {
                             console.log("removevalidator:Block Hash",eachElement.blockHash);
                             console.log("removevalidator:calleeAdminAccount",eachElement.returnValues[0]);
                         }
-                        else if(eachElement.event == "finalizeEvent"){
-                            console.log("finalizeEvent:Contract address",eachElement.returnValues[0]);
-                            console.log("finalizeEvent:Transaction Hash",eachElement.transactionHash);
-                            console.log("finalizeEvent:Block Hash",eachElement.blockHash);
-                            console.log("addvalidator:calleeAdminAccount",eachElement.returnValues[0]);
-                        }
                     })
                 }
                 
@@ -196,9 +174,6 @@ module.exports = class SimpleValidatorSet {
                 case "removevalidator":
                     console.log("removevalidator");
                     break;
-                case "finalizeEvent":
-                    console.log("finalizeEvent");
-                    break;
                 default:
                     break;
             }
@@ -215,9 +190,6 @@ module.exports = class SimpleValidatorSet {
         //             break;
         //         case "RemoveValidatorEvent":
         //             console.log("RemoveValidatorEvent");
-        //             break;
-        //         case "FinalizeCalledEvent":
-        //             console.log("FinalizeCalledEvent");
         //             break;
         //         default:			
         //             break;
