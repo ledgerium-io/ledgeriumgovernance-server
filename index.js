@@ -23,15 +23,6 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 
 var main = async function () {
 
-    // var privateKeyFileName = "./abcd.txt";
-    // var prvkey1 = "quay.io/amis/ethstats:latest";
-    // var prvkey2 = "quorumengineering/quorum:latest";
-    // privateKey["pubkey1"] = prvkey1;
-    // privateKey["pubkey2"] = prvkey2;
-    // var data = JSON.stringify(privateKey,null, 2);
-    // fs.writeFileSync(privateKeyFileName,data);
-    
-    // return;
     //await generateKeysAndCreateAccounts(accountAddressList);
     //await readWritePrivateKeys(accountAddressList);
     await createAccountsAndManageKeys();
