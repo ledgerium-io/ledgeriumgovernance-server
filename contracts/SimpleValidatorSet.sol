@@ -1,28 +1,22 @@
 pragma solidity ^0.4.24;
 import "./AdminValidatorSet.sol";
+import "./Voteable.sol";
 
 /**
  * The ValidatorSet contract maintains the set of validators and Allows
  * admins to add and remove members from the validator set
  */
-contract SimpleValidatorSet {
+contract SimpleValidatorSet is Voteable{
 
 	enum Status {
-		DISABLED,
+		INACTIVE,
 		PENDING,
 		ACTIVE
-	}
-
-	enum LastOp{
-		NO_OP,
-		REMOVE,
-		ADD
 	}
 
 	struct Validator {
 		bool isValidator;
 		Status status;
-		LastOp lop;
 	}
 
 	AdminValidatorSet adminSet;
@@ -31,7 +25,7 @@ contract SimpleValidatorSet {
 	mapping (address => address[]) adminValidatorsMap;
 	address[] validators;
 	mapping (address => bool) exists;
-
+	
 	uint32 totalCount;
 
 	constructor (address _address)public {
@@ -40,7 +34,6 @@ contract SimpleValidatorSet {
 
 	modifier isOwner() {
 		require (adminSet.checkAdmin(msg.sender));
-		//require (true);
 		_;
 	}
 
@@ -50,43 +43,45 @@ contract SimpleValidatorSet {
 
 	function addValidator (address _address)public isOwner returns(bool res)  {
 		assert (!activeValidators[_address].isValidator);
-		assert (activeValidators[_address].status == Status.DISABLED);
-		if(!exists[_address]){
-			adminValidatorsMap[msg.sender].push(_address);
-			validators.push(_address);
-		}	
-		exists[_address] = true;
-		activeValidators[_address].isValidator = true;
-		activeValidators[_address].lop = LastOp.ADD;
-		activeValidators[_address].status = Status.PENDING;
-		emit addvalidator(_address,msg.sender);
+		assert (activeValidators[_address].status == Status.INACTIVE);
+		assert (voteFor(_address,msg.sender));
+		if(votes[_address].countFor >= adminSet.getTotalCount() / 2 + 1){
+    		if(!exists[_address]){
+    				adminValidatorsMap[msg.sender].push(_address);
+    				validators.push(_address);
+    		}		
+    		exists[_address] = true;
+    		activeValidators[_address].isValidator = true;
+    		//activeValidators[_address].lop = LastOp.ADD;
+    		activeValidators[_address].status = Status.ACTIVE;
+    		require(clearVotes(_address));
+		    emit addvalidator(_address,msg.sender);
+		}
+		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
+		    require(clearVotes(_address));
+		}
 		return true;
 	}
 
 	function removeValidator (address _address)public isOwner returns(bool res)  {
 		assert (activeValidators[_address].isValidator);
 		assert (activeValidators[_address].status == Status.ACTIVE);
-		activeValidators[_address].isValidator = false;
-		activeValidators[_address].lop = LastOp.REMOVE;
-		activeValidators[_address].status = Status.PENDING;
-		emit removevalidator(_address,msg.sender);
-		return true;
-	}
-
-	function finalize (address _address)public isOwner returns(bool res)  {
-		assert (activeValidators[_address].status == Status.PENDING);
-		if(activeValidators[_address].lop == LastOp.ADD){
-			activeValidators[_address].status = Status.ACTIVE;
-			emit finalizeEvent(_address,msg.sender,"add");
+		assert (voteFor(_address,msg.sender));
+		if(votes[_address].countFor >= adminSet.getTotalCount() / 2 + 1){
+    		activeValidators[_address].isValidator = false;
+    		//activeValidators[_address].lop = LastOp.REMOVE;
+    		activeValidators[_address].status = Status.INACTIVE;
+    		require(clearVotes(_address));
+    		emit removevalidator(_address,msg.sender);
 		}
-		else{
-			activeValidators[_address].status = Status.DISABLED;
-			emit finalizeEvent(_address,msg.sender,"remove");
+		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
+		    require(clearVotes(_address));
 		}
 		return true;
 	}
 
-	function lastOp (address _address)public view isOwner returns(string res){
+
+	/*function lastOp (address _address)public view isOwner returns(string res){
 		if(activeValidators[_address].lop == LastOp.ADD){
 			return "add";
 		}
@@ -95,20 +90,10 @@ contract SimpleValidatorSet {
 		}else{
 			return "no op";
 		}
-	}
+	}*/
 
 	function getValidatorsForAdmin() public view isOwner returns (address[] a){
 	    return adminValidatorsMap[msg.sender];
-	    /*address[10] memory temp;
-	    address[] memory all = adminValidatorsMap[msg.sender];
-	    uint j = 0;
-	    for(uint i=0;i<all.length;i++){
-	        if(activeValidators[all[i]].isValidator){
-	            temp[i] = a[i];
-	            j++;
-	        }
-	    }
-	    return temp;*/
 	}
 
 	function isValidator(address _address) public view isOwner returns(bool a){
@@ -117,15 +102,6 @@ contract SimpleValidatorSet {
 
 	function getAllValidators()public view isOwner returns(address[] a){
 	    return validators;
-	    /*address[10] memory temp;
-	    address[] memory all = validators;
-	    uint j = 0;
-	    for(uint i=0;i<all.length;i++){
-	        if(activeValidators[all[i]].isValidator){
-	            temp[j] = a[i];
-	            j++;
-	        }
-	    }
-	    return temp;*/
 	}
+
 }
