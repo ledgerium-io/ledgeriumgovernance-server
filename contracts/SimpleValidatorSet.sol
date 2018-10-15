@@ -55,7 +55,11 @@ contract SimpleValidatorSet is Voteable{
     		//activeValidators[_address].lop = LastOp.ADD;
     		activeValidators[_address].status = Status.ACTIVE;
     		require(clearVotes(_address));
+			votes[_address].proposal = Proposal.NOT_CREATED;
 		    emit addvalidator(_address,msg.sender);
+		}
+		else {
+			votes[_address].proposal = Proposal.ADD;
 		}
 		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
 		    require(clearVotes(_address));
@@ -72,7 +76,11 @@ contract SimpleValidatorSet is Voteable{
     		//activeValidators[_address].lop = LastOp.REMOVE;
     		activeValidators[_address].status = Status.INACTIVE;
     		require(clearVotes(_address));
+			votes[_address].proposal = Proposal.NOT_CREATED;
     		emit removevalidator(_address,msg.sender);
+		}
+		else {
+			votes[_address].proposal = Proposal.REMOVE;
 		}
 		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
 		    require(clearVotes(_address));
@@ -88,9 +96,13 @@ contract SimpleValidatorSet is Voteable{
 		else if(activeValidators[_address].lop == LastOp.REMOVE){
 			return "remove";
 		}else{
-			return "no op";
+			return "no op";	
 		}
 	}*/
+
+	function checkProposal (address _address) public view isOwner returns(string res){
+		return internalCheckProposal(_address);
+	}
 
 	function getValidatorsForAdmin() public view isOwner returns (address[] a){
 	    return adminValidatorsMap[msg.sender];

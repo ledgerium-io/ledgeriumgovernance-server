@@ -367,7 +367,7 @@
         "id": 4,
         "nodeType": "ImportDirective",
         "scope": 586,
-        "sourceUnit": 1563,
+        "sourceUnit": 1611,
         "src": "74:24:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -381,10 +381,10 @@
               "id": 5,
               "name": "Voteable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1562,
+              "referencedDeclaration": 1610,
               "src": "264:8:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Voteable_$1562",
+                "typeIdentifier": "t_contract$_Voteable_$1610",
                 "typeString": "contract Voteable"
               }
             },
@@ -413,7 +413,7 @@
         ],
         "contractDependencies": [
           661,
-          1562
+          1610
         ],
         "contractKind": "contract",
         "documentation": "The AdminSet contract maintains the list of all the admin with their vote\nto add or remove a particular member as admin",
@@ -422,7 +422,7 @@
         "linearizedBaseContracts": [
           585,
           661,
-          1562
+          1610
         ],
         "name": "AdminValidatorSet",
         "nodeType": "ContractDefinition",
@@ -569,7 +569,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1577,
+                            "referencedDeclaration": 1625,
                             "src": "465:3:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -613,10 +613,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "450:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -699,7 +699,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "630:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -929,7 +929,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "714:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1175,7 +1175,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "782:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1677,7 +1677,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 126,
@@ -1695,10 +1695,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1058:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -1723,7 +1723,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1058:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -1734,10 +1734,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1058:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -1751,10 +1751,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1086:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -1768,7 +1768,7 @@
                           "referencedDeclaration": null,
                           "src": "1086:20:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -1790,10 +1790,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1050:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1836,10 +1836,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1111:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -1864,7 +1864,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1111:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -1875,10 +1875,10 @@
                       "lValueRequested": true,
                       "memberName": "proposal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1119,
+                      "referencedDeclaration": 1167,
                       "src": "1111:24:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
@@ -1892,10 +1892,10 @@
                         "name": "Proposal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1117,
+                        "referencedDeclaration": 1165,
                         "src": "1138:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                           "typeString": "type(enum Voteable.Proposal)"
                         }
                       },
@@ -1909,13 +1909,13 @@
                       "referencedDeclaration": null,
                       "src": "1138:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
                     "src": "1111:42:0",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Proposal_$1117",
+                      "typeIdentifier": "t_enum$_Proposal_$1165",
                       "typeString": "enum Voteable.Proposal"
                     }
                   },
@@ -1951,7 +1951,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1183:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -1988,7 +1988,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1166:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -2021,10 +2021,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1157:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2189,7 +2189,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 164,
@@ -2207,10 +2207,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1308:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -2235,7 +2235,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1308:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -2246,10 +2246,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1308:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -2263,10 +2263,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1336:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -2280,7 +2280,7 @@
                           "referencedDeclaration": null,
                           "src": "1336:20:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -2302,10 +2302,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1300:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2348,10 +2348,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1361:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -2376,7 +2376,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1361:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -2387,10 +2387,10 @@
                       "lValueRequested": true,
                       "memberName": "proposal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1119,
+                      "referencedDeclaration": 1167,
                       "src": "1361:24:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
@@ -2404,10 +2404,10 @@
                         "name": "Proposal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1117,
+                        "referencedDeclaration": 1165,
                         "src": "1388:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                           "typeString": "type(enum Voteable.Proposal)"
                         }
                       },
@@ -2421,13 +2421,13 @@
                       "referencedDeclaration": null,
                       "src": "1388:12:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
                     "src": "1361:39:0",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Proposal_$1117",
+                      "typeIdentifier": "t_enum$_Proposal_$1165",
                       "typeString": "enum Voteable.Proposal"
                     }
                   },
@@ -2463,7 +2463,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1430:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -2500,7 +2500,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1413:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -2533,10 +2533,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1404:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2701,7 +2701,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 202,
@@ -2719,10 +2719,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1555:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -2747,7 +2747,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1555:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -2758,10 +2758,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1555:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -2775,10 +2775,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1583:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -2792,7 +2792,7 @@
                           "referencedDeclaration": null,
                           "src": "1583:12:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -2814,10 +2814,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1547:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2870,7 +2870,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1625:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -2907,7 +2907,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1608:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -2940,10 +2940,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1600:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2990,10 +2990,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1644:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -3018,7 +3018,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1644:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -3029,7 +3029,7 @@
                       "lValueRequested": false,
                       "memberName": "countFor",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1121,
+                      "referencedDeclaration": 1169,
                       "src": "1644:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -3494,7 +3494,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "1830:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -3527,10 +3527,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              1580,
-                              1581
+                              1628,
+                              1629
                             ],
-                            "referencedDeclaration": 1580,
+                            "referencedDeclaration": 1628,
                             "src": "1822:7:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3698,7 +3698,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 276,
@@ -3716,10 +3716,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1970:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -3744,7 +3744,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1970:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -3755,10 +3755,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1970:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -3772,10 +3772,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1998:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -3789,7 +3789,7 @@
                           "referencedDeclaration": null,
                           "src": "1998:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -3811,10 +3811,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1962:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3867,7 +3867,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2043:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -3904,7 +3904,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "2026:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -3937,10 +3937,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2018:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3987,10 +3987,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2062:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -4015,7 +4015,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2062:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -4026,7 +4026,7 @@
                       "lValueRequested": false,
                       "memberName": "countFor",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1121,
+                      "referencedDeclaration": 1169,
                       "src": "2062:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -4281,7 +4281,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2174:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -4314,10 +4314,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              1580,
-                              1581
+                              1628,
+                              1629
                             ],
-                            "referencedDeclaration": 1580,
+                            "referencedDeclaration": 1628,
                             "src": "2166:7:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4485,7 +4485,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 333,
@@ -4503,10 +4503,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "2316:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -4531,7 +4531,7 @@
                             "nodeType": "IndexAccess",
                             "src": "2316:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -4542,10 +4542,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "2316:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -4559,10 +4559,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "2344:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -4576,7 +4576,7 @@
                           "referencedDeclaration": null,
                           "src": "2344:12:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -4598,10 +4598,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2308:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4654,7 +4654,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2390:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -4691,7 +4691,7 @@
                           "name": "voteAgainst",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1275,
+                          "referencedDeclaration": 1323,
                           "src": "2369:11:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -4724,10 +4724,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2361:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4774,10 +4774,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2409:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -4802,7 +4802,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2409:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -4813,7 +4813,7 @@
                       "lValueRequested": false,
                       "memberName": "countAgainst",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1123,
+                      "referencedDeclaration": 1171,
                       "src": "2409:28:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -4956,7 +4956,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2472:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -4989,7 +4989,7 @@
                             "name": "assert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1566,
+                            "referencedDeclaration": 1614,
                             "src": "2465:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
@@ -5157,7 +5157,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 381,
@@ -5175,10 +5175,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "2616:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -5203,7 +5203,7 @@
                             "nodeType": "IndexAccess",
                             "src": "2616:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -5214,10 +5214,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "2616:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -5231,10 +5231,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "2644:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -5248,7 +5248,7 @@
                           "referencedDeclaration": null,
                           "src": "2644:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -5270,10 +5270,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2608:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5326,7 +5326,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2693:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -5363,7 +5363,7 @@
                           "name": "voteAgainst",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1275,
+                          "referencedDeclaration": 1323,
                           "src": "2672:11:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -5396,10 +5396,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2664:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5446,10 +5446,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2712:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -5474,7 +5474,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2712:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -5485,7 +5485,7 @@
                       "lValueRequested": false,
                       "memberName": "countAgainst",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1123,
+                      "referencedDeclaration": 1171,
                       "src": "2712:28:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -5628,7 +5628,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2775:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -5661,7 +5661,7 @@
                             "name": "assert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1566,
+                            "referencedDeclaration": 1614,
                             "src": "2768:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
@@ -5854,7 +5854,7 @@
                           "name": "internalChangeVote",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1475,
+                          "referencedDeclaration": 1523,
                           "src": "2905:18:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -5887,10 +5887,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2897:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5958,10 +5958,10 @@
                         "name": "votes",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1135,
+                        "referencedDeclaration": 1183,
                         "src": "2952:5:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                           "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                         }
                       },
@@ -5986,7 +5986,7 @@
                       "nodeType": "IndexAccess",
                       "src": "2952:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                        "typeIdentifier": "t_struct$_Vote_$1179_storage",
                         "typeString": "struct Voteable.Vote storage ref"
                       }
                     },
@@ -5997,7 +5997,7 @@
                     "lValueRequested": false,
                     "memberName": "countFor",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 1121,
+                    "referencedDeclaration": 1169,
                     "src": "2952:24:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
@@ -6050,10 +6050,10 @@
                         "name": "votes",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1135,
+                        "referencedDeclaration": 1183,
                         "src": "2998:5:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                           "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                         }
                       },
@@ -6078,7 +6078,7 @@
                       "nodeType": "IndexAccess",
                       "src": "2998:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                        "typeIdentifier": "t_struct$_Vote_$1179_storage",
                         "typeString": "struct Voteable.Vote storage ref"
                       }
                     },
@@ -6089,7 +6089,7 @@
                     "lValueRequested": false,
                     "memberName": "countAgainst",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 1123,
+                    "referencedDeclaration": 1171,
                     "src": "2998:28:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
@@ -6103,7 +6103,7 @@
                   "condition": {
                     "argumentTypes": null,
                     "commonType": {
-                      "typeIdentifier": "t_enum$_Decision_$1113",
+                      "typeIdentifier": "t_enum$_Decision_$1161",
                       "typeString": "enum Voteable.Decision"
                     },
                     "id": 451,
@@ -6123,10 +6123,10 @@
                             "name": "votes",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1135,
+                            "referencedDeclaration": 1183,
                             "src": "3033:5:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                               "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                             }
                           },
@@ -6151,7 +6151,7 @@
                           "nodeType": "IndexAccess",
                           "src": "3033:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                            "typeIdentifier": "t_struct$_Vote_$1179_storage",
                             "typeString": "struct Voteable.Vote storage ref"
                           }
                         },
@@ -6162,10 +6162,10 @@
                         "lValueRequested": false,
                         "memberName": "vote",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1127,
+                        "referencedDeclaration": 1175,
                         "src": "3033:20:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_enum$_Decision_$1113_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_enum$_Decision_$1161_$",
                           "typeString": "mapping(address => enum Voteable.Decision)"
                         }
                       },
@@ -6178,7 +6178,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "3054:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -6206,7 +6206,7 @@
                       "nodeType": "IndexAccess",
                       "src": "3033:32:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Decision_$1113",
+                        "typeIdentifier": "t_enum$_Decision_$1161",
                         "typeString": "enum Voteable.Decision"
                       }
                     },
@@ -6220,10 +6220,10 @@
                         "name": "Decision",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1113,
+                        "referencedDeclaration": 1161,
                         "src": "3069:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Decision_$1113_$",
+                          "typeIdentifier": "t_type$_t_enum$_Decision_$1161_$",
                           "typeString": "type(enum Voteable.Decision)"
                         }
                       },
@@ -6237,7 +6237,7 @@
                       "referencedDeclaration": null,
                       "src": "3069:12:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Decision_$1113",
+                        "typeIdentifier": "t_enum$_Decision_$1161",
                         "typeString": "enum Voteable.Decision"
                       }
                     },
@@ -6385,7 +6385,7 @@
                               "condition": {
                                 "argumentTypes": null,
                                 "commonType": {
-                                  "typeIdentifier": "t_enum$_Proposal_$1117",
+                                  "typeIdentifier": "t_enum$_Proposal_$1165",
                                   "typeString": "enum Voteable.Proposal"
                                 },
                                 "id": 481,
@@ -6403,10 +6403,10 @@
                                       "name": "votes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1135,
+                                      "referencedDeclaration": 1183,
                                       "src": "3217:5:0",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                         "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                                       }
                                     },
@@ -6431,7 +6431,7 @@
                                     "nodeType": "IndexAccess",
                                     "src": "3217:15:0",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                                      "typeIdentifier": "t_struct$_Vote_$1179_storage",
                                       "typeString": "struct Voteable.Vote storage ref"
                                     }
                                   },
@@ -6442,10 +6442,10 @@
                                   "lValueRequested": false,
                                   "memberName": "proposal",
                                   "nodeType": "MemberAccess",
-                                  "referencedDeclaration": 1119,
+                                  "referencedDeclaration": 1167,
                                   "src": "3217:24:0",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_enum$_Proposal_$1117",
+                                    "typeIdentifier": "t_enum$_Proposal_$1165",
                                     "typeString": "enum Voteable.Proposal"
                                   }
                                 },
@@ -6459,10 +6459,10 @@
                                     "name": "Proposal",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 1117,
+                                    "referencedDeclaration": 1165,
                                     "src": "3245:8:0",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                                      "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                                       "typeString": "type(enum Voteable.Proposal)"
                                     }
                                   },
@@ -6476,7 +6476,7 @@
                                   "referencedDeclaration": null,
                                   "src": "3245:12:0",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_enum$_Proposal_$1117",
+                                    "typeIdentifier": "t_enum$_Proposal_$1165",
                                     "typeString": "enum Voteable.Proposal"
                                   }
                                 },
@@ -6692,7 +6692,7 @@
                                       "name": "clearVotes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1353,
+                                      "referencedDeclaration": 1401,
                                       "src": "3350:10:0",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -6725,10 +6725,10 @@
                                   "name": "require",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [
-                                    1580,
-                                    1581
+                                    1628,
+                                    1629
                                   ],
-                                  "referencedDeclaration": 1580,
+                                  "referencedDeclaration": 1628,
                                   "src": "3342:7:0",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6927,7 +6927,7 @@
                                       "name": "clearVotes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1353,
+                                      "referencedDeclaration": 1401,
                                       "src": "3135:10:0",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -6960,10 +6960,10 @@
                                   "name": "require",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [
-                                    1580,
-                                    1581
+                                    1628,
+                                    1629
                                   ],
-                                  "referencedDeclaration": 1580,
+                                  "referencedDeclaration": 1628,
                                   "src": "3127:7:0",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7382,7 +7382,7 @@
                       "name": "internalCheckVotes",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1511,
+                      "referencedDeclaration": 1559,
                       "src": "3677:18:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_array$_t_uint32_$2_memory_ptr_$",
@@ -7573,7 +7573,7 @@
                       "name": "internalCheckProposal",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1541,
+                      "referencedDeclaration": 1589,
                       "src": "3804:21:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_string_memory_ptr_$",
@@ -7737,7 +7737,7 @@
                       "name": "internalGetVoted",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1561,
+                      "referencedDeclaration": 1609,
                       "src": "3929:16:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_array$_t_address_$dyn_memory_ptr_$",
@@ -8013,7 +8013,7 @@
         "id": 4,
         "nodeType": "ImportDirective",
         "scope": 586,
-        "sourceUnit": 1563,
+        "sourceUnit": 1611,
         "src": "74:24:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -8027,10 +8027,10 @@
               "id": 5,
               "name": "Voteable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1562,
+              "referencedDeclaration": 1610,
               "src": "264:8:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Voteable_$1562",
+                "typeIdentifier": "t_contract$_Voteable_$1610",
                 "typeString": "contract Voteable"
               }
             },
@@ -8059,7 +8059,7 @@
         ],
         "contractDependencies": [
           661,
-          1562
+          1610
         ],
         "contractKind": "contract",
         "documentation": "The AdminSet contract maintains the list of all the admin with their vote\nto add or remove a particular member as admin",
@@ -8068,7 +8068,7 @@
         "linearizedBaseContracts": [
           585,
           661,
-          1562
+          1610
         ],
         "name": "AdminValidatorSet",
         "nodeType": "ContractDefinition",
@@ -8215,7 +8215,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1577,
+                            "referencedDeclaration": 1625,
                             "src": "465:3:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -8259,10 +8259,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "450:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -8345,7 +8345,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "630:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8575,7 +8575,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "714:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -8821,7 +8821,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "782:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -9323,7 +9323,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 126,
@@ -9341,10 +9341,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1058:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -9369,7 +9369,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1058:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -9380,10 +9380,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1058:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -9397,10 +9397,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1086:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -9414,7 +9414,7 @@
                           "referencedDeclaration": null,
                           "src": "1086:20:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -9436,10 +9436,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1050:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -9482,10 +9482,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1111:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -9510,7 +9510,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1111:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -9521,10 +9521,10 @@
                       "lValueRequested": true,
                       "memberName": "proposal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1119,
+                      "referencedDeclaration": 1167,
                       "src": "1111:24:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
@@ -9538,10 +9538,10 @@
                         "name": "Proposal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1117,
+                        "referencedDeclaration": 1165,
                         "src": "1138:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                           "typeString": "type(enum Voteable.Proposal)"
                         }
                       },
@@ -9555,13 +9555,13 @@
                       "referencedDeclaration": null,
                       "src": "1138:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
                     "src": "1111:42:0",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Proposal_$1117",
+                      "typeIdentifier": "t_enum$_Proposal_$1165",
                       "typeString": "enum Voteable.Proposal"
                     }
                   },
@@ -9597,7 +9597,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1183:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -9634,7 +9634,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1166:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -9667,10 +9667,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1157:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -9835,7 +9835,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 164,
@@ -9853,10 +9853,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1308:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -9881,7 +9881,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1308:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -9892,10 +9892,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1308:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -9909,10 +9909,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1336:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -9926,7 +9926,7 @@
                           "referencedDeclaration": null,
                           "src": "1336:20:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -9948,10 +9948,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1300:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -9994,10 +9994,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1361:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -10022,7 +10022,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1361:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -10033,10 +10033,10 @@
                       "lValueRequested": true,
                       "memberName": "proposal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1119,
+                      "referencedDeclaration": 1167,
                       "src": "1361:24:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
@@ -10050,10 +10050,10 @@
                         "name": "Proposal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1117,
+                        "referencedDeclaration": 1165,
                         "src": "1388:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                          "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                           "typeString": "type(enum Voteable.Proposal)"
                         }
                       },
@@ -10067,13 +10067,13 @@
                       "referencedDeclaration": null,
                       "src": "1388:12:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Proposal_$1117",
+                        "typeIdentifier": "t_enum$_Proposal_$1165",
                         "typeString": "enum Voteable.Proposal"
                       }
                     },
                     "src": "1361:39:0",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_Proposal_$1117",
+                      "typeIdentifier": "t_enum$_Proposal_$1165",
                       "typeString": "enum Voteable.Proposal"
                     }
                   },
@@ -10109,7 +10109,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1430:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -10146,7 +10146,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1413:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -10179,10 +10179,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1404:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -10347,7 +10347,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 202,
@@ -10365,10 +10365,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1555:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -10393,7 +10393,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1555:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -10404,10 +10404,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1555:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -10421,10 +10421,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1583:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -10438,7 +10438,7 @@
                           "referencedDeclaration": null,
                           "src": "1583:12:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -10460,10 +10460,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1547:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -10516,7 +10516,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "1625:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -10553,7 +10553,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "1608:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -10586,10 +10586,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1600:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -10636,10 +10636,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "1644:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -10664,7 +10664,7 @@
                         "nodeType": "IndexAccess",
                         "src": "1644:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -10675,7 +10675,7 @@
                       "lValueRequested": false,
                       "memberName": "countFor",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1121,
+                      "referencedDeclaration": 1169,
                       "src": "1644:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -11140,7 +11140,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "1830:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -11173,10 +11173,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              1580,
-                              1581
+                              1628,
+                              1629
                             ],
-                            "referencedDeclaration": 1580,
+                            "referencedDeclaration": 1628,
                             "src": "1822:7:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -11344,7 +11344,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 276,
@@ -11362,10 +11362,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "1970:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -11390,7 +11390,7 @@
                             "nodeType": "IndexAccess",
                             "src": "1970:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -11401,10 +11401,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "1970:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -11418,10 +11418,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "1998:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -11435,7 +11435,7 @@
                           "referencedDeclaration": null,
                           "src": "1998:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -11457,10 +11457,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "1962:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -11513,7 +11513,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2043:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -11550,7 +11550,7 @@
                           "name": "voteFor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1211,
+                          "referencedDeclaration": 1259,
                           "src": "2026:7:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -11583,10 +11583,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2018:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -11633,10 +11633,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2062:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -11661,7 +11661,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2062:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -11672,7 +11672,7 @@
                       "lValueRequested": false,
                       "memberName": "countFor",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1121,
+                      "referencedDeclaration": 1169,
                       "src": "2062:24:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -11927,7 +11927,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2174:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -11960,10 +11960,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              1580,
-                              1581
+                              1628,
+                              1629
                             ],
-                            "referencedDeclaration": 1580,
+                            "referencedDeclaration": 1628,
                             "src": "2166:7:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -12131,7 +12131,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 333,
@@ -12149,10 +12149,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "2316:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -12177,7 +12177,7 @@
                             "nodeType": "IndexAccess",
                             "src": "2316:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -12188,10 +12188,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "2316:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -12205,10 +12205,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "2344:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -12222,7 +12222,7 @@
                           "referencedDeclaration": null,
                           "src": "2344:12:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -12244,10 +12244,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2308:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -12300,7 +12300,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2390:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -12337,7 +12337,7 @@
                           "name": "voteAgainst",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1275,
+                          "referencedDeclaration": 1323,
                           "src": "2369:11:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -12370,10 +12370,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2361:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -12420,10 +12420,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2409:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -12448,7 +12448,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2409:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -12459,7 +12459,7 @@
                       "lValueRequested": false,
                       "memberName": "countAgainst",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1123,
+                      "referencedDeclaration": 1171,
                       "src": "2409:28:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -12602,7 +12602,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2472:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -12635,7 +12635,7 @@
                             "name": "assert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1566,
+                            "referencedDeclaration": 1614,
                             "src": "2465:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
@@ -12803,7 +12803,7 @@
                       {
                         "argumentTypes": null,
                         "commonType": {
-                          "typeIdentifier": "t_enum$_Proposal_$1117",
+                          "typeIdentifier": "t_enum$_Proposal_$1165",
                           "typeString": "enum Voteable.Proposal"
                         },
                         "id": 381,
@@ -12821,10 +12821,10 @@
                               "name": "votes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1135,
+                              "referencedDeclaration": 1183,
                               "src": "2616:5:0",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                 "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                               }
                             },
@@ -12849,7 +12849,7 @@
                             "nodeType": "IndexAccess",
                             "src": "2616:15:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                              "typeIdentifier": "t_struct$_Vote_$1179_storage",
                               "typeString": "struct Voteable.Vote storage ref"
                             }
                           },
@@ -12860,10 +12860,10 @@
                           "lValueRequested": false,
                           "memberName": "proposal",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 1119,
+                          "referencedDeclaration": 1167,
                           "src": "2616:24:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -12877,10 +12877,10 @@
                             "name": "Proposal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1117,
+                            "referencedDeclaration": 1165,
                             "src": "2644:8:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                              "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                               "typeString": "type(enum Voteable.Proposal)"
                             }
                           },
@@ -12894,7 +12894,7 @@
                           "referencedDeclaration": null,
                           "src": "2644:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_Proposal_$1117",
+                            "typeIdentifier": "t_enum$_Proposal_$1165",
                             "typeString": "enum Voteable.Proposal"
                           }
                         },
@@ -12916,10 +12916,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2608:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -12972,7 +12972,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1577,
+                              "referencedDeclaration": 1625,
                               "src": "2693:3:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -13009,7 +13009,7 @@
                           "name": "voteAgainst",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1275,
+                          "referencedDeclaration": 1323,
                           "src": "2672:11:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$returns$_t_bool_$",
@@ -13042,10 +13042,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2664:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -13092,10 +13092,10 @@
                           "name": "votes",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1135,
+                          "referencedDeclaration": 1183,
                           "src": "2712:5:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                             "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                           }
                         },
@@ -13120,7 +13120,7 @@
                         "nodeType": "IndexAccess",
                         "src": "2712:15:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                          "typeIdentifier": "t_struct$_Vote_$1179_storage",
                           "typeString": "struct Voteable.Vote storage ref"
                         }
                       },
@@ -13131,7 +13131,7 @@
                       "lValueRequested": false,
                       "memberName": "countAgainst",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 1123,
+                      "referencedDeclaration": 1171,
                       "src": "2712:28:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint32",
@@ -13274,7 +13274,7 @@
                                 "name": "clearVotes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1353,
+                                "referencedDeclaration": 1401,
                                 "src": "2775:10:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -13307,7 +13307,7 @@
                             "name": "assert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1566,
+                            "referencedDeclaration": 1614,
                             "src": "2768:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
@@ -13500,7 +13500,7 @@
                           "name": "internalChangeVote",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1475,
+                          "referencedDeclaration": 1523,
                           "src": "2905:18:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -13533,10 +13533,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1580,
-                        1581
+                        1628,
+                        1629
                       ],
-                      "referencedDeclaration": 1580,
+                      "referencedDeclaration": 1628,
                       "src": "2897:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -13604,10 +13604,10 @@
                         "name": "votes",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1135,
+                        "referencedDeclaration": 1183,
                         "src": "2952:5:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                           "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                         }
                       },
@@ -13632,7 +13632,7 @@
                       "nodeType": "IndexAccess",
                       "src": "2952:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                        "typeIdentifier": "t_struct$_Vote_$1179_storage",
                         "typeString": "struct Voteable.Vote storage ref"
                       }
                     },
@@ -13643,7 +13643,7 @@
                     "lValueRequested": false,
                     "memberName": "countFor",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 1121,
+                    "referencedDeclaration": 1169,
                     "src": "2952:24:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
@@ -13696,10 +13696,10 @@
                         "name": "votes",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1135,
+                        "referencedDeclaration": 1183,
                         "src": "2998:5:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                           "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                         }
                       },
@@ -13724,7 +13724,7 @@
                       "nodeType": "IndexAccess",
                       "src": "2998:15:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                        "typeIdentifier": "t_struct$_Vote_$1179_storage",
                         "typeString": "struct Voteable.Vote storage ref"
                       }
                     },
@@ -13735,7 +13735,7 @@
                     "lValueRequested": false,
                     "memberName": "countAgainst",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 1123,
+                    "referencedDeclaration": 1171,
                     "src": "2998:28:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
@@ -13749,7 +13749,7 @@
                   "condition": {
                     "argumentTypes": null,
                     "commonType": {
-                      "typeIdentifier": "t_enum$_Decision_$1113",
+                      "typeIdentifier": "t_enum$_Decision_$1161",
                       "typeString": "enum Voteable.Decision"
                     },
                     "id": 451,
@@ -13769,10 +13769,10 @@
                             "name": "votes",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1135,
+                            "referencedDeclaration": 1183,
                             "src": "3033:5:0",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                               "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                             }
                           },
@@ -13797,7 +13797,7 @@
                           "nodeType": "IndexAccess",
                           "src": "3033:15:0",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                            "typeIdentifier": "t_struct$_Vote_$1179_storage",
                             "typeString": "struct Voteable.Vote storage ref"
                           }
                         },
@@ -13808,10 +13808,10 @@
                         "lValueRequested": false,
                         "memberName": "vote",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1127,
+                        "referencedDeclaration": 1175,
                         "src": "3033:20:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_enum$_Decision_$1113_$",
+                          "typeIdentifier": "t_mapping$_t_address_$_t_enum$_Decision_$1161_$",
                           "typeString": "mapping(address => enum Voteable.Decision)"
                         }
                       },
@@ -13824,7 +13824,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1577,
+                          "referencedDeclaration": 1625,
                           "src": "3054:3:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -13852,7 +13852,7 @@
                       "nodeType": "IndexAccess",
                       "src": "3033:32:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Decision_$1113",
+                        "typeIdentifier": "t_enum$_Decision_$1161",
                         "typeString": "enum Voteable.Decision"
                       }
                     },
@@ -13866,10 +13866,10 @@
                         "name": "Decision",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1113,
+                        "referencedDeclaration": 1161,
                         "src": "3069:8:0",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_Decision_$1113_$",
+                          "typeIdentifier": "t_type$_t_enum$_Decision_$1161_$",
                           "typeString": "type(enum Voteable.Decision)"
                         }
                       },
@@ -13883,7 +13883,7 @@
                       "referencedDeclaration": null,
                       "src": "3069:12:0",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_Decision_$1113",
+                        "typeIdentifier": "t_enum$_Decision_$1161",
                         "typeString": "enum Voteable.Decision"
                       }
                     },
@@ -14031,7 +14031,7 @@
                               "condition": {
                                 "argumentTypes": null,
                                 "commonType": {
-                                  "typeIdentifier": "t_enum$_Proposal_$1117",
+                                  "typeIdentifier": "t_enum$_Proposal_$1165",
                                   "typeString": "enum Voteable.Proposal"
                                 },
                                 "id": 481,
@@ -14049,10 +14049,10 @@
                                       "name": "votes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1135,
+                                      "referencedDeclaration": 1183,
                                       "src": "3217:5:0",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1131_storage_$",
+                                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Vote_$1179_storage_$",
                                         "typeString": "mapping(address => struct Voteable.Vote storage ref)"
                                       }
                                     },
@@ -14077,7 +14077,7 @@
                                     "nodeType": "IndexAccess",
                                     "src": "3217:15:0",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_struct$_Vote_$1131_storage",
+                                      "typeIdentifier": "t_struct$_Vote_$1179_storage",
                                       "typeString": "struct Voteable.Vote storage ref"
                                     }
                                   },
@@ -14088,10 +14088,10 @@
                                   "lValueRequested": false,
                                   "memberName": "proposal",
                                   "nodeType": "MemberAccess",
-                                  "referencedDeclaration": 1119,
+                                  "referencedDeclaration": 1167,
                                   "src": "3217:24:0",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_enum$_Proposal_$1117",
+                                    "typeIdentifier": "t_enum$_Proposal_$1165",
                                     "typeString": "enum Voteable.Proposal"
                                   }
                                 },
@@ -14105,10 +14105,10 @@
                                     "name": "Proposal",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 1117,
+                                    "referencedDeclaration": 1165,
                                     "src": "3245:8:0",
                                     "typeDescriptions": {
-                                      "typeIdentifier": "t_type$_t_enum$_Proposal_$1117_$",
+                                      "typeIdentifier": "t_type$_t_enum$_Proposal_$1165_$",
                                       "typeString": "type(enum Voteable.Proposal)"
                                     }
                                   },
@@ -14122,7 +14122,7 @@
                                   "referencedDeclaration": null,
                                   "src": "3245:12:0",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_enum$_Proposal_$1117",
+                                    "typeIdentifier": "t_enum$_Proposal_$1165",
                                     "typeString": "enum Voteable.Proposal"
                                   }
                                 },
@@ -14338,7 +14338,7 @@
                                       "name": "clearVotes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1353,
+                                      "referencedDeclaration": 1401,
                                       "src": "3350:10:0",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -14371,10 +14371,10 @@
                                   "name": "require",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [
-                                    1580,
-                                    1581
+                                    1628,
+                                    1629
                                   ],
-                                  "referencedDeclaration": 1580,
+                                  "referencedDeclaration": 1628,
                                   "src": "3342:7:0",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -14573,7 +14573,7 @@
                                       "name": "clearVotes",
                                       "nodeType": "Identifier",
                                       "overloadedDeclarations": [],
-                                      "referencedDeclaration": 1353,
+                                      "referencedDeclaration": 1401,
                                       "src": "3135:10:0",
                                       "typeDescriptions": {
                                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$_t_bool_$",
@@ -14606,10 +14606,10 @@
                                   "name": "require",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [
-                                    1580,
-                                    1581
+                                    1628,
+                                    1629
                                   ],
-                                  "referencedDeclaration": 1580,
+                                  "referencedDeclaration": 1628,
                                   "src": "3127:7:0",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -15028,7 +15028,7 @@
                       "name": "internalCheckVotes",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1511,
+                      "referencedDeclaration": 1559,
                       "src": "3677:18:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_array$_t_uint32_$2_memory_ptr_$",
@@ -15219,7 +15219,7 @@
                       "name": "internalCheckProposal",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1541,
+                      "referencedDeclaration": 1589,
                       "src": "3804:21:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_string_memory_ptr_$",
@@ -15383,7 +15383,7 @@
                       "name": "internalGetVoted",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1561,
+                      "referencedDeclaration": 1609,
                       "src": "3929:16:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_array$_t_address_$dyn_memory_ptr_$",
@@ -15616,5 +15616,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-10-12T04:08:22.841Z"
+  "updatedAt": "2018-10-15T02:31:59.586Z"
 }

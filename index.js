@@ -406,16 +406,25 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
         var transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
+        var whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
+        console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
         from = accountAddressList[1];
         transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+        whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
+        console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
         from = accountAddressList[2];
         var flag = await adminValidatorSet.checkAdmin(accountAddressList[0],from);
         if(flag){
             transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
             console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-        }    
+
+            whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
+            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+        }
         return true;
     }
     catch (error) {
