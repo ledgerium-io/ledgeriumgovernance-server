@@ -130,6 +130,16 @@ module.exports = class SimpleValidatorSet {
         }
     }
 
+    async hasProposal(ethAccountToUse, validatorAddress) {
+        try {
+            var data = await this.contract.methods.checkProposal(validatorAddress).call({from : ethAccountToUse});
+            return data;
+        } catch (error) {
+            console.log("Error in SimpleValidatorSet.hasProposal(): " + error);
+            return false;
+        }
+    }
+
     subscribeForPastEvents(){
         var options = {
             fromBlock: "latest",
