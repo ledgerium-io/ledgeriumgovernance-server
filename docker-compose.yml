@@ -83,7 +83,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.100
@@ -161,7 +162,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.101
@@ -239,7 +241,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.102
@@ -317,7 +320,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.103
@@ -395,7 +399,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.104
@@ -473,7 +478,8 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.105
@@ -551,18 +557,34 @@ services:
           --publickeys=/constellation/tm.pub \
           --privatekeys=/constellation/tm.key \
           --storage=/constellation \
-          --verbosity=4
+          --verbosity=4 \
+          --tls="off"
     networks:
       app_net:
         ipv4_address: 172.16.239.106
     restart: always
+  quorum-maker:
+    hostname: quorum-maker
+    image: syneblock/quorum-maker:2.1.0_2.5
+    ports:
+      - '9999:9999'
+    depends_on:
+      - validator-0
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -u
+        set -e
+        cd /root/quorum-maker/
+        ./start_nodemanager.sh 8545 9999 172.16.239.10
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.196
+    restart: always
 networks:
   app_net:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 172.16.239.0/24
+    external: true
 volumes:
   "0":
   "1":
