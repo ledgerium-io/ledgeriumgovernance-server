@@ -28,12 +28,40 @@ contract SimpleValidatorSet is Voteable{
 	
 	uint32 totalCount;
 
-	constructor (address _address)public {
+	constructor (address _address, address _validator1, address _validator2)public {
 		adminSet = AdminValidatorSet(_address);
+
+		//Adding msg.sender as first validator
+		exists[msg.sender] = true;
+		adminValidatorsMap[msg.sender].push(msg.sender);
+		activeValidators[msg.sender].isValidator = true;
+		activeValidators[msg.sender].status = Status.ACTIVE;
+		validators.push(msg.sender);
+
+		//To add _validator1 as validator
+		exists[_validator1] = true;
+		adminValidatorsMap[_validator1].push(_validator1);
+		activeValidators[_validator1].isValidator = true;
+		activeValidators[_validator1].status = Status.ACTIVE;
+		validators.push(_validator1);
+
+		//To add _validator2 as validator
+		exists[_validator2] = true;
+		adminValidatorsMap[_validator2].push(_validator2);
+		activeValidators[_validator2].isValidator = true;
+		activeValidators[_validator2].status = Status.ACTIVE;
+		validators.push(_validator2);
+
+		totalCount = 3;
 	}
 
 	modifier isOwner() {
 		require (adminSet.checkAdmin(msg.sender));
+		_;
+	}
+
+	modifier isValidatorM() {
+		require (activeValidators[msg.sender].isValidator);
 		_;
 	}
 
@@ -88,7 +116,6 @@ contract SimpleValidatorSet is Voteable{
 		return true;
 	}
 
-
 	/*function lastOp (address _address)public view isOwner returns(string res){
 		if(activeValidators[_address].lop == LastOp.ADD){
 			return "add";
@@ -112,7 +139,7 @@ contract SimpleValidatorSet is Voteable{
 	    return activeValidators[_address].isValidator;
 	}
 
-	function getAllValidators()public view isOwner returns(address[] a){
+	function getAllValidators()public view isValidatorM returns(address[] a){
 	    return validators;
 	}
 

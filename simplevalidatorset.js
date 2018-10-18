@@ -26,10 +26,11 @@ module.exports = class SimpleValidatorSet {
         }  
     }    
     
-    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorAddress) {
+    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorAddress,otherValidatorList) {
         try {
             var constructorParameters = [];
             constructorParameters.push(adminValidatorAddress);
+            constructorParameters = constructorParameters.concat(otherValidatorList);
             var estimatedGas = 0;
             var encodedABI = await utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
             var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);

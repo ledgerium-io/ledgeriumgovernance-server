@@ -42,14 +42,14 @@ var main = async function () {
 
     readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
-        var otherAdminsList = [];
+        var otherAddressList = [];
         ethAccountToUse = accountAddressList[0];
-        otherAdminsList.push(accountAddressList[1]);
-        otherAdminsList.push(accountAddressList[2]);
-        adminValidatorSetAddress = await deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],otherAdminsList);
+        otherAddressList.push(accountAddressList[1]);
+        otherAddressList.push(accountAddressList[2]);
+        adminValidatorSetAddress = await deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],otherAddressList);
         console.log("adminValidatorSetAddress",adminValidatorSetAddress);
         
-        simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress);
+        simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress,otherAddressList);
         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
         writeContractsINConfig();
@@ -63,37 +63,37 @@ var main = async function () {
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
     
     var flag;
-    var validatorToAdd = accountAddressList[3];
-    flag = await addNewAdmin(validatorToAdd);
+    var adminToAdd = accountAddressList[3];
+    flag = await addNewAdmin(adminToAdd);
     console.log("return flag for proposalToAddAdmin ",flag);
 
-    validatorToAdd = accountAddressList[4];
-    flag = await addNewAdmin(validatorToAdd);
+    adminToAdd = accountAddressList[4];
+    flag = await addNewAdmin(adminToAdd);
     console.log("return flag for proposalToAddAdmin ",flag);
 
     flag = await getAllAdmins();
     console.log("return flag for getAllAdmins",flag);
 
-    // flag = await removeOneAdmin();
-    // console.log("return flag for proposalToRemoveAdmin ",flag);
+    flag = await removeOneAdmin();
+    console.log("return flag for proposalToRemoveAdmin ",flag);
 
-    // flag = await getAllAdmins();
-    // console.log("return flag for getAllAdmins",flag);
+    flag = await getAllAdmins();
+    console.log("return flag for getAllAdmins",flag);
 
     flag = await getListOfActiveValidators();
 
-    var newValidator = accountAddressList[2];
+    var newValidator = accountAddressList[3];
     flag = await addSimpleSetContractValidatorForAdmin(newValidator);
     console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
-    newValidator = accountAddressList[3];
-    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
-    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+    // newValidator = accountAddressList[4];
+    // flag = await addSimpleSetContractValidatorForAdmin(newValidator);
+    // console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
     flag = await getListOfActiveValidators();
     console.log("return flag for getListOfActiveValidators",flag);
 
-    var removeValidator = accountAddressList[2];
+    var removeValidator = accountAddressList[3];
     flag = await removeSimpleSetContractValidatorForAdmin(removeValidator);
     console.log("return flag for removeSimpleSetContractValidatorForAdmin",flag);
 
@@ -394,9 +394,9 @@ async function deployNewSimpleSetValidatorContract(ownerAccountAddress, adminVal
     return singleValidatorSetAddress;
 }
 
-async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress, privateKeyOwner, adminValidatorSetAddress)
+async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress, privateKeyOwner, adminValidatorSetAddress,otherValidatorList)
 {
-    var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,adminValidatorSetAddress);
+    var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,adminValidatorSetAddress,otherValidatorList);
     return singleValidatorSetAddress;
 }
 
@@ -413,18 +413,13 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
         transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
+        // from = accountAddressList[2];
+        // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+        // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
         whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
-        from = accountAddressList[2];
-        var flag = await adminValidatorSet.checkAdmin(accountAddressList[0],from);
-        if(flag){
-            transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-            console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-
-            whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
-            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
-        }
         return true;
     }
     catch (error) {
@@ -443,9 +438,9 @@ async function removeSimpleSetContractValidatorForAdmin(removeValidator){
         transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
 
-        from = accountAddressList[2];
-        transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+        // from = accountAddressList[2];
+        // transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
+        // console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
 
         return true;
     }
