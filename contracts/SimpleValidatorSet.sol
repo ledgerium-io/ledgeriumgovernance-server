@@ -27,6 +27,7 @@ contract SimpleValidatorSet is Voteable{
 	mapping (address => bool) exists;
 	
 	uint32 totalCount;
+	uint32 totalActiveCount;
 
 	constructor (address _address, address _validator1, address _validator2)public {
 		adminSet = AdminValidatorSet(_address);
@@ -53,6 +54,7 @@ contract SimpleValidatorSet is Voteable{
 		validators.push(_validator2);
 
 		totalCount = 3;
+		totalActiveCount = 3;
 	}
 
 	modifier isOwner() {
@@ -69,17 +71,19 @@ contract SimpleValidatorSet is Voteable{
 	event removevalidator(address validator,address _admin);
 	event finalizeEvent(address validator,address _admin,string _event);
 
-	function addValidator (address _address)public isOwner returns(bool res)  {
+	function addValidator (address _address) public isValidatorM returns(bool res)  {
 		assert (!activeValidators[_address].isValidator);
 		assert (activeValidators[_address].status == Status.INACTIVE);
 		assert (voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= adminSet.getTotalCount() / 2 + 1){
+		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
     		if(!exists[_address]){
     				adminValidatorsMap[msg.sender].push(_address);
     				validators.push(_address);
+					totalCount = totalCount.add(1);
     		}		
     		exists[_address] = true;
     		activeValidators[_address].isValidator = true;
+			totalActiveCount = totalActiveCount.add(1);
     		//activeValidators[_address].lop = LastOp.ADD;
     		activeValidators[_address].status = Status.ACTIVE;
     		require(clearVotes(_address));
@@ -89,20 +93,21 @@ contract SimpleValidatorSet is Voteable{
 		else {
 			votes[_address].proposal = Proposal.ADD;
 		}
-		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
+		if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
 		    require(clearVotes(_address));
 		}
 		return true;
 	}
 
-	function removeValidator (address _address)public isOwner returns(bool res)  {
+	function removeValidator (address _address) public isValidatorM returns(bool res)  {
 		assert (activeValidators[_address].isValidator);
 		assert (activeValidators[_address].status == Status.ACTIVE);
 		assert (voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= adminSet.getTotalCount() / 2 + 1){
+		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
     		activeValidators[_address].isValidator = false;
     		//activeValidators[_address].lop = LastOp.REMOVE;
     		activeValidators[_address].status = Status.INACTIVE;
+			totalActiveCount = totalActiveCount.sub(1);
     		require(clearVotes(_address));
 			votes[_address].proposal = Proposal.NOT_CREATED;
     		emit removevalidator(_address,msg.sender);
@@ -110,7 +115,7 @@ contract SimpleValidatorSet is Voteable{
 		else {
 			votes[_address].proposal = Proposal.REMOVE;
 		}
-		if(votes[_address].countAgainst >= adminSet.getTotalCount() / 2 +1){
+		if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
 		    require(clearVotes(_address));
 		}
 		return true;
@@ -127,7 +132,7 @@ contract SimpleValidatorSet is Voteable{
 		}
 	}*/
 
-	function checkProposal (address _address) public view isOwner returns(string res){
+	function checkProposal (address _address) public view isValidatorM returns(string res){
 		return internalCheckProposal(_address);
 	}
 
@@ -135,12 +140,16 @@ contract SimpleValidatorSet is Voteable{
 	    return adminValidatorsMap[msg.sender];
 	}
 
-	function isValidator(address _address) public view isOwner returns(bool a){
+	function isValidator(address _address) public view isValidatorM returns(bool a){
 	    return activeValidators[_address].isValidator;
 	}
 
 	function getAllValidators()public view isValidatorM returns(address[] a){
 	    return validators;
+	}
+
+	function getValidatorsCount()public view isValidatorM returns(uint32){
+	    return totalCount;
 	}
 
 }
