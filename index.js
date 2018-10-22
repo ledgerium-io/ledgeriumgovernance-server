@@ -64,9 +64,6 @@ var main = async function () {
 
     flag = await getListOfActiveValidators();
 
-    await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
-    return;
-    
     await addInitialValidators(accountAddressList);
     // await addIstanbulValidator("8545", accountAddressList[2]);
     // await addIstanbulValidator("8546", accountAddressList[2]);
@@ -74,6 +71,8 @@ var main = async function () {
     // await addIstanbulValidator("8549", accountAddressList[2]);
     // await addIstanbulValidator("8550", accountAddressList[2]);
     //removeIstanbulValidator("8551", accountAddressList[2]);
+
+    await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
     
     flag = await getListOfActiveValidators();
     return;
