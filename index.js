@@ -73,7 +73,6 @@ var main = async function () {
     //removeIstanbulValidator("8551", accountAddressList[2]);
 
     await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
-    
     flag = await getListOfActiveValidators();
     return;
 
