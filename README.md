@@ -13,7 +13,7 @@ It is designed to work along with yml file which is part of the repo. The IBFT t
 ## Getting Started
 
 ### Clone the repo and install the project
-- git clone https://github.com/golashr/governanceApp.git
+- git clone https://github.com/ledgerium/governanceApp.git
 - cd governanceApp
 - npm install
 - node index.js
