@@ -16,6 +16,7 @@ It is designed to work along with yml file which is part of the repo. The IBFT t
 - git clone https://github.com/golashr/governanceApp.git
 - cd governanceApp
 - npm install
+- node index.js
 
 ### Clone the repo and install the project
 Run the geth nodes by running
