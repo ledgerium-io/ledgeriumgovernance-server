@@ -584,11 +584,7 @@ services:
     restart: always
 networks:
   app_net:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 172.16.239.0/24
+    external: true
 volumes:
   "0":
   "1":
