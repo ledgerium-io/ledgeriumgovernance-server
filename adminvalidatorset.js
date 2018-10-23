@@ -35,15 +35,6 @@ module.exports = class AdminValidatorSet {
             resultList = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
             console.log(resultList);
             return utils.split(resultList);
-            // try{
-            //     resultList  = await this.contract.methods.getAllValidators.call({from:ethAccountToUse});
-            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,myData,this.web3);
-            //     return resultList;
-            // }
-            // catch (error){
-            //     //resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,this.web3);
-            //     return resultList;
-            // }    
         } catch (error) {
             console.log("Error in AdminValidatorSet.getAllAdminsAsync(): " + error);
             return resultList;

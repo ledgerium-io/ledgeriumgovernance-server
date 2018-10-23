@@ -59,7 +59,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 			totalCount++;
 			if(!exists[_address])
 				exists[_address] = true;
-				admins.push(_address);
+			admins.push(_address);
 			require(clearVotes(_address));
 		}
 		return true;

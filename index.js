@@ -40,7 +40,7 @@ var main = async function () {
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
-    readContractsFromConfig();
+    //readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
         var otherAddressList = [];
         ethAccountToUse = accountAddressList[0];
@@ -52,7 +52,7 @@ var main = async function () {
         simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress,otherAddressList);
         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-        writeContractsINConfig();
+        //writeContractsINConfig();
     }
     //If we dont have contracts to operate, abort!!
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
@@ -62,35 +62,20 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    flag = await getListOfActiveValidators();
-
-    await addInitialValidators(accountAddressList);
-    // await addIstanbulValidator("8545", accountAddressList[2]);
-    // await addIstanbulValidator("8546", accountAddressList[2]);
-    // await addIstanbulValidator("8548", accountAddressList[2]);
-    // await addIstanbulValidator("8549", accountAddressList[2]);
-    // await addIstanbulValidator("8550", accountAddressList[2]);
-    //removeIstanbulValidator("8551", accountAddressList[2]);
-
-    await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
-    flag = await getListOfActiveValidators();
-    return;
-
-
     var flag;
-    // var validatorToAdd = accountAddressList[3];
-    // flag = await addNewAdmin(validatorToAdd);
-    // console.log("return flag for proposalToAddAdmin ",flag);
+    var adminToAdd = accountAddressList[3];
+    flag = await addNewAdmin(adminToAdd);
+    console.log("return flag for proposalToAddAdmin ",flag);
 
-    // validatorToAdd = accountAddressList[4];
-    // flag = await addNewAdmin(validatorToAdd);
-    // console.log("return flag for proposalToAddAdmin ",flag);
+    adminToAdd = accountAddressList[4];
+    flag = await addNewAdmin(adminToAdd);
+    console.log("return flag for proposalToAddAdmin ",flag);
 
-    // flag = await getAllAdmins();
-    // console.log("return flag for getAllAdmins",flag);
+    flag = await getAllAdmins();
+    console.log("return flag for getAllAdmins",flag);
 
     flag = await removeOneAdmin();
-    console.log("return flag for proposalToRemoveAdmin ",flag);
+    console.log("return flag for removeOneAdmin ",flag);
 
     flag = await getAllAdmins();
     console.log("return flag for getAllAdmins",flag);
@@ -101,14 +86,26 @@ var main = async function () {
     flag = await addSimpleSetContractValidatorForAdmin(newValidator);
     console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
-    // newValidator = accountAddressList[4];
-    // flag = await addSimpleSetContractValidatorForAdmin(newValidator);
-    // console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+    flag = await getListOfActiveValidators();
+    console.log("return flag for getListOfActiveValidators",flag);
+    
+    newValidator = accountAddressList[4];
+    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
+    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+
+    //////////////////////////////////////////////////////////////
+    var from = accountAddressList[3];
+    transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
+    console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+    whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
+    console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+    //////////////////////////////////////////////////////////////
 
     flag = await getListOfActiveValidators();
     console.log("return flag for getListOfActiveValidators",flag);
 
-    var removeValidator = accountAddressList[3];
+    var removeValidator = accountAddressList[4];
     flag = await removeSimpleSetContractValidatorForAdmin(removeValidator);
     console.log("return flag for removeSimpleSetContractValidatorForAdmin",flag);
 
@@ -148,84 +145,6 @@ async function istanbulRemoveValidatorTest(){
     await delay(10000); //wait for 10 seconds!
     listIstanbulValidator();
     return;
-}
-async function addNewNodeAsValidator(newValidator) {
-
-    from = accountAddressList[0];
-    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    from = accountAddressList[1];
-    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    from = accountAddressList[2];
-    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    from = accountAddressList[3];
-    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    from = accountAddressList[4];
-    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-}
-
-async function addInitialValidators(accountAddressList) {
-    // admins are default validators
-    // add [2] as validator
-    // var from = accountAddressList[0];
-    // var newValidator = accountAddressList[2];
-    // var transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-    // from = accountAddressList[1];
-    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-
-    // // add [1] as validator
-    // newValidator = accountAddressList[1];
-    // from = accountAddressList[0];
-    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    // from = accountAddressList[2];
-    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-
-    //  // add [0] as validator
-    //  newValidator = accountAddressList[0];
-    //  from = accountAddressList[1];
-    //  transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-    //  from = accountAddressList[2];
-    //  transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-    // add all remaining nodes as validators to the smart contracts
-     // add [3] as validator
-     newValidator = accountAddressList[3];
-     from = accountAddressList[1];
-     transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-     from = accountAddressList[2];
-     transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-      // add [4] as validator
-      newValidator = accountAddressList[4];
-      from = accountAddressList[0];
-      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-      from = accountAddressList[1];
-      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-      from = accountAddressList[2];
-      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-       // add [5] as validator
-       newValidator = accountAddressList[5];
-       from = accountAddressList[0];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-       from = accountAddressList[1];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-       from = accountAddressList[2];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-
-       // add [5] as validator
-       newValidator = accountAddressList[6];
-       from = accountAddressList[0];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-       from = accountAddressList[1];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-       from = accountAddressList[2];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-       from = accountAddressList[3];
-       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
 }
 
 async function removeIstanbulValidator(port,validator)
@@ -310,7 +229,7 @@ async function getAllAdmins(){
                 var flag = await adminValidatorSet.checkAdmin(accountAddressList[0],adminList[index]);
                 if(flag){
                     noOfActiveAdmin++;
-                    console.log("admin[", index,"] ",adminList[index]);
+                    console.log("admin[", noOfActiveAdmin,"] ",adminList[index]);
                 }
             }
             console.log("Number of active admins " + noOfActiveAdmin);
@@ -323,14 +242,14 @@ async function getAllAdmins(){
     }
 } 
 
-async function addNewAdmin(validatorToAdd){
+async function addNewAdmin(adminToAdd){
     try{
         var ethAccountToPropose = accountAddressList[0];
         var ethAccountToVote1 = accountAddressList[1];
         var ethAccountToVote2 = accountAddressList[2];
         
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "got added as admin ?", flag);
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "got added as admin ?", flag);
         if(flag)
            return true;
 
@@ -343,48 +262,48 @@ async function addNewAdmin(validatorToAdd){
         * makes more than 3/2 brings this a majority and validator will be added. And proposal will be cleared off!
         * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
         */
-        var transactionhash = await adminValidatorSet.proposalToAddAdmin(ethAccountToPropose,validatorToAdd,privateKey[ethAccountToPropose]);
-        console.log("submitted transactionhash ",transactionhash, "for proposal of adding ", validatorToAdd);
+        var transactionhash = await adminValidatorSet.proposalToAddAdmin(ethAccountToPropose,adminToAdd,privateKey[ethAccountToPropose]);
+        console.log("submitted transactionhash ",transactionhash, "for proposal of adding ", adminToAdd);
 
         /* Since ADD the validator proposal is raised, checkProposal should return "add"*/
-        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "checked proposal for the admin ?", whatProposal);
+        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "checked proposal for the admin ?", whatProposal);
         
         /* Lets see how voting looks at the moment! It should return 1,0*/
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
         /*We are voting AGANST adding validator*/
-        transactionhash = await adminValidatorSet.voteAgainstAddingAdmin(ethAccountToVote1,validatorToAdd,privateKey[ethAccountToVote1]);
-        console.log("submitted transactionhash ",transactionhash, "against voting of adding", validatorToAdd);
+        transactionhash = await adminValidatorSet.voteAgainstAddingAdmin(ethAccountToVote1,adminToAdd,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "against voting of adding", adminToAdd);
 
         /* Lets see how voting looks at the moment! It should be one FOR and one AGAINST so proposal is still not finalised
         and voting is still ON. It should return 1,1*/
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
         /* One more vote FOR adding validator, and so it makes 2 votes FOR and 1 vote AGAINST
         The 3/2 is achieved FOR adding validator here. The proposal will be finalised here
         */
-        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,validatorToAdd,privateKey[ethAccountToVote2]);
-        console.log("submitted transactionhash ",transactionhash, "for voting of adding ", validatorToAdd);
+        transactionhash = await adminValidatorSet.voteForAddingAdmin(ethAccountToVote2,adminToAdd,privateKey[ethAccountToVote2]);
+        console.log("submitted transactionhash ",transactionhash, "for voting of adding ", adminToAdd);
 
         /* Lets see how voting looks at the moment! It should return 0,0 */
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
-        /* Since the validator is added, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "got added as admin ?", flag);
+        /* Since the validator is added, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "got added as admin ?", flag);
         if(flag)
 
         */
-        flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "got added as admin ?", flag);
+        flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "got added as admin ?", flag);
 
         /* Since the validator is already added, checkProposal should return "proposal not created"
         */
-        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "checked proposal for the admin ?", whatProposal);
+        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,adminToAdd);
+        console.log(adminToAdd, "checked proposal for the admin ?", whatProposal);
         return flag;
     }
     catch (error) {
@@ -398,15 +317,15 @@ async function removeOneAdmin(){
         var ethAccountToPropose = accountAddressList[0];
         var ethAccountToVote1 = accountAddressList[1];
         var ethAccountToVote2 = accountAddressList[2];
-        var validatorToRemove = accountAddressList[3];
+        var adminToRemove = accountAddressList[3];
 
         /* Testing the functionality of adding or removing a validator with votes FOR and votes AGAINST.
         * There are 3 admin in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
         * Sending Proposal means, adding one vote to the proposal
         */
         /* Lets see whether this is admin or not already, if not, we can ignore else will proceed further*/
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToRemove, "already an admin ?", flag);
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "already an admin ?", flag);
         if(!flag) 
             return true;
 
@@ -414,53 +333,53 @@ async function removeOneAdmin(){
         * makes more than 3/2 brings this a majority and validator will be removed. And proposal will be cleared off!
         * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
         */
-        var transactionhash = await adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,validatorToRemove,privateKey[ethAccountToPropose]);
-        console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", validatorToRemove);
+        var transactionhash = await adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,adminToRemove,privateKey[ethAccountToPropose]);
+        console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", adminToRemove);
 
         /* Since REMOVE the validator proposal is raised, checkProposal should return "remove"*/
-        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked proposal for the admin ?", whatProposal);
+        var whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "checked proposal for the admin ?", whatProposal);
         
         /* Lets see how voting looks at the moment! It should return 1,0*/
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
 
         /*We are voting AGAINST removing validator now*/
-        transactionhash = await adminValidatorSet.voteAgainstRemovingAdmin(ethAccountToVote1,validatorToRemove,privateKey[ethAccountToVote1]);
-        console.log("submitted transactionhash ",transactionhash, "against voting  of removing", validatorToRemove);
+        transactionhash = await adminValidatorSet.voteAgainstRemovingAdmin(ethAccountToVote1,adminToRemove,privateKey[ethAccountToVote1]);
+        console.log("submitted transactionhash ",transactionhash, "against voting  of removing", adminToRemove);
 
         /* Lets see how voting looks at the moment! It should return 1,1*/
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
         
         /*We are now voting FOR removing validator*/
-        transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote2,validatorToRemove,privateKey[ethAccountToVote2]);
-        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+        transactionhash = await adminValidatorSet.voteForRemovingAdmin(ethAccountToVote2,adminToRemove,privateKey[ethAccountToVote2]);
+        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", adminToRemove);
 
         /* One more vote FOR removing validator, and so it makes 2 votes FOR and 1 vote AGAINST removing
         The > 4/2 is not achieved FOR removing validator here. The proposal will not be finalised here
         */
-        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
+        var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
         
         /*We are now voting FOR removing validator by 'SELF'
         * The > 4/2 is now achieved FOR removing validator here. The proposal will be finalised here
         */
-        transactionhash = await adminValidatorSet.voteForRemovingAdmin(validatorToRemove,validatorToRemove,privateKey[validatorToRemove]);
-        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", validatorToRemove);
+        transactionhash = await adminValidatorSet.voteForRemovingAdmin(adminToRemove,adminToRemove,privateKey[adminToRemove]);
+        console.log("submitted transactionhash ",transactionhash, "for voting  of removing", adminToRemove);
 
-        /* Since the validator is removed, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToAdd, "got added as admin ?", flag);
+        /* Since the validator is removed, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "got added as admin ?", flag);
         if(flag)
 
         */
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,validatorToAdd);
-        console.log(validatorToRemove, "still an admin ?", flag);
+        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "still an admin ?", flag);
 
         /* Since the validator is already removed, checkProposal should return "proposal not created"
         */
-        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,validatorToRemove);
-        console.log(validatorToRemove, "checked proposal for admin ?", whatProposal);
+        whatProposal = await adminValidatorSet.checkProposal(ethAccountToPropose,adminToRemove);
+        console.log(adminToRemove, "checked proposal for admin ?", whatProposal);
         return flag;
     }
     catch (error) {
@@ -496,21 +415,26 @@ async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAdd
 async function addSimpleSetContractValidatorForAdmin(newValidator){
     try{
         var from = accountAddressList[0];
-        var transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+        var ethAccountToPropose = accountAddressList[0];
+        var transactionhash = await simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
 
-        var whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
+        var whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
         from = accountAddressList[1];
-        transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+        transactionhash = await simpleValidatorSet.voteAgainstAddingValidator(from, privateKey[from], newValidator);
+        console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator);
+
+        /* Lets see how voting looks at the moment! It should return 1,1*/
+        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+        from = accountAddressList[2];
+        transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
-        // from = accountAddressList[2];
-        // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-        // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-
-        whatProposal = await simpleValidatorSet.hasProposal(accountAddressList[0],newValidator);
+        whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
         return true;
@@ -523,19 +447,72 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
 
 async function removeSimpleSetContractValidatorForAdmin(removeValidator){
     try{
-        var from = accountAddressList[0];
-        var transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+        var ethAccountToPropose = accountAddressList[0];
+        var ethAccountToVote1 = accountAddressList[1];
+        var ethAccountToVote2 = accountAddressList[2];
 
-        from = accountAddressList[1];
-        transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+        /* Testing the functionality of adding or removing a validator with votes FOR and votes AGAINST.
+        * There are 3 validator in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
+        * Sending Proposal means, adding one vote to the proposal
+        */
+        /* Lets see whether this is validator or not already, if not, we can ignore else will proceed further*/
+        var flag = await simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "already an validator ?", flag);
+        if(!flag) 
+            return true;
 
-        // from = accountAddressList[2];
-        // transactionhash = await simpleValidatorSet.removeValidator(from,privateKey[from],removeValidator);
-        // console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+        /*We are testing REMOVE validator functionality here with one proposal FOR removing and one more vote FOR removing,
+        * makes more than 3/2 brings this a majority and validator will be removed. And proposal will be cleared off!
+        * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
+        */
+        var transactionhash = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToPropose, privateKey[ethAccountToPropose], removeValidator);
+        console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", removeValidator);
 
-        return true;
+        /* Since REMOVE the validator proposal is raised, checkProposal should return "remove"*/
+        var whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked proposal for the validator ?", whatProposal);
+        
+        /* Lets see how voting looks at the moment! It should return 1,0*/
+        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+
+        /*We are voting AGAINST removing validator now*/
+        transactionhash = await simpleValidatorSet.voteAgainstRemovingValidator(ethAccountToVote1, privateKey[ethAccountToVote1], removeValidator);
+        console.log("submitted transactionhash ", transactionhash, "against voting  of removing", removeValidator);
+
+        /* Lets see how voting looks at the moment! It should return 1,1*/
+        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+        
+        /*We are now voting FOR removing validator*/
+        transactionhash = await simpleValidatorSet.voteForRemovingValidator(ethAccountToVote2, privateKey[ethAccountToVote2], removeValidator);
+        console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
+
+        /* One more vote FOR removing validator, and so it makes 2 votes FOR and 1 vote AGAINST removing
+        The > 4/2 is not achieved FOR removing validator here. The proposal will not be finalised here
+        */
+        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+        
+        /*We are now voting FOR removing validator by 'SELF'
+        * The > 4/2 is now achieved FOR removing validator here. The proposal will be finalised here
+        */
+        transactionhash = await simpleValidatorSet.voteForRemovingValidator(removeValidator, privateKey[removeValidator], removeValidator);
+        console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
+
+        /* Since the validator is removed, var flag = await simpleValidatorSet.checkValidator(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "got added as validator ?", flag);
+        if(flag)
+
+        */
+        var flag = await simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "still an validator ?", flag);
+
+        /* Since the validator is already removed, checkProposal should return "proposal not created"
+        */
+        whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked proposal for validator ?", whatProposal);
+        return flag;
     }
     catch (error) {
         console.log("Error in removeSimpleSetContractValidatorForAdmin(): " + error);
@@ -554,6 +531,7 @@ async function getListOfActiveValidators()
                 var flag = await simpleValidatorSet.isActiveValidator(accountAddressList[0],validatorList[index]);
                 if(flag){
                     noOfActiveValidator++;
+                    console.log("validator[", noOfActiveValidator,"] ",validatorList[index]);
                 }
             }
             console.log("Number of active validators " + noOfActiveValidator);

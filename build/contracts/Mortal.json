@@ -31,14 +31,14 @@
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506101a1806100606000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100515780638da5cb5b14610068575b600080fd5b34801561005d57600080fd5b506100666100bf565b005b34801561007457600080fd5b5061007d610150565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561014e576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a72305820e05dd14fcfed627c9a8157ec3c12c6cb1041f4ed564f2a04c59350b175ee388f0029",
-  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100515780638da5cb5b14610068575b600080fd5b34801561005d57600080fd5b506100666100bf565b005b34801561007457600080fd5b5061007d610150565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561014e576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a72305820e05dd14fcfed627c9a8157ec3c12c6cb1041f4ed564f2a04c59350b175ee388f0029",
+  "bytecode": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506101a1806100606000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100515780638da5cb5b14610068575b600080fd5b34801561005d57600080fd5b506100666100bf565b005b34801561007457600080fd5b5061007d610150565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561014e576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a7230582017ab0e743550e784c73bae30004fa58085c413438dead71966f79ee3fb9e3a880029",
+  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100515780638da5cb5b14610068575b600080fd5b34801561005d57600080fd5b506100666100bf565b005b34801561007457600080fd5b5061007d610150565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561014e576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a7230582017ab0e743550e784c73bae30004fa58085c413438dead71966f79ee3fb9e3a880029",
   "sourceMap": "25:370:1:-;;;215:44;8:9:-1;5:2;;;30:1;27;20:12;5:2;215:44:1;246:10;238:5;;:18;;;;;;;;;;;;;;;;;;25:370;;;;;;",
   "deployedSourceMap": "25:370:1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;321:72;;8:9:-1;5:2;;;30:1;27;20:12;5:2;321:72:1;;;;;;99:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;99:20:1;;;;;;;;;;;;;;;;;;;;;;;;;;;321:72;364:5;;;;;;;;;;;350:19;;:10;:19;;;346:44;;;384:5;;;;;;;;;;;371:19;;;346:44;321:72::o;99:20::-;;;;;;;;;;;;;:::o",
   "source": "pragma solidity 0.4.24;\n\ncontract Mortal {\n    /* Define variable owner of the type address */\n    address public owner;\n\n    /* This function is executed at initialization and sets the owner of the contract */\n    constructor() public { owner = msg.sender; }\n\n    /* Function to recover the funds on the contract */\n    function kill() public { if (msg.sender == owner) selfdestruct(owner); }\n}\n\ncontract Greeter is Mortal {\n    /* Define variable greeting of the type string */\n    string public greeting;\n    uint32 public myNumber;\n\n    /* This runs when the contract is executed */\n    constructor(string _greeting) public {\n        greeting = _greeting;\n        myNumber = 0;\n    }\n\n    /* Main function */\n    function greet() public view returns (string) {\n        return greeting;\n    }\n\n    /* Main function */\n    function getOwner() public view returns (address) {\n        return owner;\n    }\n\n    /* Main function */\n    function setMyNumber(uint32 value) public {\n        myNumber = value;\n    }\n\n    /* Main function */\n    function getMyNumber() public view returns (uint32) {\n        return myNumber;\n    }\n}\n",
-  "sourcePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Greeter.sol",
+  "sourcePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Greeter.sol",
   "ast": {
-    "absolutePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Greeter.sol",
+    "absolutePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Greeter.sol",
     "exportedSymbols": {
       "Greeter": [
         667
@@ -136,7 +136,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1946,
+                        "referencedDeclaration": 2074,
                         "src": "246:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -222,7 +222,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1946,
+                        "referencedDeclaration": 2074,
                         "src": "350:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -297,7 +297,7 @@
                         "name": "selfdestruct",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1954,
+                        "referencedDeclaration": 2082,
                         "src": "371:12:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_selfdestruct_nonpayable$_t_address_$returns$__$",
@@ -961,7 +961,7 @@
     "src": "0:1126:1"
   },
   "legacyAST": {
-    "absolutePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Greeter.sol",
+    "absolutePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Greeter.sol",
     "exportedSymbols": {
       "Greeter": [
         667
@@ -1059,7 +1059,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1946,
+                        "referencedDeclaration": 2074,
                         "src": "246:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1145,7 +1145,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1946,
+                        "referencedDeclaration": 2074,
                         "src": "350:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1220,7 +1220,7 @@
                         "name": "selfdestruct",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1954,
+                        "referencedDeclaration": 2082,
                         "src": "371:12:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_selfdestruct_nonpayable$_t_address_$returns$__$",
@@ -1888,6 +1888,6 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2018-10-18T06:35:24.105Z"
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-10-23T04:03:52.970Z"
 }

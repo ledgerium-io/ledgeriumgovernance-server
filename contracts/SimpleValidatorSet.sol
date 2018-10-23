@@ -57,12 +57,12 @@ contract SimpleValidatorSet is Voteable{
 		totalActiveCount = 3;
 	}
 
-	modifier isOwner() {
+	modifier isAdmin() {
 		require (adminSet.checkAdmin(msg.sender));
 		_;
 	}
 
-	modifier isValidatorM() {
+	modifier isValidator() {
 		require (activeValidators[msg.sender].isValidator);
 		_;
 	}
@@ -71,57 +71,124 @@ contract SimpleValidatorSet is Voteable{
 	event removevalidator(address validator,address _admin);
 	event finalizeEvent(address validator,address _admin,string _event);
 
-	function addValidator (address _address) public isValidatorM returns(bool res)  {
-		assert (!activeValidators[_address].isValidator);
-		assert (activeValidators[_address].status == Status.INACTIVE);
-		assert (voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
-    		if(!exists[_address]){
-    				adminValidatorsMap[msg.sender].push(_address);
-    				validators.push(_address);
-					totalCount = totalCount.add(1);
+	event votedfor(address by,address vfor);
+	event votedagainst(address by,address vfor);
+
+	function proposalToAddValidator (address _address) public isAdmin returns(bool res){
+		require(votes[_address].proposal == Proposal.NOT_CREATED);
+		votes[_address].proposal = Proposal.ADD;
+		require (voteFor(_address,msg.sender));
+		return true;
+	}
+
+	function voteForAddingValidator (address _address) public isValidator returns(bool res){
+		require(votes[_address].proposal == Proposal.ADD);
+		require(voteFor(_address,msg.sender));
+		if(votes[_address].countFor >= totalCount / 2 + 1){
+			if(!exists[_address]){
+				adminValidatorsMap[msg.sender].push(_address);
+				validators.push(_address);
+				totalCount = totalCount.add(1);
     		}		
     		exists[_address] = true;
     		activeValidators[_address].isValidator = true;
-			totalActiveCount = totalActiveCount.add(1);
-    		//activeValidators[_address].lop = LastOp.ADD;
     		activeValidators[_address].status = Status.ACTIVE;
+			totalActiveCount = totalActiveCount.add(1);
     		require(clearVotes(_address));
-			votes[_address].proposal = Proposal.NOT_CREATED;
 		    emit addvalidator(_address,msg.sender);
-		}
-		else {
-			votes[_address].proposal = Proposal.ADD;
-		}
-		if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
-		    require(clearVotes(_address));
 		}
 		return true;
 	}
 
-	function removeValidator (address _address) public isValidatorM returns(bool res)  {
-		assert (activeValidators[_address].isValidator);
-		assert (activeValidators[_address].status == Status.ACTIVE);
-		assert (voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
-    		activeValidators[_address].isValidator = false;
-    		//activeValidators[_address].lop = LastOp.REMOVE;
+	function voteAgainstAddingValidator (address _address) public isAdmin returns(bool res){
+		require(votes[_address].proposal == Proposal.ADD);
+		require(voteAgainst(_address,msg.sender));
+		if(votes[_address].countAgainst >= totalCount / 2 + 1){
+			assert(clearVotes(_address));
+		}
+		return true;
+	}
+	
+	function proposalToRemoveValidator (address _address) public isAdmin returns(bool res){
+		require(votes[_address].proposal == Proposal.NOT_CREATED);
+		votes[_address].proposal = Proposal.REMOVE;
+		require (voteFor(_address,msg.sender));
+		return true;
+	}
+
+	function voteForRemovingValidator (address _address) public isValidator returns(bool res){
+		require(votes[_address].proposal == Proposal.REMOVE);
+		require(voteFor(_address,msg.sender));
+		if(votes[_address].countFor >= totalCount / 2 + 1){
+			activeValidators[_address].isValidator = false;
     		activeValidators[_address].status = Status.INACTIVE;
 			totalActiveCount = totalActiveCount.sub(1);
     		require(clearVotes(_address));
-			votes[_address].proposal = Proposal.NOT_CREATED;
     		emit removevalidator(_address,msg.sender);
-		}
-		else {
-			votes[_address].proposal = Proposal.REMOVE;
-		}
-		if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
-		    require(clearVotes(_address));
 		}
 		return true;
 	}
 
-	/*function lastOp (address _address)public view isOwner returns(string res){
+	function voteAgainstRemovingValidator (address _address) public isAdmin returns(bool res){
+		require(votes[_address].proposal == Proposal.REMOVE);
+		require(voteAgainst(_address,msg.sender));
+		if(votes[_address].countAgainst >= totalCount / 2 + 1){
+			assert(clearVotes(_address));
+		}
+		return true;
+	}
+	
+	// function addValidator (address _address) public isValidator returns(bool res)  {
+	// 	assert (!activeValidators[_address].isValidator);
+	// 	assert (activeValidators[_address].status == Status.INACTIVE);
+	// 	assert (voteFor(_address,msg.sender));
+	// 	if(votes[_address].countFor >= totalActiveCount / 2 + 1){
+    // 		if(!exists[_address]){
+	// 			adminValidatorsMap[msg.sender].push(_address);
+	// 			validators.push(_address);
+	// 			totalCount = totalCount.add(1);
+    // 		}		
+    // 		exists[_address] = true;
+    // 		activeValidators[_address].isValidator = true;
+	// 		totalActiveCount = totalActiveCount.add(1);
+    // 		//activeValidators[_address].lop = LastOp.ADD;
+    // 		activeValidators[_address].status = Status.ACTIVE;
+    // 		require(clearVotes(_address));
+	// 		votes[_address].proposal = Proposal.NOT_CREATED;
+	// 	    emit addvalidator(_address,msg.sender);
+	// 	}
+	// 	else {
+	// 		votes[_address].proposal = Proposal.ADD;
+	// 	}
+	// 	if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
+	// 	    require(clearVotes(_address));
+	// 	}
+	// 	return true;
+	// }
+
+	// function removeValidator (address _address) public isValidator returns(bool res)  {
+	// 	assert (activeValidators[_address].isValidator);
+	// 	assert (activeValidators[_address].status == Status.ACTIVE);
+	// 	assert (voteFor(_address,msg.sender));
+	// 	if(votes[_address].countFor >= totalActiveCount / 2 + 1){
+    // 		activeValidators[_address].isValidator = false;
+    // 		//activeValidators[_address].lop = LastOp.REMOVE;
+    // 		activeValidators[_address].status = Status.INACTIVE;
+	// 		totalActiveCount = totalActiveCount.sub(1);
+    // 		require(clearVotes(_address));
+	// 		votes[_address].proposal = Proposal.NOT_CREATED;
+    // 		emit removevalidator(_address,msg.sender);
+	// 	}
+	// 	else {
+	// 		votes[_address].proposal = Proposal.REMOVE;
+	// 	}
+	// 	if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
+	// 	    require(clearVotes(_address));
+	// 	}
+	// 	return true;
+	// }
+
+	/*function lastOp (address _address)public view isAdmin returns(string res){
 		if(activeValidators[_address].lop == LastOp.ADD){
 			return "add";
 		}
@@ -132,23 +199,27 @@ contract SimpleValidatorSet is Voteable{
 		}
 	}*/
 
-	function checkProposal (address _address) public view isValidatorM returns(string res){
+	function checkVotes (address _address) public view isValidator returns(uint32[2] res){
+		return internalCheckVotes(_address);
+	}
+	
+	function checkProposal (address _address) public view isValidator returns(string res){
 		return internalCheckProposal(_address);
 	}
 
-	function getValidatorsForAdmin() public view isOwner returns (address[] a){
+	function getValidatorsForAdmin() public view isAdmin returns (address[] a){
 	    return adminValidatorsMap[msg.sender];
 	}
 
-	function isValidator(address _address) public view isValidatorM returns(bool a){
+	function isActiveValidator(address _address) public view returns(bool a){
 	    return activeValidators[_address].isValidator;
 	}
 
-	function getAllValidators()public view isValidatorM returns(address[] a){
+	function getAllValidators()public view isValidator returns(address[] a){
 	    return validators;
 	}
 
-	function getValidatorsCount()public view isValidatorM returns(uint32){
+	function getValidatorsCount()public view isValidator returns(uint32){
 	    return totalCount;
 	}
 

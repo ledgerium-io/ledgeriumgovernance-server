@@ -26,14 +26,14 @@
       "type": "event"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a7230582006cc8085ed6adc6b3a5c1ec8911c94eb9ce618172d96d8adaea38f9b5c2fc43b0029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a7230582006cc8085ed6adc6b3a5c1ec8911c94eb9ce618172d96d8adaea38f9b5c2fc43b0029",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820326098420abd06ddfd1585485d6a7f7fd1564c3a840c07723113703c3d6959770029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820326098420abd06ddfd1585485d6a7f7fd1564c3a840c07723113703c3d6959770029",
   "sourceMap": "25:557:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;25:557:1;;;;;;;",
   "deployedSourceMap": "25:557:1:-;;;;;",
   "source": "pragma solidity 0.4.24;\n\ncontract Ownable {\n\n\tmapping (address => bool) owners;\n\tuint32 totalCount;\n\n\tmodifier onlyOwner(address _address) { \n\t\trequire(owners[msg.sender]);\n        _; \n\t}\n\n\tevent ownerAdded(address _address);\n\tevent ownerRemoved(address _address);\t\n\t\n\tfunction addOwner(address _address) internal returns(bool){\n\t\towners[_address] = true;\n\t\ttotalCount++;\n\t\temit ownerAdded(_address);\n\t\treturn true;\n\t}\n\n\tfunction removeOwner(address _address) internal returns(bool) {\n\t\towners[_address] = false;\n\t\ttotalCount--;\n\t\temit ownerRemoved(_address);\n\t\treturn false;\n\t}\n\t\n}\n",
-  "sourcePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Ownable.sol",
+  "sourcePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Ownable.sol",
   "ast": {
-    "absolutePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Ownable.sol",
+    "absolutePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Ownable.sol",
     "exportedSymbols": {
       "Ownable": [
         661
@@ -170,7 +170,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1782,
+                            "referencedDeclaration": 1895,
                             "src": "159:3:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -214,10 +214,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1785,
-                        1786
+                        1898,
+                        1899
                       ],
-                      "referencedDeclaration": 1785,
+                      "referencedDeclaration": 1898,
                       "src": "144:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -939,7 +939,7 @@
     "src": "0:583:1"
   },
   "legacyAST": {
-    "absolutePath": "/Users/ashwath.s/work/play/gol_governance/nodes/governanceApp/contracts/Ownable.sol",
+    "absolutePath": "/Users/rahulgolash/Rahul/Ledgerium/CoreLedgerium/governanceApp/contracts/Ownable.sol",
     "exportedSymbols": {
       "Ownable": [
         661
@@ -1076,7 +1076,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1782,
+                            "referencedDeclaration": 1895,
                             "src": "159:3:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1120,10 +1120,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1785,
-                        1786
+                        1898,
+                        1899
                       ],
-                      "referencedDeclaration": 1785,
+                      "referencedDeclaration": 1898,
                       "src": "144:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1849,6 +1849,6 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2018-10-19T00:20:22.078Z"
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-10-23T05:00:42.409Z"
 }
