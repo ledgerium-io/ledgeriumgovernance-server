@@ -56,7 +56,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 		require(voteFor(_address,msg.sender));
 		if(votes[_address].countFor >= totalCount / 2 + 1){
 			owners[_address] = true;
-			totalCount++;
+			totalCount = totalCount.add(1);
 			if(!exists[_address])
 				exists[_address] = true;
 			admins.push(_address);
@@ -70,7 +70,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 		require(voteFor(_address,msg.sender));
 		if(votes[_address].countFor >= totalCount / 2 + 1){
 			owners[_address] = false;
-        	totalCount--;
+			totalCount = totalCount.sub(1);
 			require(clearVotes(_address));
 		}
 		return true;

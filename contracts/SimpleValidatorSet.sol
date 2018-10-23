@@ -67,22 +67,35 @@ contract SimpleValidatorSet is Voteable{
 		_;
 	}
 
-	event addvalidator(address validator,address _admin);
-	event removevalidator(address validator,address _admin);
-	event finalizeEvent(address validator,address _admin,string _event);
+	event addValidator(address indexed validator,address _admin);
+	event removeValidator(address indexed validator,address _admin);
 
 	event votedfor(address by,address vfor);
 	event votedagainst(address by,address vfor);
 
+	event alreadyProposalForAddingValidator(address indexed _address);
+	event alreadyProposalForRemovingValidator(address indexed _address);
+
+	event noProposalForAddingValidator(address indexed _address);
+	event noProposalForRemovingValidator(address indexed _address);
+
 	function proposalToAddValidator (address _address) public isAdmin returns(bool res){
-		require(votes[_address].proposal == Proposal.NOT_CREATED);
+		//require(votes[_address].proposal == Proposal.NOT_CREATED);
+		if(votes[_address].proposal != Proposal.NOT_CREATED){
+			emit alreadyProposalForAddingValidator(_address);
+			return false;
+		}
 		votes[_address].proposal = Proposal.ADD;
 		require (voteFor(_address,msg.sender));
 		return true;
 	}
 
 	function voteForAddingValidator (address _address) public isValidator returns(bool res){
-		require(votes[_address].proposal == Proposal.ADD);
+		//require(votes[_address].proposal == Proposal.ADD);
+		if(votes[_address].proposal != Proposal.ADD){
+			emit noProposalForAddingValidator(_address);
+			return false;
+		}
 		require(voteFor(_address,msg.sender));
 		if(votes[_address].countFor >= totalCount / 2 + 1){
 			if(!exists[_address]){
@@ -95,13 +108,17 @@ contract SimpleValidatorSet is Voteable{
     		activeValidators[_address].status = Status.ACTIVE;
 			totalActiveCount = totalActiveCount.add(1);
     		require(clearVotes(_address));
-		    emit addvalidator(_address,msg.sender);
+		    emit addValidator(_address,msg.sender);
 		}
 		return true;
 	}
 
 	function voteAgainstAddingValidator (address _address) public isAdmin returns(bool res){
-		require(votes[_address].proposal == Proposal.ADD);
+		//require(votes[_address].proposal == Proposal.ADD);
+		if(votes[_address].proposal != Proposal.ADD){
+			emit noProposalForAddingValidator(_address);
+			return false;
+		}
 		require(voteAgainst(_address,msg.sender));
 		if(votes[_address].countAgainst >= totalCount / 2 + 1){
 			assert(clearVotes(_address));
@@ -110,27 +127,39 @@ contract SimpleValidatorSet is Voteable{
 	}
 	
 	function proposalToRemoveValidator (address _address) public isAdmin returns(bool res){
-		require(votes[_address].proposal == Proposal.NOT_CREATED);
+		//require(votes[_address].proposal == Proposal.NOT_CREATED);
+		if(votes[_address].proposal != Proposal.NOT_CREATED){
+			emit alreadyProposalForRemovingValidator(_address);
+			return false;
+		}
 		votes[_address].proposal = Proposal.REMOVE;
 		require (voteFor(_address,msg.sender));
 		return true;
 	}
 
 	function voteForRemovingValidator (address _address) public isValidator returns(bool res){
-		require(votes[_address].proposal == Proposal.REMOVE);
+		//require(votes[_address].proposal == Proposal.REMOVE);
+		if(votes[_address].proposal != Proposal.REMOVE){
+			emit noProposalForRemovingValidator(_address);
+			return false;
+		}
 		require(voteFor(_address,msg.sender));
 		if(votes[_address].countFor >= totalCount / 2 + 1){
 			activeValidators[_address].isValidator = false;
     		activeValidators[_address].status = Status.INACTIVE;
 			totalActiveCount = totalActiveCount.sub(1);
     		require(clearVotes(_address));
-    		emit removevalidator(_address,msg.sender);
+    		emit removeValidator(_address,msg.sender);
 		}
 		return true;
 	}
 
 	function voteAgainstRemovingValidator (address _address) public isAdmin returns(bool res){
 		require(votes[_address].proposal == Proposal.REMOVE);
+		if(votes[_address].proposal != Proposal.REMOVE){
+			emit noProposalForRemovingValidator(_address);
+			return false;
+		}
 		require(voteAgainst(_address,msg.sender));
 		if(votes[_address].countAgainst >= totalCount / 2 + 1){
 			assert(clearVotes(_address));

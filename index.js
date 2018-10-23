@@ -93,15 +93,6 @@ var main = async function () {
     flag = await addSimpleSetContractValidatorForAdmin(newValidator);
     console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
 
-    //////////////////////////////////////////////////////////////
-    var from = accountAddressList[3];
-    transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
-    console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
-
-    whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
-    console.log(newValidator, "checked proposal for the validator ?", whatProposal);
-    //////////////////////////////////////////////////////////////
-
     flag = await getListOfActiveValidators();
     console.log("return flag for getListOfActiveValidators",flag);
 
@@ -431,6 +422,13 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
         console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
         from = accountAddressList[2];
+        transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+        whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
+        console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+        var from = accountAddressList[3];
         transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
