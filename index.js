@@ -40,7 +40,7 @@ var main = async function () {
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
-    //readContractsFromConfig();
+    readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
         var otherAddressList = [];
         ethAccountToUse = accountAddressList[0];
@@ -52,7 +52,7 @@ var main = async function () {
         simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress,otherAddressList);
         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-        //writeContractsINConfig();
+        writeContractsINConfig();
     }
     //If we dont have contracts to operate, abort!!
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
@@ -63,6 +63,21 @@ var main = async function () {
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
     var flag;
+
+
+    await addInitialValidators(accountAddressList);
+    // await addIstanbulValidator("8545", accountAddressList[2]);
+    // await addIstanbulValidator("8546", accountAddressList[2]);
+    // await addIstanbulValidator("8548", accountAddressList[2]);
+    // await addIstanbulValidator("8549", accountAddressList[2]);
+    // await addIstanbulValidator("8550", accountAddressList[2]);
+    //removeIstanbulValidator("8551", accountAddressList[2]);
+
+    await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
+    flag = await getListOfActiveValidators();
+    return;
+
+
     var adminToAdd = accountAddressList[3];
     flag = await addNewAdmin(adminToAdd);
     console.log("return flag for proposalToAddAdmin ",flag);
@@ -107,6 +122,86 @@ var main = async function () {
 }
 
 main();
+
+
+async function addNewNodeAsValidator(newValidator) {
+
+    from = accountAddressList[0];
+    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    from = accountAddressList[1];
+    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    from = accountAddressList[2];
+    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    from = accountAddressList[3];
+    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    from = accountAddressList[4];
+    transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+}
+
+async function addInitialValidators(accountAddressList) {
+    // admins are default validators
+    // add [2] as validator
+    // var from = accountAddressList[0];
+    // var newValidator = accountAddressList[2];
+    // var transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+    // from = accountAddressList[1];
+    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+    // // add [1] as validator
+    // newValidator = accountAddressList[1];
+    // from = accountAddressList[0];
+    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    // from = accountAddressList[2];
+    // transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+
+    //  // add [0] as validator
+    //  newValidator = accountAddressList[0];
+    //  from = accountAddressList[1];
+    //  transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+    //  from = accountAddressList[2];
+    //  transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+    // add all remaining nodes as validators to the smart contracts
+     // add [3] as validator
+     newValidator = accountAddressList[3];
+     from = accountAddressList[1];
+     transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+     from = accountAddressList[2];
+     transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+      // add [4] as validator
+      newValidator = accountAddressList[4];
+      from = accountAddressList[0];
+      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+      from = accountAddressList[1];
+      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+      from = accountAddressList[2];
+      transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+       // add [5] as validator
+       newValidator = accountAddressList[5];
+       from = accountAddressList[0];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+       from = accountAddressList[1];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+       from = accountAddressList[2];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+
+       // add [5] as validator
+       newValidator = accountAddressList[6];
+       from = accountAddressList[0];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+       from = accountAddressList[1];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+       from = accountAddressList[2];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+       from = accountAddressList[3];
+       transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
+}
 
 async function istanbulAddValidatorTest()
 {
