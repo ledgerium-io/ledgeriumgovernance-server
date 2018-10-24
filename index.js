@@ -27,6 +27,10 @@ var main = async function () {
     //await readWritePrivateKeys(accountAddressList);
     await createAccountsAndManageKeys();
 
+    //We need minimum 3 accounts and private keys set to continue from here!
+    if((accountAddressList.length <3) || (Object.keys(privateKey).length < 3))
+        return;
+
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
 
@@ -40,7 +44,7 @@ var main = async function () {
     adminValidatorSet = new AdminValidatorSet(web3);
     simpleValidatorSet = new SimpleValidatorSet(web3);
 
-    //readContractsFromConfig();
+    readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
         var otherAddressList = [];
         ethAccountToUse = accountAddressList[0];
@@ -52,7 +56,7 @@ var main = async function () {
         simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress,otherAddressList);
         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-        //writeContractsINConfig();
+        writeContractsINConfig();
     }
     //If we dont have contracts to operate, abort!!
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
@@ -62,7 +66,102 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    var flag;
+    //flag = await runAdminTestCases();
+    flag = await validatorSetup();
+    //flag = await runValidatorTestCases();
+
+    return;
+}
+
+main();
+
+/** This will add all the istanbul existing validator nodes as validator in SimpleValidatorSet SmartContract! Both list will come 
+/in sync.
+*/
+async function validatorSetup()
+{
+    console.log("****************** Setup Validators list ******************");
+    console.log("****************** Start ******************");
+    try{
+        var activeValidatorList;
+        activeValidatorList = await getListOfActiveValidators();
+        console.log("return list for getListOfActiveValidators",activeValidatorList.length);
+
+        var noOfAccounts = Object.keys(privateKey).length;
+        //Let the first account, as existing validator propose to add new validators!
+        var ethAccountToPropose = accountAddressList[0];
+        console.log("No of accounts to setup as validators ", noOfAccounts);
+        
+        //We will start with 4th element as first 3 are as
+        for(var index = 3; index < noOfAccounts; index++ ){
+            newValidator = accountAddressList[index]; //New validator to be added
+            
+            var transactionhash = await simpleValidatorSet.proposalToAddValidator(ethAccountToPropose, privateKey[ethAccountToPropose], newValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
+
+            var whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose,newValidator);
+            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+            var activeValidatorList = await getListOfActiveValidators();
+            for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
+                if(ethAccountToPropose == activeValidatorList[indexAV])
+                    continue;
+                var votingFrom = activeValidatorList[indexAV];
+                transactionhash = await simpleValidatorSet.voteForAddingValidator(votingFrom, privateKey[votingFrom], newValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+                whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose, newValidator);
+                console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+                //Check if no of required votes (N/2+1) is already achieved, if so, the running proposal will be cleared off
+                //if so, dont need to run the loop and break it now, to run further voting!
+                if(whatProposal == "proposal not created")
+                    break; 
+            }
+        }
+        activeValidatorList = await getListOfActiveValidators();
+        console.log("return list for getListOfActiveValidators",activeValidatorList.length);
+        console.log("****************** End ******************");
+    }
+    catch (error) {
+        console.log("Error in getAllAdmins(): " + error);
+        return false;
+    }
+}
+
+async function runValidatorTestCases(){
+    
+    console.log("****************** Running Validator Test cases ******************");
+    console.log("****************** Start Validator Test cases ******************");
+
+    var activeValidatorList;
+    var newValidator = accountAddressList[3];
+    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
+    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+
+    activeValidatorList = await getListOfActiveValidators();
+    console.log("return list for getListOfActiveValidators",activeValidatorList.length);
+    
+    newValidator = accountAddressList[4];
+    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
+    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
+
+    activeValidatorList = await getListOfActiveValidators();
+    console.log("return list for getListOfActiveValidators",activeValidatorList.length);
+
+    var removeValidator = accountAddressList[4];
+    flag = await removeSimpleSetContractValidatorForAdmin(removeValidator);
+    console.log("return flag for removeSimpleSetContractValidatorForAdmin",flag);
+
+    activeValidatorList = await getListOfActiveValidators();
+    console.log("return list for getListOfActiveValidators",activeValidatorList.length);
+
+    console.log("****************** End Validator Test cases ******************");
+}
+
+async function runAdminTestCases(){
+    
+    console.log("****************** Running Admin Test cases ******************");
+    console.log("****************** Start Admin Test cases ******************");
     var adminToAdd = accountAddressList[3];
     flag = await addNewAdmin(adminToAdd);
     console.log("return flag for proposalToAddAdmin ",flag);
@@ -71,42 +170,18 @@ var main = async function () {
     flag = await addNewAdmin(adminToAdd);
     console.log("return flag for proposalToAddAdmin ",flag);
 
-    flag = await getAllAdmins();
-    console.log("return flag for getAllAdmins",flag);
+    var activeAdminList;
+    activeAdminList = await getAllAdmins();
+    console.log("return list for getAllAdmins",activeAdminList.length);
 
     flag = await removeOneAdmin();
     console.log("return flag for removeOneAdmin ",flag);
 
-    flag = await getAllAdmins();
-    console.log("return flag for getAllAdmins",flag);
-
-    flag = await getListOfActiveValidators();
-
-    var newValidator = accountAddressList[3];
-    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
-    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
-
-    flag = await getListOfActiveValidators();
-    console.log("return flag for getListOfActiveValidators",flag);
+    activeAdminList = await getAllAdmins();
+    console.log("return list for getAllAdmins",activeAdminList.length);
     
-    newValidator = accountAddressList[4];
-    flag = await addSimpleSetContractValidatorForAdmin(newValidator);
-    console.log("return flag for addSimpleSetContractValidatorsForAdmin",flag);
-
-    flag = await getListOfActiveValidators();
-    console.log("return flag for getListOfActiveValidators",flag);
-
-    var removeValidator = accountAddressList[4];
-    flag = await removeSimpleSetContractValidatorForAdmin(removeValidator);
-    console.log("return flag for removeSimpleSetContractValidatorForAdmin",flag);
-
-    flag = await getListOfActiveValidators();
-    console.log("return flag for getListOfActiveValidators ",flag);
-
-    return;
+    console.log("****************** End Admin Test cases ******************");
 }
-
-main();
 
 async function istanbulAddValidatorTest()
 {
@@ -211,26 +286,27 @@ async function listIstanbulValidator()
 }
 
 async function getAllAdmins(){
+    var activeAdminList = [];
     try{
         var noOfActiveAdmin = 0;
         var adminList = [];
         adminList = await adminValidatorSet.getAllAdmins(accountAddressList[0]);
         if (adminList != undefined && adminList.length > 0) {
             for(var index = 0; index < adminList.length; index++ ){
-                var flag = await adminValidatorSet.checkAdmin(accountAddressList[0],adminList[index]);
+                var flag = await adminValidatorSet.isActiveAdmin(accountAddressList[0],adminList[index]);
                 if(flag){
                     noOfActiveAdmin++;
+                    activeAdminList.push(adminList[index]);
                     console.log("admin[", noOfActiveAdmin,"] ",adminList[index]);
                 }
             }
             console.log("Number of active admins " + noOfActiveAdmin);
-            return true;
         }
     }
     catch (error) {
         console.log("Error in getAllAdmins(): " + error);
-        return false;
     }
+    return activeAdminList;
 } 
 
 async function addNewAdmin(adminToAdd){
@@ -239,7 +315,7 @@ async function addNewAdmin(adminToAdd){
         var ethAccountToVote1 = accountAddressList[1];
         var ethAccountToVote2 = accountAddressList[2];
         
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        var flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToAdd);
         console.log(adminToAdd, "got added as admin ?", flag);
         if(flag)
            return true;
@@ -283,12 +359,12 @@ async function addNewAdmin(adminToAdd){
         var votes = await adminValidatorSet.checkVotes(ethAccountToPropose,adminToAdd);
         console.log(adminToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
-        /* Since the validator is added, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        /* Since the validator is added, var flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToAdd);
         console.log(adminToAdd, "got added as admin ?", flag);
         if(flag)
 
         */
-        flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToAdd);
+        flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToAdd);
         console.log(adminToAdd, "got added as admin ?", flag);
 
         /* Since the validator is already added, checkProposal should return "proposal not created"
@@ -315,7 +391,7 @@ async function removeOneAdmin(){
         * Sending Proposal means, adding one vote to the proposal
         */
         /* Lets see whether this is admin or not already, if not, we can ignore else will proceed further*/
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        var flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToRemove);
         console.log(adminToRemove, "already an admin ?", flag);
         if(!flag) 
             return true;
@@ -359,12 +435,12 @@ async function removeOneAdmin(){
         transactionhash = await adminValidatorSet.voteForRemovingAdmin(adminToRemove,adminToRemove,privateKey[adminToRemove]);
         console.log("submitted transactionhash ",transactionhash, "for voting  of removing", adminToRemove);
 
-        /* Since the validator is removed, var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        /* Since the validator is removed, var flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToRemove);
         console.log(adminToRemove, "got added as admin ?", flag);
         if(flag)
 
         */
-        var flag = await adminValidatorSet.checkAdmin(ethAccountToPropose,adminToRemove);
+        var flag = await adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToRemove);
         console.log(adminToRemove, "still an admin ?", flag);
 
         /* Since the validator is already removed, checkProposal should return "proposal not created"
@@ -428,12 +504,18 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
         whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
+        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
         var from = accountAddressList[3];
         transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
         console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
         whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
         return true;
     }
@@ -498,10 +580,11 @@ async function removeSimpleSetContractValidatorForAdmin(removeValidator){
         transactionhash = await simpleValidatorSet.voteForRemovingValidator(removeValidator, privateKey[removeValidator], removeValidator);
         console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
 
+        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+
         /* Since the validator is removed, var flag = await simpleValidatorSet.checkValidator(ethAccountToPropose,removeValidator);
         console.log(removeValidator, "got added as validator ?", flag);
-        if(flag)
-
         */
         var flag = await simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
         console.log(removeValidator, "still an validator ?", flag);
@@ -520,6 +603,7 @@ async function removeSimpleSetContractValidatorForAdmin(removeValidator){
 
 async function getListOfActiveValidators()
 {
+    var activeValidatorList = [];
     try{
         var noOfActiveValidator = 0;
         var validatorList = [];
@@ -529,17 +613,17 @@ async function getListOfActiveValidators()
                 var flag = await simpleValidatorSet.isActiveValidator(accountAddressList[0],validatorList[index]);
                 if(flag){
                     noOfActiveValidator++;
+                    activeValidatorList.push(validatorList[index]);
                     console.log("validator[", noOfActiveValidator,"] ",validatorList[index]);
                 }
             }
             console.log("Number of active validators " + noOfActiveValidator);
-            return true;
         }
     }
     catch (error) {
         console.log("Error in getListOfActiveValidators(): " + error);
-        return false;
     }
+    return activeValidatorList;
 }
 
 async function generateKeysAndCreateAccounts(){

@@ -131,15 +131,15 @@ module.exports = class AdminValidatorSet {
         }
     }
     
-    async checkAdmin(ethAccountToUse, otherAdminToCheck){
+    async isActiveAdmin(ethAccountToUse, otherAdminToCheck){
         try {
-            var flag = await this.contract.methods.checkAdmin(otherAdminToCheck).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkAdmin(otherAdminToCheck).encodeABI();
+            var flag = await this.contract.methods.isActiveAdmin(otherAdminToCheck).call({from : ethAccountToUse});
+            //var encodedABI = this.contract.methods.checkActiveAdmin(otherAdminToCheck).encodeABI();
             //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
             //return utils.convertToBool(data);
             return flag;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            console.log("Error in AdminValidatorSet.isActiveAdmin(): " + error);
             return false;
         }
     }

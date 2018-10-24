@@ -116,7 +116,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 		return true;
 	}
 
-	function checkAdmin(address _address) public view returns(bool){
+	function isActiveAdmin(address _address) public view returns(bool){
 	    return owners[_address];
 	}
 

@@ -58,7 +58,7 @@ contract SimpleValidatorSet is Voteable{
 	}
 
 	modifier isAdmin() {
-		require (adminSet.checkAdmin(msg.sender));
+		require (adminSet.isActiveAdmin(msg.sender));
 		_;
 	}
 
