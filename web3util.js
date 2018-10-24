@@ -5,11 +5,13 @@ const fs = require('fs');
 var keythereum = require('keythereum');
 const async =  require('async');
 const ethUtil         = require('ethereumjs-util');
-
-const utils = {
+class Utils  {
+    constructor(web3provider, utils) {
+    }
+    
     async getCurrentTime () {
         return moment().format('YYYY-MM-DD HH:mm:ss').trim();
-    },
+    }
       
     async transaction (from,to,value,data){
         return {
@@ -20,7 +22,7 @@ const utils = {
             gasPrice: '0x00',
             gas     : 4700000
         }
-    },
+    }
 
     async getContractEncodeABI(abi,bytecode,web3,arg){
         try{
@@ -30,7 +32,7 @@ const utils = {
         } catch (error) {
             console.log("Exception in utils.getContractEncodeABI(): " + error);
         } 
-    },
+    }
     
     async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, web3 /*callback*/) {
         console.log("deployContract");
@@ -66,10 +68,10 @@ const utils = {
         } catch (error) {
             console.log("Exception in utils.deployContract(): " + error);
         }    
-    },
+    }
     
      async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
-        nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
+        let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
         {
             console.log("nonceToUse ",nonceToUse);
             const txParams = {
@@ -87,7 +89,7 @@ const utils = {
             tx.sign(privateKeyBuffer);
             const serializedTx = tx.serialize();
 
-            receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+            let receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
             return receipt;
             // .once('transactionHash',(receipt)=>{
             //     console.log('transactionHash', receipt);
@@ -103,7 +105,7 @@ const utils = {
             // });
         //});
         }
-    },
+    }
     
     /** To get estimate of gas consumptio for the given transaction prior to actual
      * execution on blockchain! Extremely useful feature however, giving issues on quorum
@@ -115,7 +117,7 @@ const utils = {
                 to      : toContractAddress,
                 data    : methodData
             });
-    },
+    }
 
     /** to get receipt of the event raised from the blockchain
     */ 
@@ -124,13 +126,13 @@ const utils = {
         if(!receipt)
             console.log("Transaction",transactionHash,"did not get mined!");
         return receipt;
-    },
+    }
     
     readSolidityContractJSON (filename) {
         var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
         let abi = JSON.stringify(json.abi);
         return [abi, json.bytecode];
-    },
+    }
 
     compileSolidityContract (filename,contractName) {
         let source = fs.readFileSync(filename, 'utf8');
@@ -138,25 +140,25 @@ const utils = {
         let abi = compiledContract.contracts[":"+contractName].interface;
         let bytecode = compiledContract.contracts[":"+contractName].bytecode;
         return [abi, bytecode];
-    },
+    }
 
     keccak (web3,text){
         return web3.utils.keccak256(text);
-    },
+    }
 
     async sendTransaction(web3,transaction){
         return await web3.eth.sendTransaction(transaction);
-    },
+    }
 
     generatePublicKey (privateKey) {
         return '0x'+ethUtil.privateToAddress(privateKey).toString('hex');
-    },
+    }
 
     getPrivateKeyFromKeyStore (accountAddress, keyStorePath, password) {
         var keyObject = keythereum.importFromFile(accountAddress, keyStorePath);
         var privateKey = keythereum.recover(password, keyObject);
         return privateKey.toString('hex');
-    },
+    }
 
     async subscribe (string,web3,callback) {
         web3.eth.subscribe(string,(error,transaction)=>{
@@ -166,7 +168,7 @@ const utils = {
                 callback(transaction);
             }
         });
-    },
+    }
     
     // to get all events from a submitted transaction to send to node application
     async listen(contract,callback){
@@ -181,7 +183,7 @@ const utils = {
                 callback(event);
             }
         });
-    },
+    }
 
     async getData(fromAccount,toContract,endata,web3){
         return await web3.eth.call({
@@ -189,7 +191,7 @@ const utils = {
             to: toContract,
             data: endata
         });
-    },
+    }
 
     split(array){
         temp = [];
@@ -202,7 +204,7 @@ const utils = {
             add.push("0x"+temp[j].slice(24,64));
         }
         return add.splice(2, add.length);
-    },
+    }
 
     convertToBool(inputString){
         if(inputString == "0x0000000000000000000000000000000000000000000000000000000000000001")
@@ -211,4 +213,4 @@ const utils = {
             return false;
     }
 }
-module.exports = utils;
+module.exports = Utils;

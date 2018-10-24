@@ -1,14 +1,20 @@
-const utils = require('./web3util');
+class SimpleValidatorSet {
 
-module.exports = class SimpleValidatorSet {
-
-    constructor(web3provider) {
-        this.web3 = web3provider;
-        //Read ABI and Bytecode from dynamic source.
-        var value = utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
+    constructor(web3provider, utils, simpleValidatorSetAddress, abi, Web3) {
+        this.web3 = new Web3(web3provider);
+        this.utils = utils;
+        var value;
+        if(!abi) {
+            //Read ABI and Bytecode from dynamic source.
+            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
+        }else{
+            value = [abi, ""];
+        }
         if(value.length > 0){
             this.simpleValidatorSetAbi = value[0];
             this.simpleValidatorSetByteCode = value[1];
+            this.contract = new this.web3.eth.Contract(
+                JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
         }
     }
     
@@ -32,8 +38,8 @@ module.exports = class SimpleValidatorSet {
             constructorParameters.push(adminValidatorAddress);
             constructorParameters = constructorParameters.concat(otherValidatorList);
             var estimatedGas = 0;
-            var encodedABI = await utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
-            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
+            var encodedABI = await this.utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
+            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
             this.simpleValidatorSetAddress = deployedAddress.contractAddress;    
             return this.simpleValidatorSetAddress;
         } catch (error) {
@@ -46,7 +52,7 @@ module.exports = class SimpleValidatorSet {
         try {
             var constructorParameters = [];
             constructorParameters.push(adminValidatorAddress);
-            var deployedAddress = await utils.deployContract(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode, ethAccountToUse, constructorParameters, this.web3);//, function(returnTypeString, result){
+            var deployedAddress = await this.utils.deployContract(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode, ethAccountToUse, constructorParameters, this.web3);//, function(returnTypeString, result){
             this.simpleValidatorSetAddress = deployedAddress;    
             return this.simpleValidatorSetAddress;
         } catch (error) {
@@ -59,9 +65,9 @@ module.exports = class SimpleValidatorSet {
         var resultList = [];
         try {
             var encodedABI = this.contract.methods.getAllValidators().encodeABI();
-            resultList = await utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,this.web3);
+            resultList = await this.utils.getData(ethAccountToUse,this.simpleValidatorSetAddress,encodedABI,this.web3);
             console.log(resultList);
-            return utils.split(resultList);
+            return this.utils.split(resultList);
         } catch (error) {
             console.log("Error in SimpleValidatorSet.getAllValidatorsAsync(): " + error);
             return resultList;
@@ -87,10 +93,10 @@ module.exports = class SimpleValidatorSet {
     async proposalToAddValidator(ethAccountToUse, privateKey, newValidator){
         try{
             var encodedABI = this.contract.methods.proposalToAddValidator(newValidator).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -102,10 +108,10 @@ module.exports = class SimpleValidatorSet {
     async voteForAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd){
         try{
             var encodedABI = this.contract.methods.voteForAddingValidator(otherValidatorToAdd).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -117,10 +123,10 @@ module.exports = class SimpleValidatorSet {
     async voteAgainstAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd){
         try{
             var encodedABI = this.contract.methods.voteAgainstAddingValidator(otherValidatorToAdd).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -132,10 +138,10 @@ module.exports = class SimpleValidatorSet {
     async proposalToRemoveValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
             var encodedABI = this.contract.methods.proposalToRemoveValidator(otherValidatorToRemove).encodeABI();
-            //var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             //console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -147,10 +153,10 @@ module.exports = class SimpleValidatorSet {
     async voteForRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
             var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -162,10 +168,10 @@ module.exports = class SimpleValidatorSet {
     async voteAgainstRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
             var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -177,10 +183,10 @@ module.exports = class SimpleValidatorSet {
     // async addValidator(ethAccountToUse, privateKey, newValidator) {
     //     try {
     //         var encodedABI = this.contract.methods.addValidator(newValidator).encodeABI();
-    //         // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
     //         // console.log("estimatedGas",estimatedGas);
     //         var estimatedGas = 0;
-    //         var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
     //         return transactionObject.transactionHash;
     //     } catch (error) {
     //         console.log("Error in SimpleValidatorSet.addValidator(): " + error);
@@ -191,10 +197,10 @@ module.exports = class SimpleValidatorSet {
     // async removeValidator(ethAccountToUse, privateKey, validatorToRemove) {
     //     try {
     //         var encodedABI = this.contract.methods.removeValidator(validatorToRemove).encodeABI();
-    //         // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
     //         // console.log("estimatedGas",estimatedGas);
     //         var estimatedGas = 0;
-    //         var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
     //         return transactionObject.transactionHash;        
     //     } catch (error) {
     //         console.log("Error in SimpleValidatorSet.removeValidator(): " + error);
@@ -216,8 +222,8 @@ module.exports = class SimpleValidatorSet {
         try {
             var votes = await this.contract.methods.checkVotes(validatorAddress).call({from : ethAccountToUse});
             //var encodedABI = this.contract.methods.checkVotes(validatorAddress).encodeABI();
-            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return utils.convertToBool(data);
+            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
             console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
@@ -268,7 +274,7 @@ module.exports = class SimpleValidatorSet {
      }     
         
      listenForContractObjectEvents(contractObject){
-        utils.listen(contractObject,(events)=>{
+        this.utils.listen(contractObject,(events)=>{
             console.log('SimpleValidatorSet Event Received');
             switch(events.event){
                 case "addvalidator":
@@ -284,7 +290,7 @@ module.exports = class SimpleValidatorSet {
             }
         });
 
-        // utils.subscribe("SimpleValidatorSet", this.web3, (events)=>{
+        // this.utils.subscribe("SimpleValidatorSet", this.web3, (events)=>{
         //     console.log('SimpleValidatorSet subscribe Event Received');
         //     switch(events.event){
         //         case "InitiateChange":
@@ -302,3 +308,8 @@ module.exports = class SimpleValidatorSet {
         // });
     }
 }
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+    module.exports = SimpleValidatorSet;
+else
+    window.SimpleValidatorSet = SimpleValidatorSet;

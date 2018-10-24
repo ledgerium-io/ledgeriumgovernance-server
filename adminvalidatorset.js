@@ -1,14 +1,21 @@
-const utils = require('./web3util');
+class AdminValidatorSet {
 
-module.exports = class AdminValidatorSet {
-
-    constructor(web3provider) {
-        this.web3 = web3provider;
-        //Read ABI and Bytecode from dynamic source.
-        var value = utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
+    constructor(web3provider, utils, adminValidatorSetAddress, abi, Web3) { 
+        var value;
+        this.utils = utils;
+        if(!abi) {
+            //Read ABI and Bytecode from dynamic source.
+            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
+        }else{
+            value = [abi, ""];
+        }
         if(value.length > 0){
+            this.web3 = new Web3(web3provider);
             this.adminValidatorSetAbi = value[0];
             this.adminValidatorSetByteCode = value[1];
+            this.contract = new this.web3.eth.Contract(
+                JSON.parse(this.adminValidatorSetAbi),
+                adminValidatorSetAddress);
         }
     }
     
@@ -28,13 +35,25 @@ module.exports = class AdminValidatorSet {
         }    
     }
 
+    GetAliasForAdmin(admin, fn) {
+        fn("alias - " + admin);
+    }
+
+    async getAllAdmins2(){
+        return await this.contract.methods.getAllAdmins().call({});
+        // var encodedABI = this.contract.methods.getAllAdmins().encodeABI();
+        // return await web3.eth.call({
+        //     data: encodedABI
+        // });
+    }
+
     async getAllAdmins(ethAccountToUse) {
         var resultList = [];
         try {
             var encodedABI = this.contract.methods.getAllAdmins().encodeABI();
-            resultList = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            resultList = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
             console.log(resultList);
-            return utils.split(resultList);
+            return this.utils.split(resultList);
         } catch (error) {
             console.log("Error in AdminValidatorSet.getAllAdminsAsync(): " + error);
             return resultList;
@@ -44,10 +63,10 @@ module.exports = class AdminValidatorSet {
     async proposalToAddAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
         try{
             var encodedABI = this.contract.methods.proposalToAddAdmin(otherAdminToAdd).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -59,10 +78,10 @@ module.exports = class AdminValidatorSet {
     async voteForAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
         try{
             var encodedABI = this.contract.methods.voteForAddingAdmin(otherAdminToAdd).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -74,10 +93,10 @@ module.exports = class AdminValidatorSet {
     async voteAgainstAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
         try{
             var encodedABI = this.contract.methods.voteAgainstAddingAdmin(otherAdminToAdd).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -89,10 +108,10 @@ module.exports = class AdminValidatorSet {
     async proposalToRemoveAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
             var encodedABI = this.contract.methods.proposalToRemoveAdmin(otherAdminToRemove).encodeABI();
-            //var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             //console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -104,10 +123,10 @@ module.exports = class AdminValidatorSet {
     async voteForRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
             var encodedABI = this.contract.methods.voteForRemovingAdmin(otherAdminToRemove).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -119,10 +138,10 @@ module.exports = class AdminValidatorSet {
     async voteAgainstRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
         try{
             var encodedABI = this.contract.methods.voteAgainstRemovingAdmin(otherAdminToRemove).encodeABI();
-            // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -148,8 +167,8 @@ module.exports = class AdminValidatorSet {
         try {
             var votes = await this.contract.methods.checkVotes(otherAdminToCheck).call({from : ethAccountToUse});
             //var encodedABI = this.contract.methods.checkVotes(otherAdminToCheck).encodeABI();
-            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return utils.convertToBool(data);
+            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
             console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
@@ -161,8 +180,8 @@ module.exports = class AdminValidatorSet {
         try {
             var whatProposal = await this.contract.methods.checkProposal(otherAdminToCheck).call({from : ethAccountToUse});
             //var encodedABI = this.contract.methods.checkProposal(otherAdminToCheck).encodeABI();
-            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return utils.convertToBool(data);
+            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
+            //return this.utils.convertToBool(data);
             return whatProposal;
         } catch (error) {
             console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
@@ -173,8 +192,8 @@ module.exports = class AdminValidatorSet {
     async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
         try {
             var estimatedGas = 0;
-            var encodedABI = await utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminValidatorAddress);
-            var deployedAddress =  await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminValidatorAddress);
+            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
             this.adminValidatorSetAddress = deployedAddress.contractAddress;
             return this.adminValidatorSetAddress;
         } catch (error) {
@@ -185,7 +204,7 @@ module.exports = class AdminValidatorSet {
     
     async deployNewAdminSetValidatorContract(ethAccountToUse, otherAdminsList) {
         try {
-            var deployedAddress = await utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);
+            var deployedAddress = await this.utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);
             this.adminValidatorSetAddress = deployedAddress;
             return this.adminValidatorSetAddress;
         } catch (error) {
@@ -226,7 +245,7 @@ module.exports = class AdminValidatorSet {
      }     
         
      listenForContractObjectEvents(contractObject){
-        utils.listen(contractObject, (events)=>{
+        this.utils.listen(contractObject, (events)=>{
             console.log('AdminValidatorSet live event Received');
             switch(events.event){
                 case "votedfor":
@@ -245,7 +264,7 @@ module.exports = class AdminValidatorSet {
             }
         });
 
-        // utils.subscribe("AdminValidatorSet", this.web3, (events)=>{
+        // this.utils.subscribe("AdminValidatorSet", this.web3, (events)=>{
         //     console.log('AdminValidatorSet subscribe Event Received');
         //     switch(events.event){
         //         case "votedfor":
@@ -259,4 +278,11 @@ module.exports = class AdminValidatorSet {
         //     }
         // });
     }  
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    const Web3 = require('web3');
+    module.exports = AdminValidatorSet;
+}else{
+    window.AdminValidatorSet = AdminValidatorSet;
 }

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Web3 = require('web3');
 //const Web3 = require('web3-quorum');
-const utils =  require('./web3util');
+const Utils =  require('./web3util');
 const async =  require('async');
 const mnemonic = require('./mnemonic');
 const SimpleValidatorSet = require('./simplevalidatorset');
@@ -9,7 +9,8 @@ const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
 var host = "http://localhost:8545";
-var web3 = new Web3(new Web3.providers.HttpProvider(host));
+var web3 = new Web3.providers.HttpProvider(host);
+const utils = new Utils();
 
 //var host = "ws://localhost:9000";
 //web3 = new Web3(new Web3.providers.WebsocketProvider(host));
@@ -41,8 +42,8 @@ var main = async function () {
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
 
-    adminValidatorSet = new AdminValidatorSet(web3);
-    simpleValidatorSet = new SimpleValidatorSet(web3);
+    adminValidatorSet = new AdminValidatorSet(web3, utils, "", "", Web3);
+    simpleValidatorSet = new SimpleValidatorSet(web3, utils, "", "", Web3);
 
     readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
@@ -69,6 +70,19 @@ var main = async function () {
     //flag = await runAdminTestCases();
     flag = await validatorSetup();
     //flag = await runValidatorTestCases();
+    var flag;
+
+    //return;
+    //await addInitialValidators(accountAddressList);
+    // await addIstanbulValidator("8545", accountAddressList[2]);
+    // await addIstanbulValidator("8546", accountAddressList[2]);
+    // await addIstanbulValidator("8548", accountAddressList[2]);
+    // await addIstanbulValidator("8549", accountAddressList[2]);
+    // await addIstanbulValidator("8550", accountAddressList[2]);
+    //removeIstanbulValidator("8551", accountAddressList[2]);
+    // return;
+    //await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
+    flag = await getListOfActiveValidators();
     return;
 }
 
