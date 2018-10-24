@@ -66,31 +66,9 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    var flag;
-
-
-    await addInitialValidators(accountAddressList);
-    // await addIstanbulValidator("8545", accountAddressList[2]);
-    // await addIstanbulValidator("8546", accountAddressList[2]);
-    // await addIstanbulValidator("8548", accountAddressList[2]);
-    // await addIstanbulValidator("8549", accountAddressList[2]);
-    // await addIstanbulValidator("8550", accountAddressList[2]);
-    //removeIstanbulValidator("8551", accountAddressList[2]);
-
-    await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
-    flag = await getListOfActiveValidators();
-
     //flag = await runAdminTestCases();
     flag = await validatorSetup();
     //flag = await runValidatorTestCases();
-
-    return;
-
-
-    // var adminToAdd = accountAddressList[3];
-    // flag = await addNewAdmin(adminToAdd);
-    // console.log("return flag for proposalToAddAdmin ",flag);
-
     return;
 }
 
@@ -584,39 +562,66 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
     try{
         var from = accountAddressList[0];
         var ethAccountToPropose = accountAddressList[0];
-        var transactionhash = await simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
-        console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
 
         var whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
-        from = accountAddressList[1];
-        transactionhash = await simpleValidatorSet.voteAgainstAddingValidator(from, privateKey[from], newValidator);
-        console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator);
-
-        /* Lets see how voting looks at the moment! It should return 1,1*/
         var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
         console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
-        from = accountAddressList[2];
-        transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+        var transactionhash = await simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
+        console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
 
-        whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
+        whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
         console.log(newValidator, "checked proposal for the validator ?", whatProposal);
 
-        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
-        console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+        var activeValidatorList = await getListOfActiveValidators();
+        for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
+            if(ethAccountToPropose == activeValidatorList[indexAV])
+                continue;
+            var votingFrom = activeValidatorList[indexAV];
+            transactionhash = await simpleValidatorSet.voteForRemovingValidator(votingFrom, privateKey[votingFrom], newValidator);
+            console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
 
-        var from = accountAddressList[3];
-        transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
-        console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+            /* Lets see how voting looks at the moment! It should return 1,1*/
+            var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
-        whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
-        console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+            whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+            //Check if no of required votes (N/2+1) is already achieved, if so, the running proposal will be cleared off
+            //if so, dont need to run the loop and break it now, to run further voting!
+            if(whatProposal == "proposal not created")
+                break; 
+        }
+        
+        // from = accountAddressList[1];
+        // transactionhash = await simpleValidatorSet.voteAgainstAddingValidator(from, privateKey[from], newValidator);
+        // console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator);
 
-        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
-        console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+        // /* Lets see how voting looks at the moment! It should return 1,1*/
+        // var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        // console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+        // from = accountAddressList[2];
+        // transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
+        // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+        // whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
+        // console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+        // votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        // console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+        // var from = accountAddressList[3];
+        // transactionhash = await simpleValidatorSet.voteForAddingValidator(from, privateKey[from], newValidator);
+        // console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+
+        // whatProposal = await simpleValidatorSet.checkProposal(accountAddressList[0], newValidator);
+        // console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+        // votes = await simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+        // console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
         return true;
     }
@@ -629,8 +634,6 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
 async function removeSimpleSetContractValidatorForAdmin(removeValidator){
     try{
         var ethAccountToPropose = accountAddressList[0];
-        var ethAccountToVote1 = accountAddressList[1];
-        var ethAccountToVote2 = accountAddressList[2];
 
         /* Testing the functionality of adding or removing a validator with votes FOR and votes AGAINST.
         * There are 3 validator in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
@@ -657,32 +660,48 @@ async function removeSimpleSetContractValidatorForAdmin(removeValidator){
         var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
         console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
 
-        /*We are voting AGAINST removing validator now*/
-        transactionhash = await simpleValidatorSet.voteAgainstRemovingValidator(ethAccountToVote1, privateKey[ethAccountToVote1], removeValidator);
-        console.log("submitted transactionhash ", transactionhash, "against voting  of removing", removeValidator);
+        var activeValidatorList = await getListOfActiveValidators();
+        for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
+            if(ethAccountToPropose == activeValidatorList[indexAV])
+                continue;
+            var votingFrom = activeValidatorList[indexAV];
+            transactionhash = await simpleValidatorSet.voteForRemovingValidator(votingFrom, privateKey[votingFrom], removeValidator);
+            console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+
+            whatProposal = await simpleValidatorSet.checkProposal(ethAccountToPropose, removeValidator);
+            console.log(removeValidator, "checked proposal for the validator ?", whatProposal);
+            //Check if no of required votes (N/2+1) is already achieved, if so, the running proposal will be cleared off
+            //if so, dont need to run the loop and break it now, to run further voting!
+            if(whatProposal == "proposal not created")
+                break; 
+        }
+
+        // /*We are voting AGAINST removing validator now*/
+        // transactionhash = await simpleValidatorSet.voteAgainstRemovingValidator(ethAccountToVote1, privateKey[ethAccountToVote1], removeValidator);
+        // console.log("submitted transactionhash ", transactionhash, "against voting  of removing", removeValidator);
 
         /* Lets see how voting looks at the moment! It should return 1,1*/
-        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
-        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+        // var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        // console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
         
-        /*We are now voting FOR removing validator*/
-        transactionhash = await simpleValidatorSet.voteForRemovingValidator(ethAccountToVote2, privateKey[ethAccountToVote2], removeValidator);
-        console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
+        // /*We are now voting FOR removing validator*/
+        // transactionhash = await simpleValidatorSet.voteForRemovingValidator(ethAccountToVote2, privateKey[ethAccountToVote2], removeValidator);
+        // console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
 
-        /* One more vote FOR removing validator, and so it makes 2 votes FOR and 1 vote AGAINST removing
-        The > 4/2 is not achieved FOR removing validator here. The proposal will not be finalised here
-        */
-        var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
-        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+        // /* One more vote FOR removing validator, and so it makes 2 votes FOR and 1 vote AGAINST removing
+        // The > 4/2 is not achieved FOR removing validator here. The proposal will not be finalised here
+        // */
+        // var votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        // console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
         
-        /*We are now voting FOR removing validator by 'SELF'
-        * The > 4/2 is now achieved FOR removing validator here. The proposal will be finalised here
-        */
-        transactionhash = await simpleValidatorSet.voteForRemovingValidator(removeValidator, privateKey[removeValidator], removeValidator);
-        console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
+        // /*We are now voting FOR removing validator by 'SELF'
+        // * The > 4/2 is now achieved FOR removing validator here. The proposal will be finalised here
+        // */
+        // transactionhash = await simpleValidatorSet.voteForRemovingValidator(removeValidator, privateKey[removeValidator], removeValidator);
+        // console.log("submitted transactionhash ", transactionhash, "for voting  of removing", removeValidator);
 
-        votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
-        console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+        // votes = await simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
+        // console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
 
         /* Since the validator is removed, var flag = await simpleValidatorSet.checkValidator(ethAccountToPropose,removeValidator);
         console.log(removeValidator, "got added as validator ?", flag);

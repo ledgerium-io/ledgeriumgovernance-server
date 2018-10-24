@@ -79,6 +79,9 @@ contract SimpleValidatorSet is Voteable{
 	event noProposalForAddingValidator(address indexed _address);
 	event noProposalForRemovingValidator(address indexed _address);
 
+	event alreadyActiveValidator(address indexed _address);
+	event alreadyInActiveValidator(address indexed _address);
+
 	function proposalToAddValidator (address _address) public isAdmin returns(bool res){
 		//require(votes[_address].proposal == Proposal.NOT_CREATED);
 		if(votes[_address].proposal != Proposal.NOT_CREATED){
@@ -109,7 +112,7 @@ contract SimpleValidatorSet is Voteable{
 			totalActiveCount = totalActiveCount.add(1);
     		require(clearVotes(_address));
 		    emit addValidator(_address,msg.sender);
-		}
+		}	
 		return true;
 	}
 
@@ -133,7 +136,7 @@ contract SimpleValidatorSet is Voteable{
 			return false;
 		}
 		votes[_address].proposal = Proposal.REMOVE;
-		require (voteFor(_address,msg.sender));
+		require (voteFor(_address,msg.sender));	
 		return true;
 	}
 
@@ -150,7 +153,7 @@ contract SimpleValidatorSet is Voteable{
 			totalActiveCount = totalActiveCount.sub(1);
     		require(clearVotes(_address));
     		emit removeValidator(_address,msg.sender);
-		}
+		}	
 		return true;
 	}
 

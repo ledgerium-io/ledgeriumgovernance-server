@@ -18,7 +18,14 @@ It is designed to work along with yml file which is part of the repo. The IBFT t
 - npm install
 - node index.js
 
+### We also use truffle for compiling smart contract so truffle can be installed and run compile
+- sudo npm install -g truffle
+- truffle compile
+
 ### Clone the repo and install the project
+Create docker network by running this command
+- docker network create -d bridge --subnet 172.16.239.0/24 --gateway 172.16.239.1 app_net
+
 Run the geth nodes by running
 - docker-compose up -d
 
