@@ -67,6 +67,7 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
+    flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
     flag = await validatorSetup();
     //flag = await runValidatorTestCases();

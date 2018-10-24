@@ -13,6 +13,7 @@ class SimpleValidatorSet {
         if(value.length > 0){
             this.simpleValidatorSetAbi = value[0];
             this.simpleValidatorSetByteCode = value[1];
+            this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(
                 JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
         }

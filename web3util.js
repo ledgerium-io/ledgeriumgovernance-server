@@ -194,8 +194,8 @@ class Utils  {
     }
 
     split(array){
-        temp = [];
-        add = [];
+        let temp = [];
+        let add = [];
         array = array.slice(2,array.length);
         for(var i=0;i<array.length;i+=64){
             temp.push(array.slice(i,i+64));

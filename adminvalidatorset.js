@@ -13,8 +13,8 @@ class AdminValidatorSet {
             this.web3 = new Web3(web3provider);
             this.adminValidatorSetAbi = value[0];
             this.adminValidatorSetByteCode = value[1];
-            this.contract = new this.web3.eth.Contract(
-                JSON.parse(this.adminValidatorSetAbi),
+            this.adminValidatorSetAddress = adminValidatorSetAddress;
+            this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),
                 adminValidatorSetAddress);
         }
     }
