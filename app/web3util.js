@@ -57,8 +57,26 @@ class Utils {
             console.log("Exception in utils.deployContract(): " + error);
         }    
     }
+
+    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
+        let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
+        console.log("nonceToUse ",nonceToUse);
+        const txParams = {
+            nonce: nonceToUse,
+            gasPrice: '0x00',
+            gasLimit: 4700000, //estimatedGas, //20000000, // Todo, estimate gas
+            from: fromAccountAddress,
+            to: toContractAddress,
+            value: '0x00',
+            data: methodData
+            //"privateFor" : privateFor
+        }
+        
+        let receipt = await web3.eth.sendTransaction(txParams);
+        return receipt;
+    }
     
-    sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas, fn)
+    sendMethodTransactionCb (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas, fn)
     {//, calleeMethodName,callback) {
         web3.eth.getTransactionCount(fromAccountAddress, 'pending', function(err,  nonceToUse) {
             console.log("nonceToUse ",nonceToUse);
@@ -77,13 +95,15 @@ class Utils {
             const serializedTx = tx.serialize();
 
             //web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
-            web3.eth.sendTransaction(txParams)
-            .on('receipt', function(r, e) {
-                fn(null, r);
-            })
-            .on('error', function(e, r) {
-                fn(e, null);
-            })
+            web3.eth.sendTransaction(txParams, (err, txHash) => {
+                fn(err, txHash);
+            });
+            // .on('receipt', function(r, e) {
+            //     fn(null, r);
+            // })
+            // .on('error', function(e, r) {
+            //     fn(e, null);
+            // })
         });
    }
     

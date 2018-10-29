@@ -148,12 +148,12 @@
             console.log(accounts[0]);
             currentAccount = accounts[0];//.toLowerCase();
             // refresh the page in the case that web3 account changes
-            var accountInterval = setInterval(function () {
-              helper.checkAdmin(currentAccount, currentAccount, (f) => {
-                if(!f) {
-                  location.reload();
-                }
-              })
+            var accountInterval = setInterval(async function () {
+              let f = helper.isActiveAdmin(currentAccount, currentAccount);
+              if(!f) {
+                location.reload();
+              }
+              
               {{!-- if (web3.eth.accounts[0] !== currentAccount) {
                 location.reload();
               } --}}
@@ -193,6 +193,11 @@
             // Add rows to the adminTable
             var table = document.getElementById("adminTable");
 
+            result.forEach(eachAdmin => {
+              if (currentAccount == eachAdmin) {
+                userIsAdmin = true;
+              }
+            });
             // Is current user an admin?
             result.forEach(async (eachAdmin) => {
               if (currentAccount == eachAdmin) {
@@ -283,7 +288,7 @@
                       {
                         if(res.toLowerCase() == "remove") {
                           accountActionCell.innerHTML = `<div> Current proposal - ${res} </div>`;
-                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorClicked('${eachValidator}')">Accept proposal</button>`;
+                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorAcceptClicked('${eachValidator}')">Accept proposal</button>`;
                         }else{
                           accountActionCell.innerHTML = `<button class="button-primary" onclick="removeValidatorClicked('${eachValidator}')">Propose to remove</button>`;
                         }
@@ -490,26 +495,51 @@
       })
     }
 
-    function removeValidatorClicked(validatorAccount) {
+    function removeValidatorAcceptClicked(validatorAccount) {
       submittingTransaction();
-      console.log(`User wants to remove validator: ${validatorAccount}`);
-      simpleHelper.RemoveValidator(currentAccount, validatorAccount, "", function (error, result) {
+      console.log(`User wants to accept proposal to remove validator: ${validatorAccount}`);
+      simpleHelper.voteForRemovingValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
         if (error) {
           showError("Transaction cancelled");
           return;
         }
-        console.log(`Remove validator vote against Transaction #: ${result}`);
+        console.log(`Remove validator vote for Transaction #: ${hash}`);
         simpleHelper.ProposeRemoveValidatorFromChain(validatorAccount, (err, chain_result)=>{
           console.log("received results:removeIstanbulValidator");
           if(chain_result) {
             console.log("results", chain_result.result);
-            submittedTransaction(result.transactionHash);
+            submittedTransaction(hash);
           }
           else if(err) {
             console.log("print result", err);
             showError("Transaction cancelled");
           }
         });
+
+      });
+    }
+
+    function removeValidatorClicked(validatorAccount) {
+      submittingTransaction();
+      console.log(`User wants to remove validator: ${validatorAccount}`);
+      simpleHelper.proposalToRemoveValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
+        if (error) {
+          showError("Transaction cancelled");
+          return;
+        }
+        console.log(`Remove validator vote against Transaction #: ${hash}`);
+        simpleHelper.ProposeRemoveValidatorFromChain(validatorAccount, (err, chain_result)=>{
+          console.log("received results:removeIstanbulValidator");
+          if(chain_result) {
+            console.log("results", chain_result.result);
+            submittedTransaction(hash);
+          }
+          else if(err) {
+            console.log("print result", err);
+            showError("Transaction cancelled");
+          }
+        });
+
       });
     }
 

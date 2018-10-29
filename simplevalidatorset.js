@@ -142,11 +142,54 @@ class SimpleValidatorSet {
             //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             //console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
+                this.contract._address,encodedABI,privateKey,this.web3, estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
             console.log("Error in AdminValidatorSet.proposalToRemoveValidator(): " + error);
+            return false;
+        }
+    }
+
+    proposalToRemoveValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+        try{
+            var encodedABI = this.contract.methods.proposalToRemoveValidator(otherValidatorToRemove).encodeABI();
+            //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            //console.log("estimatedGas",estimatedGas);
+            var estimatedGas = 0;
+            this.utils.sendMethodTransactionCb(ethAccountToUse,
+                this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet.proposalToRemoveValidatorCb(): " + error);
+            return false;
+        }
+    }
+
+    ProposeRemoveValidatorFromChain(validator, fn) {
+        var message = {
+            method: "istanbul_propose",
+            params: [validator,false],
+            jsonrpc: "2.0",
+            id: new Date().getTime()
+        };
+        
+        this.web3.currentProvider.send(message, fn);
+        return;
+    }
+
+    voteForRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+        try{
+            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas = 0;
+            this.utils.sendMethodTransactionCb(ethAccountToUse,
+                this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet.voteForRemovingValidatorCb(): " + error);
             return false;
         }
     }
