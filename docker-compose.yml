@@ -12,7 +12,7 @@ services:
         ipv4_address: 172.16.239.9
   validator-0:
     hostname: validator-0
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30303:30303'
       - '8545:8545'
@@ -91,7 +91,7 @@ services:
     restart: always
   validator-1:
     hostname: validator-1
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30304:30303'
       - '8546:8545'
@@ -170,7 +170,7 @@ services:
     restart: always
   validator-2:
     hostname: validator-2
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30305:30303'
       - '8547:8545'
@@ -249,7 +249,7 @@ services:
     restart: always
   validator-3:
     hostname: validator-3
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30306:30303'
       - '8548:8545'
@@ -328,7 +328,7 @@ services:
     restart: always
   validator-4:
     hostname: validator-4
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30307:30303'
       - '8549:8545'
@@ -407,7 +407,7 @@ services:
     restart: always
   validator-5:
     hostname: validator-5
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30308:30303'
       - '8550:8545'
@@ -486,7 +486,7 @@ services:
     restart: always
   validator-6:
     hostname: validator-6
-    image: ledgerium/quorum:latest
+    image: quorumengineering/quorum:latest
     ports:
       - '30309:30303'
       - '8551:8545'
