@@ -1,0 +1,14 @@
+etheradmin.js starting parameters
+listenPort: 3002
+consortiumId: 111
+containerName: dontcare
+identityBlobPrefix: passphrase-
+ethRpcPort: 8545
+validatorListBlobName: AddressList.json
+paritySpecBlobName: spec.json
+valSetContractBlobName: ../contracts/SimpleValidatorSet.sol
+adminContractBlobName: ../contracts/AdminValidatorSet.sol
+adminContractABIBlobName: ../contracts/AdminValidatorSet.sol.abi
+Started EtherAdmin website - Ver.##VERSION##
+Start EtherAdmin Site
+Admin webserver listening on port 3002
