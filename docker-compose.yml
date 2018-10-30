@@ -20,7 +20,7 @@ services:
       - '9000:9000'
     volumes:
       - 0:/constellation:z
-      - ~/0eth:/eth:z
+      # - ~/0eth:/eth:z
     depends_on:
       - constellation-0
     environment:
