@@ -89,8 +89,13 @@ class Utils  {
             tx.sign(privateKeyBuffer);
             const serializedTx = tx.serialize();
 
-            let receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
-            return receipt;
+            let transactionHash = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+            // var receipt;
+            // do{
+            //     receipt = await web3.eth.getTransactionReceipt(transactionHash);
+            // }
+            // while(receipt == null)
+            return transactionHash;
             // .once('transactionHash',(receipt)=>{
             //     console.log('transactionHash', receipt);
             // })

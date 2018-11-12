@@ -100,7 +100,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForAddingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet.voteAgainstAddingAdmin(): " + error);
             return false;
         }
     }
@@ -145,7 +145,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet.voteAgainstRemovingAdmin(): " + error);
             return false;
         }
     }
