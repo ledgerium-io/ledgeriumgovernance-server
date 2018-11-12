@@ -789,7 +789,7 @@ async function generateKeysAndCreateAccounts(){
     try{
         accountAddressList.length = 0;
         
-        var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+        var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
         var keyData = {};
         if(fs.existsSync(privateKeyFileName)){
             keyData = fs.readFileSync(privateKeyFileName,"utf8");
@@ -823,7 +823,7 @@ async function generateKeysAndCreateAccounts(){
 
 async function createAccountsAndManageKeys(){
     
-    var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
     if(fs.existsSync(privateKeyFileName)){
         var keyData = fs.readFileSync(privateKeyFileName,"utf8");
         privateKey = JSON.parse(keyData);
@@ -870,7 +870,7 @@ async function readWritePrivateKeys(){
         if(accountAddressList.length <= 0)
             return;
         
-        var privateKeyFileName = __dirname + "/keyStore/" + "privatekey.json";
+        var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
         var keyStorePath = __dirname;
         
         var keyData = {};
@@ -919,7 +919,7 @@ async function readWritePrivateKeys(){
 
 async function readContractsFromConfig(){
     try{
-        var contractFileName = __dirname + "/keyStore/" + "contractsConfig.json";
+        var contractFileName = __dirname + "/keystore/" + "contractsConfig.json";
         var keyData = {};
         if(fs.existsSync(contractFileName)){
             keyData = fs.readFileSync(contractFileName,"utf8");
@@ -937,7 +937,7 @@ async function readContractsFromConfig(){
 
 async function writeContractsINConfig(){
     try{
-        var contractFileName = __dirname + "/keyStore/" + "contractsConfig.json";
+        var contractFileName = __dirname + "/keystore/" + "contractsConfig.json";
         contractsList["adminValidatorSetAddress"] = adminValidatorSetAddress;
         contractsList["simpleValidatorSetAddress"] = simpleValidatorSetAddress;
     
