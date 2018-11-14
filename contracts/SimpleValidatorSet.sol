@@ -71,7 +71,7 @@ contract SimpleValidatorSet is Voteable{
 
 	modifier isValidator() {
 		require (activeValidators[msg.sender].isValidator);
-		_;
+		_; 
 	}
 
 	event minValidatorNeeded(uint8 minNoOfValidator);

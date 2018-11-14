@@ -168,14 +168,22 @@ class SimpleValidatorSet {
     }
 
     ProposeRemoveValidatorFromChain(validator, fn) {
-        var message = {
-            method: "istanbul_propose",
-            params: [validator,false],
-            jsonrpc: "2.0",
-            id: new Date().getTime()
-        };
-        
-        this.web3.currentProvider.send(message, fn);
+        fetch('/istanbul_propose', {
+            method: 'post',
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify({
+                account: validator,
+                proposal: false
+            })
+        }).then(data => {
+            console.log(data);
+            fn(null, data);
+        }).catch(error => { 
+            console.error('Error:', error);
+            fn(error, null);
+        });
         return;
     }
 

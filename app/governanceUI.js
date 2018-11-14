@@ -8,6 +8,8 @@ var moment = require('moment');
 var Promise = require('promise');
 // var storage = require('azure-storage');
 var appjson = require('./version.json')
+var net = require('net');
+var Web3 = require('web3');
 
 /*
  * Parameters
@@ -18,7 +20,7 @@ process.env['AZURE_STORAGE_ACCOUNT'] = process.argv[4] || "dontcare";
 process.env['AZURE_STORAGE_ACCESS_KEY'] = process.argv[5] || "dontcare";
 var containerName = process.argv[6] || "dontcare";
 var identityBlobPrefix = process.argv[7] || "passphrase-";
-var ethRpcPort = process.argv[8] || "8545";
+var ethRpcPort = process.argv[8] || "8546";
 var validatorListBlobName = process.argv[9] || "AddressList.json";
 var paritySpecBlobName = process.argv[10] || "spec.json";
 var valSetContractBlobName = process.argv[11] || "../contracts/SimpleValidatorSet.sol";
@@ -51,6 +53,7 @@ app.use('/assets', express.static('assets'))
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(bodyParser.json());
 
 var activeNodes = [];
 var abiContent = '';
@@ -428,3 +431,32 @@ app.listen(listenPort, function () {
   console.log('Admin webserver listening on port ' + listenPort);
 });
 
+app.post('/istanbul_propose', function(req, res) {
+  var web3 = new Web3(new Web3.providers.IpcProvider('/Users/ashwath.s/eth/geth.ipc', net));
+
+  web3.eth.getCoinbase((err, coinbase) => {
+    //let coinbase = web3.eth.coinbase;
+    if(coinbase === req.body.account) {
+      var message = {
+        method: "istanbul_propose",
+        params: [validator, req.body.proposal],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+      };
+    
+      web3.currentProvider.send(message, (err,result)=>{
+          console.log("received results:removeIstanbulValidator");
+          if(result){
+              console.log("results", result.result);
+              res.status(200).send(result);
+          }
+          else if(err) {
+            console.log("print result", err);
+            res.status(500).send(err);
+          }
+      });
+      
+    }
+    res.status(400).send("Invalid sender address for the node")
+  });
+});

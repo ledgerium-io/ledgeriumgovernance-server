@@ -117,14 +117,15 @@
   <script type="text/javascript" async defer>
     var isLoaded = false;
     var localWeb3 = new Web3(web3.currentProvider);
-    //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8546"));
+    //var web3provider = new Web3.providers.HttpProvider("http://localhost:8546");
     var contractAbi = '{{{json this.contractAbi}}}';
     var nodeInfo = {{{json this.nodes}}};
     var adminAddress = {{{json this.nodes.adminContractAddress}}};
     var simpleAddress = {{{json this.nodes.simpleContractAddress}}};
     var utils = new Utils();
-    var helper = new AdminValidatorSet(web3.currentProvider, utils, adminAddress, {{{json this.nodes.adminContractAbi}}}, Web3)
-    var simpleHelper = new SimpleValidatorSet(web3.currentProvider, utils, simpleAddress, {{{json this.nodes.simpleContractAbi}}}, Web3)
+    var helper = new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, {{{json this.nodes.adminContractAbi}}}, Web3)
+    var simpleHelper = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, {{{json this.nodes.simpleContractAbi}}}, Web3)
     var validatorCapacity = 0;
     var userIsAdmin = false;
     var consortiumValidatorAddresses = [];
@@ -188,13 +189,13 @@
           //var validatorCapacityHtml = `Each administrator is allowed ${inWords(2)} nodes`;
           document.getElementById('validatorsHeader').innerHTML = "List of validators on network";
 
-          let result = await helper.getAllAdmins2("0x44643353444f4b42b46ED28e668C204db6Dbb7c3");
+          let result = await helper.getAllAdmins();
           {
             // Add rows to the adminTable
             var table = document.getElementById("adminTable");
 
             result.forEach(eachAdmin => {
-              if (currentAccount == eachAdmin) {
+              if (currentAccount.toLowerCase() == eachAdmin.toLowerCase()) {
                 userIsAdmin = true;
               }
             });
