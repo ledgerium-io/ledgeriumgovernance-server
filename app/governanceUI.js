@@ -445,10 +445,10 @@ app.post('/istanbul_propose', function(req, res) {
 
   console.log("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
-    console.log(`Got coinbase - ${coinbase}`);
     //let coinbase = web3.eth.coinbase;
-    if(coinbase === req.body.sender) {
-      console.log(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
+    console.log(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
+    if(coinbase.toLowerCase() === req.body.sender.toLowerCase()) {
+      
       var message = {
         method: "istanbul_propose",
         params: [req.body.account, req.body.proposal],
