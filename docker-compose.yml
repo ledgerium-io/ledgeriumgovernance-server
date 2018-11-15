@@ -591,9 +591,28 @@ services:
       app_net:
         ipv4_address: 172.16.239.196
     restart: always
-  node_app-0:
-      hostname: node_app-0
-      image: quorumengineering/quorum:latest
+  # node_app-0:
+  #     hostname: node_app-0
+  #     image: quorumengineering/quorum:latest
+  #     volumes:
+  #       - 0:/constellation:z
+  #       - _val0eth:/eth:z
+  #     depends_on:
+  #       - validator-0
+  #     entrypoint:
+  #       - /bin/sh
+  #       - -c
+  #       - |
+  #         tail -f /dev/null
+  #     networks:
+  #       app_net:
+  #         ipv4_address: 172.16.239.110
+  #     restart: always
+  node_app-1:
+      hostname: node_app-1
+      image: governance_app_ui_img:latest
+      ports:
+        - '3003:3003'
       volumes:
         - 0:/constellation:z
         - _val0eth:/eth:z
@@ -606,7 +625,7 @@ services:
           tail -f /dev/null
       networks:
         app_net:
-          ipv4_address: 172.16.239.110
+          ipv4_address: 172.16.239.111
       restart: always
 networks:
   app_net:

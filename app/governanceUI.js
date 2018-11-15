@@ -435,7 +435,7 @@ app.listen(listenPort, function () {
 });
 
 app.post('/istanbul_propose', function(req, res) {
-  var web3 = new Web3(new Web3.providers.IpcProvider('/Users/ashwath.s/eth/geth.ipc', net));
+  var web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
 
   web3.eth.getCoinbase((err, coinbase) => {
     //let coinbase = web3.eth.coinbase;
