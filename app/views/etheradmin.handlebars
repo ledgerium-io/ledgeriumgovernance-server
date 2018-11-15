@@ -201,7 +201,7 @@
             });
             // Is current user an admin?
             result.forEach(async (eachAdmin) => {
-              if (currentAccount == eachAdmin) {
+              if (currentAccount.toLowerCase() == eachAdmin.toLowerCase()) {
                 userIsAdmin = true;
               }
                 // Create an empty <tr> element and add it to the last position of the table:

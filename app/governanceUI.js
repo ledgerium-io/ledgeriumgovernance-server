@@ -109,15 +109,21 @@ function getRecentBlock() {
     } catch (err) {
       console.log(err);
     }
-    var latestBlockNumber = web3RPC.eth.blockNumber;
-    var recentBlockNumber = Math.max(latestBlockNumber - recentBlockDecrement, 1);
+    var latestBlockNumber;
+    web3RPC.eth.getBlockNumber(function(err, latest) {
+      console.log("err " + err);
+      console.log("latest " + latest);
+      latestBlockNumber = latest;
 
-    web3RPC.eth.getBlock(recentBlockNumber, function (error, result) {
-      if (!error) {
-        resolve(result);
-      } else {
-        reject('Unable to get a recent block');
-      }
+      var recentBlockNumber = Math.max(latestBlockNumber - recentBlockDecrement, 1);
+
+      web3RPC.eth.getBlock(recentBlockNumber, function (error, result) {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject('Unable to get a recent block');
+        }
+      });
     })
   });
 }
@@ -442,6 +448,7 @@ app.post('/istanbul_propose', function(req, res) {
     console.log(`Got coinbase - ${coinbase}`);
     //let coinbase = web3.eth.coinbase;
     if(coinbase === req.body.sender) {
+      console.log(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
       var message = {
         method: "istanbul_propose",
         params: [req.body.account, req.body.proposal],
