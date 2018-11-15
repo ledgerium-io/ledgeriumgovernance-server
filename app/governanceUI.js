@@ -471,6 +471,8 @@ app.post('/istanbul_propose', function(req, res) {
       });
       
     }
-    res.status(400).send("Invalid sender address for the node")
+    else{
+      res.status(400).send("Invalid sender address for the node");
+    }
   });
 });
