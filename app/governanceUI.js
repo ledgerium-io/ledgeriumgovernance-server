@@ -339,7 +339,7 @@ getAbiDatafromBlob();
 // });
 
 app.get('/', function (req, res) {
-  var hasNodeRows = activeNodes.length > 0;
+  var hasNodeRows = activeNodes.length >= 0;
   if (hasNodeRows) {
     var data = {
       hasNodeRows: hasNodeRows,
