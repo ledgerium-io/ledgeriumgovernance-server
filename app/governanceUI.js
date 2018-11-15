@@ -140,10 +140,8 @@ function getNodeInfo(hostinfo, ipAddress) {
       console.log(err);
     }
     var web3PromiseArray = [];
-    console.log(`getNodeInfo - calling getPeerCount`);
     web3PromiseArray.push(new Promise(function (resolve, reject) {
       web3RPC.net.getPeerCount(function (error, result) {
-        console.log(`getNodeInfo - calling ${error} & ${result}`);
         if (!error) {
           resolve(result);
         } else {
@@ -296,7 +294,7 @@ function getActiveNodeDetails(leasedList) {
       var result = filecontent.enodeUrl.match(nodeRegexExp);
 
       var promise = new Promise(function (resolve, reject) {
-        resolve(getNodeInfo(filecontent, "localhost"));
+        resolve(getNodeInfo(filecontent, result[1]));
         //resolve('getNodeInfo(filecontent, "localhost")');
       });
 
