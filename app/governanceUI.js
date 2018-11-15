@@ -292,10 +292,8 @@ function getActiveNodeDetails(leasedList) {
     }
 
     leasedList.forEach((value) => {
-      console.log(leasedList);
       var filecontent = require("./config/"+value.name);
-      console.log(filecontent);
-      //var result = filecontent.enodeUrl.match(nodeRegexExp);
+      var result = filecontent.enodeUrl.match(nodeRegexExp);
 
       var promise = new Promise(function (resolve, reject) {
         resolve(getNodeInfo(filecontent, "localhost"));
