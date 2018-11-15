@@ -193,7 +193,7 @@
           {
             // Add rows to the adminTable
             var table = document.getElementById("adminTable");
-
+          
             result.forEach(eachAdmin => {
               if (currentAccount.toLowerCase() == eachAdmin.toLowerCase()) {
                 userIsAdmin = true;
@@ -229,7 +229,7 @@
                 });
 
                 // Add Vote Against Button if is existing admin
-                if (userIsAdmin && (eachAdmin != currentAccount)) {
+                if (userIsAdmin && (eachAdmin.toLowerCase() != currentAccount.toLowerCase())) {
                   var cell3 = adminRow.insertCell(2);
                   cell3.id = `VoteAgainst-${eachAdmin}`;
                   
