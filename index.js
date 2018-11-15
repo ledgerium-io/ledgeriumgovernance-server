@@ -8,7 +8,7 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
 //var host = "http://localhost:20100";
-var host = "http://localhost:8546";
+var host = "http://localhost:8545";
 var web3 = new Web3.providers.HttpProvider(host);
 const utils = new Utils();
 
@@ -68,6 +68,8 @@ var main = async function () {
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
     var admins = await adminValidatorSet.getAllAdmins();
+
+    flag = await validatorSetup();
 
     var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
 
