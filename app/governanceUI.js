@@ -455,6 +455,11 @@ app.post('/istanbul_propose', function(req, res) {
         jsonrpc: "2.0",
         id: new Date().getTime()
       };
+
+      console.log(JSON.stringify(message));
+
+      console.log(JSON.stringify(web3.currentProvider));
+      console.log(JSON.stringify(web3.currentProvider.send));
     
       web3.currentProvider.send(message, (err,result)=>{
           console.log("received results:removeIstanbulValidator");
