@@ -458,7 +458,7 @@ app.post('/istanbul_propose', function(req, res) {
 
       console.log(JSON.stringify(message));
 
-      web3.currentProvider.send(message, (err,result)=>{
+      web3.currentProvider.sendAsync(message, (err,result)=>{
           console.log("received results:removeIstanbulValidator");
           if(result){
               console.log("results", result.result);
