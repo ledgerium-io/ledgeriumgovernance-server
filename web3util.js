@@ -3,8 +3,8 @@ const EthereumTx = require('ethereumjs-tx');
 const solc = require('solc');
 const fs = require('fs');
 var keythereum = require('keythereum');
-const async =  require('async');
-const ethUtil         = require('ethereumjs-util');
+//const async =  require('async');
+const ethUtil = require('ethereumjs-util');
 class Utils  {
     constructor(web3provider, utils) {
     }
@@ -71,20 +71,28 @@ class Utils  {
     }
     
      async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
-        let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
+        try
         {
+            var gasPrice = await web3.eth.getGasPrice();
+            console.log("gasPrice ",web3.utils.toHex(gasPrice)); 
+
+            var balance = await web3.eth.getBalance(fromAccountAddress);
+            console.log("FromAccount", fromAccountAddress, "has balance of", web3.utils.fromWei(balance, 'ether'), "ether");
+            
+            let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
             console.log("nonceToUse ",nonceToUse);
             const txParams = {
                 nonce: nonceToUse,
-                gasPrice: '0x00',
-                gasLimit: 4700000, //estimatedGas, //20000000, // Todo, estimate gas
+                //gasPrice: '0x00',
+                gasPrice: web3.utils.toHex(gasPrice),//'0x4A817C800', //20Gwei
+                gasLimit: '0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
                 from: fromAccountAddress,
                 to: toContractAddress,
-                value: '0x00',
+                value: web3.utils.toHex(0),
                 data: methodData
                 //"privateFor" : privateFor
             }
-            const tx = new EthereumTx(txParams)
+            const tx = new EthereumTx(txParams);
             const privateKeyBuffer = new Buffer(privateKey, 'hex');
             tx.sign(privateKeyBuffer);
             const serializedTx = tx.serialize();
@@ -95,7 +103,10 @@ class Utils  {
             //     receipt = await web3.eth.getTransactionReceipt(transactionHash);
             // }
             // while(receipt == null)
-            return transactionHash;
+            if(transactionHash.status)
+                return transactionHash;
+            else
+                return null;
             // .once('transactionHash',(receipt)=>{
             //     console.log('transactionHash', receipt);
             // })
@@ -109,6 +120,10 @@ class Utils  {
             //     console.log('Error in ', calleeMethodName, `ERROR:\n${error.message}:${error.stack}`);
             // });
         //});
+        }
+        catch (error) {
+            console.log("Error in utils.sendMethodTransaction(): " + error);
+            return "";
         }
     }
     

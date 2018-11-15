@@ -197,7 +197,7 @@ class AdminValidatorSet {
             this.adminValidatorSetAddress = deployedAddress.contractAddress;
             return this.adminValidatorSetAddress;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.deployNewSimpleSetValidatorContract(): " + error);
+            console.log("Error in AdminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
             return "";
         }
     }
