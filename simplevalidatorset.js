@@ -167,7 +167,7 @@ class SimpleValidatorSet {
         }
     }
 
-    ProposeRemoveValidatorFromChain(validator, fn) {
+    ProposeRemoveValidatorFromChain(sender, validator, fn) {
         fetch('/istanbul_propose', {
             method: 'post',
             headers: {
@@ -175,6 +175,7 @@ class SimpleValidatorSet {
             },
             body: JSON.stringify({
                 account: validator,
+                sender: sender,
                 proposal: false
             })
         }).then(data => {

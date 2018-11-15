@@ -529,7 +529,7 @@
           return;
         }
         console.log(`Remove validator vote against Transaction #: ${hash}`);
-        simpleHelper.ProposeRemoveValidatorFromChain(validatorAccount, (err, chain_result)=>{
+        simpleHelper.ProposeRemoveValidatorFromChain(currentAccount, validatorAccount, (err, chain_result)=>{
           console.log("received results:removeIstanbulValidator");
           if(chain_result) {
             console.log("results", chain_result.result);

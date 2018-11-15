@@ -14,19 +14,22 @@ var Web3 = require('web3');
 /*
  * Parameters
  */
-var listenPort = process.argv[2] || "3002";
-var consortiumId = process.argv[3] || "111";
-process.env['AZURE_STORAGE_ACCOUNT'] = process.argv[4] || "dontcare";
-process.env['AZURE_STORAGE_ACCESS_KEY'] = process.argv[5] || "dontcare";
-var containerName = process.argv[6] || "dontcare";
-var identityBlobPrefix = process.argv[7] || "passphrase-";
-var ethRpcPort = process.argv[8] || "8546";
-var validatorListBlobName = process.argv[9] || "AddressList.json";
-var paritySpecBlobName = process.argv[10] || "spec.json";
-var valSetContractBlobName = process.argv[11] || "../contracts/SimpleValidatorSet.sol";
-var adminContractBlobName = process.argv[12] || "../contracts/AdminValidatorSet.sol";
-var adminContractABIBlobName = process.argv[13] || "../contracts/AdminValidatorSet.sol.abi";
-var logFilePath=process.argv[14] || "log1.txt";
+var gethIp = process.argv[2];
+var gethIpRpcPort = process.argv[3];
+
+var listenPort = "3003";
+var consortiumId = "111";
+process.env['AZURE_STORAGE_ACCOUNT'] = "dontcare";
+process.env['AZURE_STORAGE_ACCESS_KEY'] = "dontcare";
+var containerName = "dontcare";
+var identityBlobPrefix = "passphrase-";
+var ethRpcPort = gethIpRpcPort;
+var validatorListBlobName = "AddressList.json";
+var paritySpecBlobName = "spec.json";
+var valSetContractBlobName = "../contracts/SimpleValidatorSet.sol";
+var adminContractBlobName = "../contracts/AdminValidatorSet.sol";
+var adminContractABIBlobName = "../contracts/AdminValidatorSet.sol.abi";
+var logFilePath = "log1.txt";
 
 /*
  * Constants
@@ -102,7 +105,7 @@ console.log(`Started EtherAdmin website - Ver.${appjson.version}`);
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
     try {
-      var web3RPC = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:' + ethRpcPort));
+      var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
     } catch (err) {
       console.log(err);
     }
@@ -436,10 +439,10 @@ app.post('/istanbul_propose', function(req, res) {
 
   web3.eth.getCoinbase((err, coinbase) => {
     //let coinbase = web3.eth.coinbase;
-    if(coinbase === req.body.account) {
+    if(coinbase === req.body.sender) {
       var message = {
         method: "istanbul_propose",
-        params: [validator, req.body.proposal],
+        params: [req.body.account, req.body.proposal],
         jsonrpc: "2.0",
         id: new Date().getTime()
       };
