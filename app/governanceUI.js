@@ -437,7 +437,9 @@ app.listen(listenPort, function () {
 app.post('/istanbul_propose', function(req, res) {
   var web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
 
+  console.log("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
+    console.log(`Got coinbase - ${coinbase}`);
     //let coinbase = web3.eth.coinbase;
     if(coinbase === req.body.sender) {
       var message = {
