@@ -97,6 +97,24 @@ services:
       app_net:
         ipv4_address: 172.16.239.100
     restart: always
+  governance_ui-0:
+    hostname: governance_ui-0
+    image: governance_app_ui_img:latest
+    ports:
+      - '3545:3003'
+    volumes:
+      - _val0eth:/eth:z
+    depends_on:
+      - validator-0
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.10 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.110
   validator-1:
     hostname: validator-1
     image: quorumengineering/quorum:latest
@@ -106,6 +124,7 @@ services:
       - '9001:9000'
     volumes:
       - 1:/constellation:z
+      - _val1eth:/eth:z
     depends_on:
       - constellation-1
     environment:
@@ -177,6 +196,24 @@ services:
       app_net:
         ipv4_address: 172.16.239.101
     restart: always
+  governance_ui-1:
+    hostname: governance_ui-1
+    image: governance_app_ui_img:latest
+    ports:
+      - '3546:3003'
+    volumes:
+      - _val1eth:/eth:z
+    depends_on:
+      - validator-1
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.11 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.111
   validator-2:
     hostname: validator-2
     image: quorumengineering/quorum:latest
@@ -186,6 +223,7 @@ services:
       - '9002:9000'
     volumes:
       - 2:/constellation:z
+      - _val2eth:/eth:z
     depends_on:
       - constellation-2
     environment:
@@ -256,6 +294,25 @@ services:
       app_net:
         ipv4_address: 172.16.239.102
     restart: always
+  governance_ui-2:
+    hostname: governance_ui-2
+    image: governance_app_ui_img:latest
+    ports:
+      - '3547:3003'
+    volumes:
+      - _val2eth:/eth:z
+    depends_on:
+      - validator-2
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.12 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.112
+    restart: always
   validator-3:
     hostname: validator-3
     image: quorumengineering/quorum:latest
@@ -265,6 +322,7 @@ services:
       - '9003:9000'
     volumes:
       - 3:/constellation:z
+      - _val3eth:/eth:z
     depends_on:
       - constellation-3
     environment:
@@ -334,6 +392,25 @@ services:
     networks:
       app_net:
         ipv4_address: 172.16.239.103
+    restart: always
+  governance_ui-3:
+    hostname: governance_ui-3
+    image: governance_app_ui_img:latest
+    ports:
+      - '3548:3003'
+    volumes:
+      - _val3eth:/eth:z
+    depends_on:
+      - validator-3
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.13 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.113
     restart: always
   validator-4:
     hostname: validator-4
@@ -414,6 +491,25 @@ services:
       app_net:
         ipv4_address: 172.16.239.104
     restart: always
+  governance_ui-4:
+    hostname: governance_ui-4
+    image: governance_app_ui_img:latest
+    ports:
+      - '3549:3003'
+    volumes:
+      - _val4eth:/eth:z
+    depends_on:
+      - validator-4
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.14 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.114
+    restart: always
   validator-5:
     hostname: validator-5
     image: quorumengineering/quorum:latest
@@ -492,6 +588,25 @@ services:
     networks:
       app_net:
         ipv4_address: 172.16.239.105
+    restart: always
+  governance_ui-5:
+    hostname: governance_ui-5
+    image: governance_app_ui_img:latest
+    ports:
+      - '3550:3003'
+    volumes:
+      - _val5eth:/eth:z
+    depends_on:
+      - validator-5
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.15 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.115
     restart: always
   validator-6:
     hostname: validator-6
@@ -572,6 +687,25 @@ services:
       app_net:
         ipv4_address: 172.16.239.106
     restart: always
+  governance_ui-6:
+    hostname: governance_ui-6
+    image: governance_app_ui_img:latest
+    ports:
+      - '3551:3003'
+    volumes:
+      - _val6eth:/eth:z
+    depends_on:
+      - validator-6
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /ledgerium/governanceapp/governanceApp/app
+        node governanceUI.js 172.16.239.16 8545
+    networks:
+      app_net:
+        ipv4_address: 172.16.239.116
+    restart: always
   quorum-maker:
     hostname: quorum-maker
     image: syneblock/quorum-maker:2.1.0_2.5
@@ -608,25 +742,6 @@ services:
   #       app_net:
   #         ipv4_address: 172.16.239.110
   #     restart: always
-  node_app-1:
-      hostname: node_app-1
-      image: governance_app_ui_img:latest
-      ports:
-        - '3003:3003'
-      volumes:
-        - 0:/constellation:z
-        - _val0eth:/eth:z
-      depends_on:
-        - validator-0
-      entrypoint:
-        - /bin/sh
-        - -c
-        - |
-          tail -f /dev/null
-      networks:
-        app_net:
-          ipv4_address: 172.16.239.111
-      restart: always
 networks:
   app_net:
     external: true
@@ -639,3 +754,9 @@ volumes:
   "5":
   "6":
   "_val0eth":
+  "_val1eth":
+  "_val2eth":
+  "_val3eth":
+  "_val4eth":
+  "_val5eth":
+  "_val6eth":
