@@ -2,14 +2,20 @@ const fs = require('fs');
 const Web3 = require('web3');
 //const Web3 = require('web3-quorum');
 const Utils =  require('./web3util');
-const async =  require('async');
+//const async =  require('async');
 const mnemonic = require('./mnemonic');
 const SimpleValidatorSet = require('./simplevalidatorset');
 const AdminValidatorSet = require('./adminvalidatorset');
 
+// var HDWalletProvider = require("truffle-hdwallet-provider");
+// var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";
+// var provider = new HDWalletProvider(privateKey1, "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
+
 //var host = "http://localhost:20100";
 var host = "http://localhost:8545";
 var web3 = new Web3.providers.HttpProvider(host);
+//var web3 = new Web3();
+//web3.setProvider(provider);
 const utils = new Utils();
 
 //var host = "ws://localhost:9000";
@@ -34,10 +40,6 @@ var main = async function () {
 
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
-
-    //istanbulAddValidatorTest();
-    //await delay(10000); //wait for 10 seconds!
-    //istanbulRemoveValidatorTest();
 
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
@@ -67,6 +69,7 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
+    /*
     var admins = await adminValidatorSet.getAllAdmins();
 
     flag = await validatorSetup();
@@ -80,11 +83,15 @@ var main = async function () {
     flag = await getListOfActiveValidators();
 
     return;
+    */
+   
     flag = await runAdminTestCases();
+    //flag = await getListOfActiveValidators();
+    //flag = await runAdminTestCases();
     flag = await runRemoveAdminTestCases();
     //flag = await validatorSetup();
-    //flag = await runValidatorTestCases();
-    //flag = await runRemoveValidatorTestCases();
+    // flag = await runValidatorTestCases();
+    // flag = await runRemoveValidatorTestCases();
 
     //await addInitialValidators(accountAddressList);
     // await addIstanbulValidator("8545", accountAddressList[2]);
@@ -96,6 +103,8 @@ var main = async function () {
     // return;
     //await addNewNodeAsValidator("0xfbef52b4f9d99a197a3ec14ddbdc235af22e1ca8");
     //flag = await getListOfActiveValidators();
+
+    //provider.engine.stop();
     return;
 }
 
@@ -145,6 +154,7 @@ async function validatorSetup()
                     break; 
                 console.log("****************** New Voting Loop End ******************");    
             }
+            istanbulAddValidator(newValidator);
         }
         activeValidatorList = await getListOfActiveValidators();
         console.log("return list for getListOfActiveValidators",activeValidatorList.length);
@@ -337,30 +347,30 @@ async function addInitialValidators(accountAddressList) {
        transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
 }
 
-async function istanbulAddValidatorTest()
+async function istanbulAddValidator(validatorAddress)
 {
     listIstanbulValidator();
     
-    addIstanbulValidator(8545,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    addIstanbulValidator(8546,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    addIstanbulValidator(8547,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    addIstanbulValidator(8548,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    addIstanbulValidator(8549,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    addIstanbulValidator(8550,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    addIstanbulValidator(8545,validatorAddress);
+    addIstanbulValidator(8546,validatorAddress);
+    addIstanbulValidator(8547,validatorAddress);
+    addIstanbulValidator(8548,validatorAddress);
+    addIstanbulValidator(8549,validatorAddress);
+    addIstanbulValidator(8550,validatorAddress);
 
     await delay(10000); //wait for 10 seconds!
     listIstanbulValidator();
     return;
 }    
 
-async function istanbulRemoveValidatorTest(){
+async function istanbulRemoveValidator(validatorAddress){
     listIstanbulValidator();
 
-    removeIstanbulValidator(8545,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    removeIstanbulValidator(8546,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    removeIstanbulValidator(8547,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    removeIstanbulValidator(8548,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
-    removeIstanbulValidator(8549,"0xd3208045d77781ebb2acdc7a79ec4791ec99eb7a");
+    removeIstanbulValidator(8545,validatorAddress);
+    removeIstanbulValidator(8546,validatorAddress);
+    removeIstanbulValidator(8547,validatorAddress);
+    removeIstanbulValidator(8548,validatorAddress);
+    removeIstanbulValidator(8549,validatorAddress);
 
     await delay(10000); //wait for 10 seconds!
     listIstanbulValidator();
@@ -688,6 +698,7 @@ async function addSimpleSetContractValidatorForAdmin(newValidator){
             if(whatProposal == "proposal not created")
                 break; 
         }
+        istanbulAddValidator(newValidator);
         return true;
     }
     catch (error) {
@@ -764,6 +775,8 @@ async function removeSimpleSetContractValidatorForAdmin(removeValidator){
         */
         flag = await simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
         console.log(removeValidator, "still an validator ?", flag);
+
+        istanbulRemoveValidator(removeValidator);
         return flag;
     }
     catch (error) {
@@ -962,7 +975,7 @@ async function writeContractsINConfig(){
 }    
 
 async function accessEarlierGreeting(ethAccountToUse){
-    var greeting1;
+    //var greeting1;
 
     // Todo: Read ABI from dynamic source.
     var value = utils.readSolidityContractJSON("./build/contracts/Greeter.json");
@@ -971,7 +984,7 @@ async function accessEarlierGreeting(ethAccountToUse){
     }
 
     var constructorParameters = [];
-    constructorParameters.push("Hi Rahul");
+    constructorParameters.push("Hi Ledgerium");
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
     var deployedAddressGreeter = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     
