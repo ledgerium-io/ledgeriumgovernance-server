@@ -73,8 +73,8 @@ var main = async function () {
     //flag = await runAdminTestCases();
     flag = await runRemoveAdminTestCases();
     //flag = await validatorSetup();
-    flag = await runValidatorTestCases();
-    flag = await runRemoveValidatorTestCases();
+    // flag = await runValidatorTestCases();
+    // flag = await runRemoveValidatorTestCases();
 
     //await addInitialValidators(accountAddressList);
     // await addIstanbulValidator("8545", accountAddressList[2]);
