@@ -63,6 +63,7 @@ services:
         --syncmode "full" \
         --ethstats "validator-0:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
         --gasprice 100000000
+
     networks:
       app_net:
         ipv4_address: 172.16.239.10
@@ -99,7 +100,7 @@ services:
     restart: always
   governance_ui-0:
     hostname: governance_ui-0
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3545:3003'
     volumes:
@@ -198,7 +199,7 @@ services:
     restart: always
   governance_ui-1:
     hostname: governance_ui-1
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3546:3003'
     volumes:
@@ -296,7 +297,7 @@ services:
     restart: always
   governance_ui-2:
     hostname: governance_ui-2
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3547:3003'
     volumes:
@@ -395,7 +396,7 @@ services:
     restart: always
   governance_ui-3:
     hostname: governance_ui-3
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3548:3003'
     volumes:
@@ -493,7 +494,7 @@ services:
     restart: always
   governance_ui-4:
     hostname: governance_ui-4
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3549:3003'
     volumes:
@@ -591,7 +592,7 @@ services:
     restart: always
   governance_ui-5:
     hostname: governance_ui-5
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3550:3003'
     volumes:
@@ -689,7 +690,7 @@ services:
     restart: always
   governance_ui-6:
     hostname: governance_ui-6
-    image: governance_app_ui_img:latest
+    image: ledgeriumengineering/governance_app_ui_img:latest
     ports:
       - '3551:3003'
     volumes:
