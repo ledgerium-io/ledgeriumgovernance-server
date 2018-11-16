@@ -71,6 +71,8 @@ var main = async function () {
 
     flag = await validatorSetup();
 
+    return;
+
     var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
 
     var proposal = await simpleValidatorSet.checkProposal(ethAccountToUse, accountAddressList[1]);
