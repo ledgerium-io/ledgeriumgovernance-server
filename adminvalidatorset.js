@@ -192,6 +192,12 @@ class AdminValidatorSet {
     async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
         try {
             var estimatedGas = 0;
+            // var deployedAddress =  await this.utils.sendMethodTransactionDirect(ethAccountToUse,
+            //     _privateKey,
+            //     this.adminValidatorSetAbi,
+            //     this.adminValidatorSetByteCode,
+            //     adminValidatorAddress,
+            //     this.web3);
             var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminValidatorAddress);
             var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
             this.adminValidatorSetAddress = deployedAddress.contractAddress;
