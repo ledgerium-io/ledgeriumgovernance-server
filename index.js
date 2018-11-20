@@ -69,13 +69,14 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    /*
+    flag = await getListOfActiveValidators();
+
     var admins = await adminValidatorSet.getAllAdmins();
 
     flag = await validatorSetup();
 
     return;
-
+    /*
     var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
 
     var proposal = await simpleValidatorSet.checkProposal(ethAccountToUse, accountAddressList[1]);
@@ -84,7 +85,7 @@ var main = async function () {
 
     return;
     */
-   
+
     flag = await runAdminTestCases();
     //flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
@@ -848,7 +849,7 @@ async function generateKeysAndCreateAccounts(){
 
 async function createAccountsAndManageKeys(){
     
-    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
+    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.h.json";
     if(fs.existsSync(privateKeyFileName)){
         var keyData = fs.readFileSync(privateKeyFileName,"utf8");
         privateKey = JSON.parse(keyData);
@@ -986,37 +987,38 @@ async function accessEarlierGreeting(ethAccountToUse){
     var constructorParameters = [];
     constructorParameters.push("Hi Ledgerium");
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
-    var deployedAddressGreeter = await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
+    var deployedAddressGreeter = "0x0000000000000000000000000000000000000006";//await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     
     console.log("Greeter deployedAddress ", deployedAddressGreeter);
-    greeting1 = new web3.eth.Contract(JSON.parse(value[0]),deployedAddressGreeter);
+    _web3 = new Web3(web3);
+    greeting1 = new _web3.eth.Contract(JSON.parse(value[0]),deployedAddressGreeter);
 
     ///////////////////////////////////////////////////////////////
     // Todo: Read ABI from dynamic source.
-    var value1 = utils.readSolidityContractJSON("./build/contracts/TestGreeter.json");
-    if(value1.length <= 0){
-        return;
-    }
+    // var value1 = utils.readSolidityContractJSON("./build/contracts/TestGreeter.json");
+    // if(value1.length <= 0){
+    //     return;
+    // }
 
-    constructorParameters = [];
-    constructorParameters.push(deployedAddressGreeter);
-    //value1[0] = Contract ABI and value1[1] =  Contract Bytecode
-    var deployedAddressTesterGreeter = await utils.deployContract(value1[0], value1[1], ethAccountToUse, constructorParameters, web3);
+    // constructorParameters = [];
+    // constructorParameters.push(deployedAddressGreeter);
+    // //value1[0] = Contract ABI and value1[1] =  Contract Bytecode
+    // var deployedAddressTesterGreeter = await utils.deployContract(value1[0], value1[1], ethAccountToUse, constructorParameters, web3);
     
-    console.log("TestGreeter deployedAddress ", deployedAddressTesterGreeter);
-    testGreeting = new web3.eth.Contract(JSON.parse(value1[0]),deployedAddressTesterGreeter);
+    // console.log("TestGreeter deployedAddress ", deployedAddressTesterGreeter);
+    // testGreeting = new _web3.eth.Contract(JSON.parse(value1[0]),deployedAddressTesterGreeter);
 
-    let encodedABI = testGreeting.methods.add(23,54).encodeABI();
-    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressTesterGreeter,encodedABI,privateKey[ethAccountToUse],web3,200000);
-    console.log("TransactionLog for TestGreeter Setvalue -", transactionObject.transactionHash);
+    // let encodedABI = testGreeting.methods.add(23,54).encodeABI();
+    // var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressTesterGreeter,encodedABI,privateKey[ethAccountToUse],web3,200000);
+    // console.log("TransactionLog for TestGreeter Setvalue -", transactionObject.transactionHash);
 
     greeting1.methods.getMyNumber().call().then(result => {
         console.log("getMyNumber", result);
     });
 
-    testGreeting.methods.result().call().then(result => {
-        console.log("result", result);
-    });
+    // testGreeting.methods.result().call().then(result => {
+    //     console.log("result", result);
+    // });
 
     // greeting1.methods.greet().call().then(result => {
     //     console.log("myvalue", result);
