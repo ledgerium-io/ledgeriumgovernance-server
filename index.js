@@ -43,6 +43,7 @@ var main = async function () {
 
     var ethAccountToUse = accountAddressList[0];
     //await accessEarlierGreeting(ethAccountToUse);
+    //return;
 
     adminValidatorSet = new AdminValidatorSet(web3, utils, "", "", Web3);
     simpleValidatorSet = new SimpleValidatorSet(web3, utils, "", "", Web3);
@@ -155,7 +156,7 @@ async function validatorSetup()
                     break; 
                 console.log("****************** New Voting Loop End ******************");    
             }
-            istanbulAddValidator(newValidator);
+            //istanbulAddValidator(newValidator);
         }
         activeValidatorList = await getListOfActiveValidators();
         console.log("return list for getListOfActiveValidators",activeValidatorList.length);
@@ -883,7 +884,7 @@ async function createAccountsAndManageKeys(){
     var noOfPrivateKeys = Object.keys(privateKey).length;
     var noOfAccounts = accountAddressList.length;
     if(noOfAccounts > 0 && noOfPrivateKeys > 0 && (noOfAccounts == noOfPrivateKeys)){
-        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
+        console.log("There are", accountAddressList.length, "ethereum accounts & private keys in the privatekey file");
     }
     return;
 }
@@ -905,7 +906,7 @@ async function readWritePrivateKeys(){
             keyData = JSON.parse(keyData);
         }    
         var key;
-        console.log("There are", accountAddressList.length, "ethereum accounts in the blockchain");
+        console.log("There are", accountAddressList.length, "ethereum accounts & private keys in the privatekey file");
         if(accountAddressList.length > 0){
             var i = 0;
             accountAddressList.forEach(eachElement => {
@@ -984,8 +985,9 @@ async function accessEarlierGreeting(ethAccountToUse){
         return;
     }
 
+    _web3 = new Web3(web3);
     var constructorParameters = [];
-    constructorParameters.push("Hi Ledgerium");
+    //constructorParameters.push("Hi Ledgerium");
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
     var deployedAddressGreeter = "0x0000000000000000000000000000000000000006";//await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     
@@ -1036,10 +1038,10 @@ async function accessEarlierGreeting(ethAccountToUse){
     // var estimatedGas = await utils.estimateGasTransaction(ethAccountToUse,deployedAddress, encodedABI,web3);
     // console.log("estimatedGas",estimatedGas);
     
-    // var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddress,encodedABI,privateKey[ethAccountToUse],web3,200000);
-    // console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
+    encodedABI = greeting1.methods.setMyNumber(499).encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressGreeter,encodedABI,privateKey[ethAccountToUse],_web3,200000);
+    console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
 
-    // greeting1.methods.getMyNumber().call().then(result => {
-    //     console.log("getMyNumber", result);
-    // });
+    result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
+    console.log("getMyNumber after", result);
 }

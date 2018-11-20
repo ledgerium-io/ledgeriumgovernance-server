@@ -95,7 +95,7 @@ class Utils  {
                 nonce: nonceToUse,
                 //gasPrice: '0x00',
                 gasPrice: web3.utils.toHex(gasPrice),//'0x4A817C800', //20Gwei
-                gasLimit: '0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
+                gasLimit: '0x47b760',//'0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
                 from: fromAccountAddress,
                 to: toContractAddress,
                 value: web3.utils.toHex(0),
@@ -137,7 +137,7 @@ class Utils  {
         }
     }
     
-    /** To get estimate of gas consumptio for the given transaction prior to actual
+    /** To get estimate of gas consumption for the given transaction prior to actual
      * execution on blockchain! Extremely useful feature however, giving issues on quorum
     */
    async estimateGasTransaction (fromAccountAddress, toContractAddress, methodData, web3) {

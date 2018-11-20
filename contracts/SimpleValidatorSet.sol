@@ -112,6 +112,7 @@ contract SimpleValidatorSet is Voteable{
 		}
 		votes[_address].proposal = Proposal.ADD;
 		require (voteFor(_address,msg.sender));
+		votes[_address].proposer = msg.sender;
 		return true;
 	}
 
@@ -175,7 +176,7 @@ contract SimpleValidatorSet is Voteable{
 	* @return Emits event minValidatorNeeded() in case the no of existing active validators are less than 3
 	* @return Emits event alreadyProposalForRemovingValidator() in case some proposal already exists
     */
-  	function proposalToRemoveValidator (address _address) public isAdmin returns(bool res){
+  	function proposalToRemoveValidator (address _address) public isValidator returns(bool res){
 		if(totalActiveCount <= 3){
 			emit minValidatorNeeded(3);
 			return false;
@@ -193,6 +194,7 @@ contract SimpleValidatorSet is Voteable{
 		}
 		votes[_address].proposal = Proposal.REMOVE;
 		require (voteFor(_address,msg.sender));	
+		votes[_address].proposer = msg.sender;
 		return true;
 	}
 
@@ -360,5 +362,16 @@ contract SimpleValidatorSet is Voteable{
     */
 	function getActiveValidatorsCount()public view isValidator returns(uint32){
 	    return totalActiveCount;
+	}
+
+	/**
+    * @dev Function to clear votes/proposal for the given address
+	* @param _address address of the admin
+	* @return returns the status true/false
+    */
+	function clearProposal(address _address)public isValidator returns(bool res){
+	    if(_address==address(0))
+			return false;
+		return clearVotes(_address);
 	}
 }
