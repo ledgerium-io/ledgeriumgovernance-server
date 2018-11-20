@@ -81,6 +81,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 		}
 		votes[_address].proposal = Proposal.ADD;
 		require (voteFor(_address,msg.sender));
+		votes[_address].proposer = msg.sender;
 		return true;
 	}
 
@@ -159,6 +160,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 		}
 		votes[_address].proposal = Proposal.REMOVE;
 		require (voteFor(_address,msg.sender));
+		votes[_address].proposer = msg.sender;
 		return true;
 	}
 
@@ -284,5 +286,15 @@ contract AdminValidatorSet is Voteable, Ownable {
 	function getTotalActiveCount()public view returns(uint32){
 	    return totalActiveCount;
 	}
-	
+
+	/**
+    * @dev Function to clear votes/proposal for the given address
+	* @param _address address of the admin
+	* @return returns the status true/false
+    */
+	function clearProposal(address _address)public isOwner returns(bool res){
+	    if(_address==address(0))
+			return false;
+		return clearVotes(_address);
+	}
 }

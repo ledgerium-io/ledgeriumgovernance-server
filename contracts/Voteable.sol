@@ -2,7 +2,6 @@ pragma solidity 0.4.24;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 
-
 contract Voteable{
 
 	using SafeMath for uint32;
@@ -21,12 +20,19 @@ contract Voteable{
 
 	struct Vote {
 		Proposal proposal;
+		address proposer;	//Address which started the proposal
 		uint32 countFor;
 		uint32 countAgainst;
 		mapping (address => Decision) vote;
 		address[] voted;
 	}
 
+	modifier isProposer(address _address) {
+		require(_address != address(0));
+		require (votes[_address].proposer == msg.sender);
+		_; 
+	}
+	
 	mapping (address => Vote) votes;
 
 	event votedfor(address by,address vfor);
@@ -62,6 +68,7 @@ contract Voteable{
         }
         votes[_address].proposal = Proposal.NOT_CREATED;
         votes[_address].voted = empty;
+		votes[_address].proposer = address(0);
         return true;
 	}
 
@@ -102,6 +109,5 @@ contract Voteable{
 	function internalGetVoted(address _address) internal view returns(address[]){
 	    address[] memory arr = votes[_address].voted;
 	    return arr;
-	}
-	
+	}	
 }
