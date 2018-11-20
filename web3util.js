@@ -27,7 +27,7 @@ class Utils  {
     async getContractEncodeABI(abi,bytecode,web3,arg){
         try{
             let contract = new web3.eth.Contract(JSON.parse(abi));
-            return await contract.deploy({ data : bytecode, arguments : arg}).encodeABI();
+            return await contract.deploy({ data : bytecode, arguments : arg, privateFor: ["0x43a69edd54e07b95113fed92e8c9ba004500ce12"]}).encodeABI();
             //return await contract.deploy({ data : bytecode, arguments : arg, "privateFor" : privateFor }).encodeABI();
         } catch (error) {
             console.log("Exception in utils.getContractEncodeABI(): " + error);
@@ -69,7 +69,17 @@ class Utils  {
             console.log("Exception in utils.deployContract(): " + error);
         }    
     }
-    
+    async sendMethodTransactionDirect(fromAccountAddress, privateKey, abi, bytecode, args, web3) {
+        let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
+
+        var simpleContract = web3.eth.contract(abi);
+        var contract = await simpleContract.new(args, {from: fromAccountAddress, data: bytecode, gas: 0x47b760,
+            privateFor: ["0x43a69edd54e07b95113fed92e8c9ba004500ce12"]});
+            // function(e, contract) {
+
+            // }
+    }
+
      async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
         try
         {

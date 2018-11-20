@@ -70,6 +70,23 @@ var main = async function () {
     adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
     simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
+    /*
+    var admins = await adminValidatorSet.getAllAdmins();
+
+    flag = await validatorSetup();
+
+    return;
+
+    var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
+
+    var proposal = await simpleValidatorSet.checkProposal(ethAccountToUse, accountAddressList[1]);
+    
+    flag = await getListOfActiveValidators();
+
+    return;
+    */
+   
+    flag = await runAdminTestCases();
     //flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
     flag = await runRemoveAdminTestCases();

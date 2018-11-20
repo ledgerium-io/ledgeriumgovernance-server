@@ -6,17 +6,6 @@
       <tr>
         <td>
           <h2>Ledgerium governance UI</h2>
-          <div id="aliasContainer">
-            <span id="aliasDisplay"></span>
-            <span>
-              <a href='#' id="updateAliasLink" onclick="showAliasEditor()">(Update)</a>
-            </span>
-          </div>
-          <div id="aliasEditor" style="display:none">
-            <input id="aliasEditorText" type="text">
-            <button class="button-primary" onclick="updateAliasClicked()">Save</button>
-            <button class="button-primary" onclick="hideAliasEditor()">Cancel</button>
-          </div>
         </td>
       </tr>
       <tr>
@@ -89,6 +78,7 @@
             <th>Node Hostname</th>
             <th>Peer Count</th>
             <th>Latest Block Number</th>
+            <th>Remote Address</th>
           </tr>
         </thead>
         <tbody>
@@ -104,7 +94,7 @@
       <hr />
       <i>As of {{this.timestamp}} (Refresh interval: ~{{this.refreshinterval}} seconds)</i>
       <hr /> {{else}}
-      <h4>Waiting on all Ethereum nodes to boot up...</h4>
+      <h4>Waiting on all Ledgerium nodes to boot up...</h4>
       {{/if}}
   </div>
 
@@ -153,18 +143,17 @@
               let f = helper.isActiveAdmin(currentAccount, currentAccount);
               if(!f) {
                 location.reload();
-              }
-              
-              {{!-- if (web3.eth.accounts[0] !== currentAccount) {
+              }    
+              if (web3.eth.accounts[0] !== currentAccount) {
                 location.reload();
-              } --}}
+              }
             }, 60000);
-            //if (`${accounts[0]}` == "undefined") {
-              //showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a>");
-            //}
-            //else {
+            if (`${accounts[0]}` == "undefined") {
+              showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a>");
+            }
+            else {
               document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${accounts[0]}`;
-            //}
+            }
           })
 
           // Print the Metamask providers network Id
@@ -544,20 +533,6 @@
       });
     }
 
-    function updateAliasClicked() {
-      submittingTransaction();
-      var newAlias = document.getElementById('aliasEditorText').value;
-      console.log(`User wants to update alias: ${newAlias}`);
-      helper.UpdateAliasAsync(newAlias, function (result, error) {
-        if (typeof error != "undefined") {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Alias updated: ${result}`);
-        submittedTransaction(result);
-      });
-    }
-
     function submittingTransaction() {
       document.getElementById("failureStatus").style.display = "none";
       document.getElementById("transactionStatus").style.display = "block";
@@ -607,11 +582,6 @@
       document.getElementById('aliasContainer').style.display = "none";
       document.getElementById('aliasEditor').style.display = "block";
       document.getElementById('aliasEditorText').focus();
-    }
-
-    function hideAliasEditor() {
-      document.getElementById('aliasContainer').style.display = "block";
-      document.getElementById('aliasEditor').style.display = "none";
     }
 
     function errorMessage(message) {

@@ -6,7 +6,6 @@ var util = require('util');
 var Web3 = require('web3');
 var moment = require('moment');
 var Promise = require('promise');
-// var storage = require('azure-storage');
 var appjson = require('./version.json')
 var net = require('net');
 var Web3 = require('web3');
@@ -19,8 +18,6 @@ var gethIpRpcPort = process.argv[3];
 
 var listenPort = "3003";
 var consortiumId = "111";
-process.env['AZURE_STORAGE_ACCOUNT'] = "dontcare";
-process.env['AZURE_STORAGE_ACCESS_KEY'] = "dontcare";
 var containerName = "dontcare";
 var identityBlobPrefix = "passphrase-";
 var ethRpcPort = gethIpRpcPort;
@@ -34,13 +31,16 @@ var logFilePath = "log1.txt";
 /*
  * Constants
  */
-const refreshInterval = 10000;
+const refreshInterval = 60000;
 const nodeRegexExp = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
-// var blobService = storage.createBlobService();
+
 const recentBlockDecrement = 10; // To find a recent block for "/networkInfo", take the "currentBlock - recentBlockDecrement"
+var activeNodes = [];
+var abiContent = '';
+var timeStamp;
+var addressList = undefined;
 
 var app = express();
-
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
   helpers: {
@@ -57,11 +57,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-
-var activeNodes = [];
-var abiContent = '';
-var timeStamp;
-var addressList = undefined;
 
 process.on('uncaughtException', err => {
   if (err.message.includes("ECONNRESET")) {
@@ -111,12 +106,8 @@ function getRecentBlock() {
     }
     var latestBlockNumber;
     web3RPC.eth.getBlockNumber(function(err, latest) {
-      console.log("err " + err);
-      console.log("latest " + latest);
       latestBlockNumber = latest;
-
       var recentBlockNumber = Math.max(latestBlockNumber - recentBlockDecrement, 1);
-
       web3RPC.eth.getBlock(recentBlockNumber, function (error, result) {
         if (!error) {
           resolve(result);
@@ -127,7 +118,6 @@ function getRecentBlock() {
     })
   });
 }
-
 
 /* 
  * Given a node hostinfo object, collect node information (Consortium Id, PeerCount, Latest Block #) 
@@ -141,7 +131,7 @@ function getNodeInfo(hostinfo, ipAddress) {
     }
     var web3PromiseArray = [];
     web3PromiseArray.push(new Promise(function (resolve, reject) {
-      web3RPC.net.getPeerCount(function (error, result) {
+      web3RPC.eth.net.getPeerCount(function (error, result) {
         if (!error) {
           resolve(result);
         } else {
@@ -285,7 +275,6 @@ function getActiveNodeDetails(leasedList) {
   var nodePromiseArray = [];
   var promise = new Promise((resolve, reject) => {
     if (leasedList.length == 0) {
-      // No list       
       resolve([]);
     }
 
@@ -329,14 +318,6 @@ function getNodesfromBlob() {
 console.log('Start EtherAdmin Site');
 setInterval(getNodesfromBlob, refreshInterval);
 getAbiDatafromBlob();
-// getAddressListContents().then((result) => {
-//   if (result) {
-//     console.log(`getAddressListContents() returns: ${JSON.stringify(result)}`);
-//     addressList = result;
-//   } else {
-//     console.log(`${validatorListBlobName} does not exist`);
-//   }
-// });
 
 app.get('/', function (req, res) {
   var hasNodeRows = activeNodes.length >= 0;
@@ -382,7 +363,7 @@ app.get('/networkinfo', function (req, res) {
 
       } else {
         networkInfo.errorMessage += "Couldn't find any active nodes\n";
-      }
+      } 
     })
     .then(getRecentBlock)
     .then(function (recentBlock) {
@@ -445,7 +426,6 @@ app.post('/istanbul_propose', function(req, res) {
 
   console.log("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
-    //let coinbase = web3.eth.coinbase;
     console.log(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
     if(coinbase.toLowerCase() === req.body.sender.toLowerCase()) {
       
