@@ -23,9 +23,6 @@ class SimpleValidatorSet {
         try{
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
-
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.setOwnersParameters(): " + error);
@@ -101,7 +98,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToAddValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToAddValidator(): " + error);
             return false;
         }
     }
@@ -116,7 +113,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForAddingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForAddingValidator(): " + error);
             return false;
         }
     }
@@ -131,7 +128,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstAddingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteAgainstAddingValidator(): " + error);
             return false;
         }
     }
@@ -147,7 +144,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToRemoveValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToRemoveValidator(): " + error);
             return false;
         }
     }
@@ -162,9 +159,30 @@ class SimpleValidatorSet {
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToRemoveValidatorCb(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToRemoveValidatorCb(): " + error);
             return false;
         }
+    }
+
+    ProposeAddValidatorFromChain(sender, validator, fn) {
+        fetch('/istanbul_propose', {
+            method: 'post',
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify({
+                account: validator,
+                sender: sender,
+                proposal: true
+            })
+        }).then(data => {
+            console.log(data);
+            fn(null, data);
+        }).catch(error => { 
+            console.error('Error:', error);
+            fn(error, null);
+        });
+        return;
     }
 
     ProposeRemoveValidatorFromChain(sender, validator, fn) {
@@ -190,76 +208,70 @@ class SimpleValidatorSet {
 
     voteForRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
         try{
-            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
+
             this.utils.sendMethodTransactionCb(ethAccountToUse,
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingValidatorCb(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForRemovingValidatorCb(): " + error);
             return false;
         }
     }
 
     async voteForRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
-            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
+            
             var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForRemovingValidator(): " + error);
             return false;
         }
     }
     
     async voteAgainstRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
-            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
+            
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstRemovingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidator(): " + error);
             return false;
         }
     }
-    
-    // async addValidator(ethAccountToUse, privateKey, newValidator) {
-    //     try {
-    //         var encodedABI = this.contract.methods.addValidator(newValidator).encodeABI();
-    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-    //         // console.log("estimatedGas",estimatedGas);
-    //         var estimatedGas = 0;
-    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
-    //         return transactionObject.transactionHash;
-    //     } catch (error) {
-    //         console.log("Error in SimpleValidatorSet.addValidator(): " + error);
-    //         return "";
-    //     }    
-    // }
 
-    // async removeValidator(ethAccountToUse, privateKey, validatorToRemove) {
-    //     try {
-    //         var encodedABI = this.contract.methods.removeValidator(validatorToRemove).encodeABI();
-    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-    //         // console.log("estimatedGas",estimatedGas);
-    //         var estimatedGas = 0;
-    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
-    //         return transactionObject.transactionHash;        
-    //     } catch (error) {
-    //         console.log("Error in SimpleValidatorSet.removeValidator(): " + error);
-    //         return "";
-    //     }
-    // }
+    voteAgainstRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+        try{
+            var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
+
+            this.utils.sendMethodTransactionCb(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas,
+                fn);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidatorCb(): " + error);
+            return false;
+        }
+    }
    
     async isActiveValidator(ethAccountToUse, validatorAddress) {
         try {
@@ -274,12 +286,9 @@ class SimpleValidatorSet {
     async checkVotes(ethAccountToUse, validatorAddress){
         try {
             var votes = await this.contract.methods.checkVotes(validatorAddress).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkVotes(validatorAddress).encodeABI();
-            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            console.log("Error in SimpleValidatorSet.checkAdmin(): " + error);
             return false;
         }
     }
