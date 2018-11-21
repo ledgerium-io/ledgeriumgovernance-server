@@ -75,3 +75,8 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+#pub file
+*.pub
+
+keystore/contractsConfig.json
