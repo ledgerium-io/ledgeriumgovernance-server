@@ -1,4 +1,9 @@
 {
+<<<<<<< HEAD
   "adminValidatorSetAddress": "0xE49B9d077AF2f9cCb37E8444362abD7DD36C5575",
   "simpleValidatorSetAddress": "0x36C4bc9C120C9ADD741C8466b74a0bb0fD5137A2"
+=======
+    "adminValidatorSetAddress": "0x0000000000000000000000000000000000002018",
+    "simpleValidatorSetAddress": "0x0000000000000000000000000000000000002019"
+>>>>>>> f3e8148facadec4f1dce1d46c19d345776a27cd9
 }

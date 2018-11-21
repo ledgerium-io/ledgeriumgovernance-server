@@ -228,11 +228,11 @@
                       let proposal = await helper.checkProposal(currentAccount, eachAdmin);
                       {
                         if(proposal.toLowerCase() == "proposal not created") {
-                          cell3.innerHTML = `<button class="button-primary" onclick="proposeToVoteOutButtonClicked('${eachAdmin}')">Propose to vote out</button>`;
+                          cell3.innerHTML = `<button class="button-primary" onclick="proposeToVoteOutButtonClicked('${eachAdmin}')">Propose to remove</button>`;
                         }else {
                           cell3.innerHTML = `<div> Current proposal - ${proposal} </div>`
-                          cell3.innerHTML += `<button class="button-primary" onclick="voteForAdminButtonClicked('${eachAdmin}', '${proposal}')">Yes</button>`;
-                          cell3.innerHTML += `<button class="button-primary" onclick="voteAgainstAdminButtonClicked('${eachAdmin}', '${proposal}')">No</button>`;
+                          cell3.innerHTML += `<button class="button-primary" onclick="voteForAdminButtonClicked('${eachAdmin}', '${proposal}')">Accept</button>`;
+                          cell3.innerHTML += `<button class="button-primary" onclick="voteAgainstAdminButtonClicked('${eachAdmin}', '${proposal}')">Reject</button>`;
                         }
                       }
                     }else{
@@ -241,11 +241,6 @@
                   }
                 }
             });
-            
-            if (!userIsAdmin) {
-              //document.getElementById("validatorTab").style.display = "none";
-              document.getElementById("aliasContainer").style.display = "none";
-            }
 
             // Add a list of this accounts validators
             if (result.includes(currentAccount)) {
@@ -278,7 +273,8 @@
                       {
                         if(res.toLowerCase() == "remove") {
                           accountActionCell.innerHTML = `<div> Current proposal - ${res} </div>`;
-                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorAcceptClicked('${eachValidator}')">Accept proposal</button>`;
+                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorAcceptClicked('${eachValidator}')">Accept</button>`;
+                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorDeniedClicked('${eachValidator}')">Reject</button>`;
                         }else{
                           accountActionCell.innerHTML = `<button class="button-primary" onclick="removeValidatorClicked('${eachValidator}')">Propose to remove</button>`;
                         }
@@ -505,7 +501,29 @@
             showError("Transaction cancelled");
           }
         });
+      });
+    }
 
+    function removeValidatorDeniedClicked(validatorAccount) {
+      submittingTransaction();
+      console.log(`User wants to accept proposal to remove validator: ${validatorAccount}`);
+      simpleHelper.voteAgainstRemovingValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
+        if (error) {
+          showError("Transaction cancelled");
+          return;
+        }
+        console.log(`Remove validator vote for Transaction #: ${hash}`);
+        simpleHelper.ProposeAddValidatorFromChain(currentAccount, validatorAccount, (err, chain_result)=>{
+          console.log("received results:addIstanbulValidator");
+          if(chain_result) {
+            console.log("results", chain_result.result);
+            submittedTransaction(hash);
+          }
+          else if(err) {
+            console.log("Error: ProposeAddValidatorFromChain", err);
+            showError("Transaction cancelled");
+          }
+        });
       });
     }
 

@@ -189,17 +189,34 @@ var main = async function () {
     //     simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
     //     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-    //     writeContractsINConfig();
-    // }
-    // //If we dont have contracts to operate, abort!!
-    // if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
-    // || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
-    //     return;
-    // }
-    //// adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
-    // simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
+        writeContractsINConfig();
+    }
+    //If we dont have contracts to operate, abort!!
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
+    || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
+        return;
+    }
+    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
+    simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    // flag = await runAdminTestCases();
+    flag = await getListOfActiveValidators();
+
+    var admins = await adminValidatorSet.getAllAdmins();
+
+    flag = await validatorSetup();
+
+    return;
+    /*
+    var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
+
+    var proposal = await simpleValidatorSet.checkProposal(ethAccountToUse, accountAddressList[1]);
+    
+    flag = await getListOfActiveValidators();
+
+    return;
+    */
+
+    flag = await runAdminTestCases();
     //flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
     // flag = await runRemoveAdminTestCases();
@@ -869,7 +886,7 @@ async function writeAccountsAndKeys(){
 
 async function createAccountsAndManageKeys(){
     
-    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
+    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.h.json";
     if(fs.existsSync(privateKeyFileName)){
         var keyData = fs.readFileSync(privateKeyFileName,"utf8");
         privateKey = JSON.parse(keyData);

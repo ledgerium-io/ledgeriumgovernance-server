@@ -142,6 +142,27 @@ class SimpleValidatorSet {
         }
     }
 
+    ProposeAddValidatorFromChain(sender, validator, fn) {
+        fetch('/istanbul_propose', {
+            method: 'post',
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify({
+                account: validator,
+                sender: sender,
+                proposal: true
+            })
+        }).then(data => {
+            console.log(data);
+            fn(null, data);
+        }).catch(error => { 
+            console.error('Error:', error);
+            fn(error, null);
+        });
+        return;
+    }
+
     ProposeRemoveValidatorFromChain(sender, validator, fn) {
         fetch('/istanbul_propose', {
             method: 'post',
@@ -165,10 +186,9 @@ class SimpleValidatorSet {
 
     voteForRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
         try{
-            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
+
             this.utils.sendMethodTransactionCb(ethAccountToUse,
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
@@ -180,10 +200,9 @@ class SimpleValidatorSet {
 
     async voteForRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
-            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
+            
             var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
@@ -195,11 +214,15 @@ class SimpleValidatorSet {
     
     async voteAgainstRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
         try{
-            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
-            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-            // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
+            
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
@@ -207,7 +230,27 @@ class SimpleValidatorSet {
             return false;
         }
     }
-    
+
+    voteAgainstRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+        try{
+            var estimatedGas = 0;
+            var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
+
+            this.utils.sendMethodTransactionCb(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas,
+                fn);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidatorCb(): " + error);
+            return false;
+        }
+    }
+   
     async isActiveValidator(ethAccountToUse, validatorAddress) {
         try {
             var data = await this.contract.methods.isActiveValidator(validatorAddress).call({from : ethAccountToUse});
@@ -221,9 +264,6 @@ class SimpleValidatorSet {
     async checkVotes(ethAccountToUse, validatorAddress){
         try {
             var votes = await this.contract.methods.checkVotes(validatorAddress).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkVotes(validatorAddress).encodeABI();
-            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
             console.log("Error in SimpleValidatorSet.checkAdmin(): " + error);
