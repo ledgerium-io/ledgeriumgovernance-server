@@ -30,16 +30,22 @@ contract SimpleValidatorSet is Voteable{
 	uint32 totalActiveCount;
 
 	/**
-    * @dev Function to deploy and construct simplevalidatorset. These addresses are hardcoded
+    * @dev Function to deploy and construct simplevalidatorset. msg.sender will be added as one of validator too
+	* @param _address _address, address of adminValidatorSet contract
+	* @param _validator11 _validator1, which is to be added as active admin
+	* @param _validator21 _validator2, which is to be added as active admin
+    * @return A success flag
     */
-	constructor (address _adminContractAddress) public {
+	constructor (address _address, address _validator11, address _validator21)public {
+		address v1 = _validator11;
+		address v2 = _validator21;
+		address a = _address;
 		
-		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
-		address msg_sender = address(0x44643353444f4b42b46ed28e668c204db6dbb7c3);
-		address _validator1 = address(0x43a69edd54e07b95113fed92e8c9ba004500ce12);
-		address _validator2 = address(0xd44b2838207a46f1007b3f296a599fadfb20978c);
-		
-		adminSet = AdminValidatorSet(adminContractAddress);
+		adminSet = AdminValidatorSet(address(0x0000000000000000000000000000000000002018));
+
+		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
+		address _validator1 = address(0x43a69eDD54e07B95113FEd92e8c9ba004500Ce12);
+		address _validator2 = address(0xd44b2838207A46F1007B3F296a599fADfb20978c);
 
 		//Adding msg.sender as first validator
 		exists[msg_sender] = true;
