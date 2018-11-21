@@ -1,95 +1,208 @@
+'use strict';
 const fs = require('fs');
 const Web3 = require('web3');
-//const Web3 = require('web3-quorum');
 const Utils =  require('./web3util');
-//const async =  require('async');
 const mnemonic = require('./mnemonic');
-const SimpleValidatorSet = require('./simplevalidatorset');
-const AdminValidatorSet = require('./adminvalidatorset');
+const SimpleValidator = require('./simplevalidatorindex');
+const AdminValidator = require('./adminvalidatorindex');
+const ethUtil = require('ethereumjs-util');
 
 // var HDWalletProvider = require("truffle-hdwallet-provider");
 // var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";
 // var provider = new HDWalletProvider(privateKey1, "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
 
 //var host = "http://localhost:20100";
-var host = "http://localhost:8545";
-var web3 = new Web3.providers.HttpProvider(host);
+var host,port;
+var web3;
 //var web3 = new Web3();
 //web3.setProvider(provider);
 const utils = new Utils();
+global.utils = utils;
 
 //var host = "ws://localhost:9000";
 //web3 = new Web3(new Web3.providers.WebsocketProvider(host));
-
-//Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
-var adminValidatorSet,simpleValidatorSet;
-var privateKey = {};
+var usecontractconfig = false;
+var readkeyconfig = false;
 var contractsList = {};
+//Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
+var adminValidator,simpleValidator;
+var privateKey = {};
 var accountAddressList = [];
 var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 
 var main = async function () {
 
+    const args = process.argv.slice(2);
+    for (let i=0; i<args.length ; i++) {
+        let temp = args[i].split("=");
+        switch (temp[0]) {
+            case "hostname":
+                host = temp[1];
+                global.host = host;
+                break;
+            case "port":
+                port = temp[1];
+                global.port = port;
+                let URL = "http://" + host + ":" + port;
+                web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                global.web3 = web3;
+                adminValidator = new AdminValidator();
+                global.adminValidator = adminValidator;
+                simpleValidator = new SimpleValidator();
+                global.simpleValidator = simpleValidator;
+                break;
+            case "privateKeys":
+                let prvKeys = temp[1].split(",");
+                createAccountsAndManageKeysFromPrivateKeys(prvKeys);
+                writeAccountsAndKeys();
+                break;
+            case "readkeyconfig":
+            readkeyconfig = temp[1];
+                switch(readkeyconfig){
+                    case "true":
+                    default: 
+                        readAccountsAndKeys();
+                        break;
+                    case "false":
+                        console.log("Given readkeyconfig option not supported! Provide correct details");
+                        break;     
+                }
+                break;
+            case "usecontractconfig":
+                usecontractconfig = temp[1];
+                switch(usecontractconfig){
+                    case "true":
+                        readContractsFromConfig();
+                        if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+                            if(accountAddressList.length < 3){
+                                console.log("Ethereum accounts are not available! Can not proceed further!!");
+                                return;
+                            }    
+                            adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
+                            console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+                            simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
+                            console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+                            writeContractsINConfig();
+                        }
+                        adminValidator.setHelperParameters(adminValidatorSetAddress);
+                        simpleValidator.setHelperParameters(simpleValidatorSetAddress);
+                        global.adminValidatorSetAddress = adminValidatorSetAddress;
+                        global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+                        break;
+                    case "false":
+                        if(accountAddressList.length < 3){
+                            console.log("Ethereum accounts are not available! Can not proceed further!!");
+                            return;
+                        }
+                        adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
+                        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+                        adminValidator.setHelperParameters(adminValidatorSetAddress);
+                        simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
+                        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+                        simpleValidator.setHelperParameters(simpleValidatorSetAddress);
+
+                        global.adminValidatorSetAddress = adminValidatorSetAddress;
+                        global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+                        break;
+                    default:
+                        console.log("Given usecontractconfig option not supported! Provide correct details");
+                        break;
+                }
+                break;
+            case "runadminvalidator":{
+                let list = temp[1].split(",");
+                for (let j=0; j<list.length ; j++) {
+                    switch (list[j]) {
+                        case "runAdminTestCases":
+                            var result = await adminValidator.runAdminTestCases();
+                            console.log("result",result);
+                            break;
+                        case "runRemoveAdminTestCases":
+                            var result = await adminValidator.runRemoveAdminTestCases();
+                            console.log("result",result);
+                            break;
+                        case "getAllAdmins":
+                            var result = await adminValidator.getAllAdmins();
+                            console.log("result",result);
+                            break;
+                        default:
+                            console.log("Given runadminvalidator option not supported! Provide correct details");
+                            break;
+                    }
+                }
+                break;
+            }
+            case "runsimplevalidator":{
+                let list = temp[1].split(",");
+                for (let j=0; j<list.length ; j++) {
+                    switch (list[j]) {
+                        case "validatorSetup":
+                            var result = await simpleValidator.validatorSetup();
+                            console.log("result",result);
+                            break;
+                        case "runValidatorTestCases":
+                            var result = await simpleValidator.runValidatorTestCases();
+                            console.log("result",result);
+                            break;
+                        case "runRemoveValidatorTestCases":
+                            var result = await simpleValidator.runRemoveValidatorTestCases();
+                            console.log("result",result);
+                            break;
+                        case "getListOfActiveValidators":
+                            var result = await simpleValidator.getListOfActiveValidators();
+                            console.log("result",result);
+                            break;
+                        default:
+                            console.log("Given runsimplevalidator option not supported! Provide correct details");
+                            break;
+                    }
+                }
+                break;
+            }
+            default:
+                //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
+                break;
+        }
+    }
+
     //await generateKeysAndCreateAccounts(accountAddressList);
     //await readWritePrivateKeys(accountAddressList);
-    await createAccountsAndManageKeys();
-
+    
     //We need minimum 3 accounts and private keys set to continue from here!
-    if((accountAddressList.length <3) || (Object.keys(privateKey).length < 3))
-        return;
+    // if((accountAddressList.length <3) || (Object.keys(privateKey).length < 3))
+    //     return;
 
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
 
-    var ethAccountToUse = accountAddressList[0];
-    //await accessEarlierGreeting(ethAccountToUse);
+    //var ethAccountToUse = accountAddressList[0];
+    ////await accessEarlierGreeting(ethAccountToUse);
     //return;
 
-    adminValidatorSet = new AdminValidatorSet(web3, utils, "", "", Web3);
-    simpleValidatorSet = new SimpleValidatorSet(web3, utils, "", "", Web3);
+    // simpleValidatorSet = new SimpleValidatorSet(web3, utils, "", "", Web3);
 
-    readContractsFromConfig();
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
-        var otherAddressList = [];
-        ethAccountToUse = accountAddressList[0];
-        otherAddressList.push(accountAddressList[1]);
-        otherAddressList.push(accountAddressList[2]);
-        adminValidatorSetAddress = await deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],otherAddressList);
-        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+    // readContractsFromConfig();
+    // if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+    //     adminValidatorSetAddress = await deployNewAdminSetValidatorContractWithPrivateKey();
+    //     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
         
-        simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress,otherAddressList);
-        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    //     simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
+    //     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-        writeContractsINConfig();
-    }
-    //If we dont have contracts to operate, abort!!
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
-    || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
-        return;
-    }
-    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
-    simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
+    //     writeContractsINConfig();
+    // }
+    // //If we dont have contracts to operate, abort!!
+    // if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
+    // || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
+    //     return;
+    // }
+    //// adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
+    // simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    /*
-    var admins = await adminValidatorSet.getAllAdmins();
-
-    flag = await validatorSetup();
-
-    return;
-
-    var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
-
-    var proposal = await simpleValidatorSet.checkProposal(ethAccountToUse, accountAddressList[1]);
-    
-    flag = await getListOfActiveValidators();
-
-    return;
-    */
-   
-    flag = await runAdminTestCases();
+    // flag = await runAdminTestCases();
     //flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
-    flag = await runRemoveAdminTestCases();
+    // flag = await runRemoveAdminTestCases();
     //flag = await validatorSetup();
     // flag = await runValidatorTestCases();
     // flag = await runRemoveValidatorTestCases();
@@ -228,47 +341,6 @@ async function runRemoveValidatorTestCases(){
     console.log("****************** End Remove Validator Test cases ******************");
 }
 
-async function runAdminTestCases(){
-    
-    console.log("****************** Running Admin Test cases ******************");
-    console.log("****************** Start Admin Test cases ******************");
-    var adminToAdd = accountAddressList[3];
-    flag = await addNewAdmin(adminToAdd);
-    console.log("return flag for proposalToAddAdmin ",flag);
-
-    adminToAdd = accountAddressList[4];
-    flag = await addNewAdmin(adminToAdd);
-    console.log("return flag for proposalToAddAdmin ",flag);
-
-    var activeAdminList;
-    activeAdminList = await getAllAdmins();
-    console.log("return list for getAllAdmins",activeAdminList.length);
-
-    var adminToRemove = accountAddressList[3];
-    flag = await removeOneAdmin(adminToRemove);
-    console.log("return flag for removeOneAdmin ",flag);
-
-    activeAdminList = await getAllAdmins();
-    console.log("return list for getAllAdmins",activeAdminList.length);
-    
-    console.log("****************** End Admin Test cases ******************");
-}
-
-async function runRemoveAdminTestCases(){
-    
-    console.log("****************** Running Remove Admin Test cases ******************");
-    var activeAdminList = await getAllAdmins();
-    for(var indexAV = 1; indexAV < activeAdminList.length; indexAV++){
-        removeAdmin = activeAdminList[indexAV];
-        flag = await removeOneAdmin(removeAdmin);
-        console.log("return flag for removeOneAdmin",flag);
-        activeAdminCurrentList = await getAllAdmins();
-        console.log("return list for updated getAllAdmins",activeAdminCurrentList.length);
-    }
-    console.log("****************** End Remove Admin Test cases ******************");
-}
-
-
 async function addNewNodeAsValidator(newValidator) {
 
     from = accountAddressList[0];
@@ -346,108 +418,6 @@ async function addInitialValidators(accountAddressList) {
        transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
        from = accountAddressList[3];
        transactionhash = await simpleValidatorSet.addValidator(from, privateKey[from], newValidator);
-}
-
-async function istanbulAddValidator(validatorAddress)
-{
-    listIstanbulValidator();
-    
-    addIstanbulValidator(8545,validatorAddress);
-    addIstanbulValidator(8546,validatorAddress);
-    addIstanbulValidator(8547,validatorAddress);
-    addIstanbulValidator(8548,validatorAddress);
-    addIstanbulValidator(8549,validatorAddress);
-    addIstanbulValidator(8550,validatorAddress);
-
-    await delay(10000); //wait for 10 seconds!
-    listIstanbulValidator();
-    return;
-}    
-
-async function istanbulRemoveValidator(validatorAddress){
-    listIstanbulValidator();
-
-    removeIstanbulValidator(8545,validatorAddress);
-    removeIstanbulValidator(8546,validatorAddress);
-    removeIstanbulValidator(8547,validatorAddress);
-    removeIstanbulValidator(8548,validatorAddress);
-    removeIstanbulValidator(8549,validatorAddress);
-
-    await delay(10000); //wait for 10 seconds!
-    listIstanbulValidator();
-    return;
-}
-
-async function removeIstanbulValidator(port,validator)
-{
-    var host = "http://localhost:" + port;
-    console.log("removeIstanbulValidator pointing to", host);
-    var web3 = new Web3(new Web3.providers.HttpProvider(host));
-    var coinbase = await web3.eth.getCoinbase();
-    console.log(coinbase);
-    var message = {
-        method: "istanbul_propose",
-        params: [validator,false],
-        jsonrpc: "2.0",
-        id: new Date().getTime()
-        };
-    
-    web3.currentProvider.send(message,(err,result)=>{
-        console.log("received results:removeIstanbulValidator");
-        if(result)
-            console.log("results", result.result);
-        else if(err)
-        console.log("print result", err);
-    });
-    return;
-}
-
-async function addIstanbulValidator(port,validator)
-{
-    var host = "http://localhost:" + port;
-    console.log("addIstanbulValidator pointing to", host);
-    var web3 = new Web3(new Web3.providers.HttpProvider(host));
-    var coinbase = await web3.eth.getCoinbase();
-    console.log(coinbase);
-    var message = {
-        method: "istanbul_propose",
-        params: [validator,true],
-        jsonrpc: "2.0",
-        id: new Date().getTime()
-        };
-    
-    web3.currentProvider.send(message,(err,result)=>{
-        console.log("received results:addIstanbulValidator");
-        if(result)
-            console.log("results", result.result);
-        else if(err)
-        console.log("print result", err);
-    });
-    return;
-}
-
-const delay = ms => new Promise(res => {console.log(new Date().getTime()); setTimeout(res, ms); console.log(new Date().getTime());});
-
-async function listIstanbulValidator()
-{
-    var host = "http://localhost:" + "8545";
-    console.log("listIstanbulValidator pointing to", host);
-    var web3 = new Web3(new Web3.providers.HttpProvider(host));
-    var message = {
-        method: "istanbul_getValidators",
-        params: [],
-        jsonrpc: "2.0",
-        id: new Date().getTime()
-        };
-    
-    web3.currentProvider.send(message,(err,result)=>{
-        console.log("received results:listIstanbulValidator");
-        if(result)
-            console.log("results", result.result);
-        else if(err)
-        console.log("print result", err);
-    });
-    return;
 }
 
 async function getAllAdmins(){
@@ -624,28 +594,26 @@ async function removeOneAdmin(adminToRemove){
     }
 }
 
-async function deployNewAdminSetValidatorContract(ownerAccountAddress,otherAdminsList)
-{
-    var adminValidatorSetAddress = await adminValidatorSet.deployNewAdminSetValidatorContract(ownerAccountAddress,otherAdminsList);
-    return adminValidatorSetAddress;
-}
+// async function deployNewAdminSetValidatorContractWithPrivateKey()
+// {
+//     //ethAccountToUse = accountAddressList[0];
+//     //privateKeyOwner = privateKey[ethAccountToUse];
+//     var otherAdminsList = [];
+//     otherAdminsList.push(accountAddressList[1]);
+//     otherAdminsList.push(accountAddressList[2]);
+//     //var adminValrSetAddress = await adminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,otherAdminsList);
+//     return adminValrSetAddress;
+// }
 
-async function deployNewAdminSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,otherAdminsList)
+async function deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress)
 {
-    var adminValidatorSetAddress = await adminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,otherAdminsList);
-    return adminValidatorSetAddress;
-}
-
-async function deployNewSimpleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress)
-{
-    var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContract(ownerAccountAddress, adminValidatorSetAddress);
-    return singleValidatorSetAddress;
-}
-
-async function deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress, privateKeyOwner, adminValidatorSetAddress,otherValidatorList)
-{
-    var singleValidatorSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ownerAccountAddress,privateKeyOwner,adminValidatorSetAddress,otherValidatorList);
-    return singleValidatorSetAddress;
+    //ethAccountToUse = accountAddressList[0];
+    //privateKeyOwner = privateKey[ethAccountToUse];
+    var validatorAddressList = [];
+    validatorAddressList.push(accountAddressList[1]);
+    validatorAddressList.push(accountAddressList[2]);
+    //var singleValrSetAddress = await simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,adminValidatorSetAddress,validatorAddressList);
+    return singleValrSetAddress;
 }
 
 async function addSimpleSetContractValidatorForAdmin(newValidator){
@@ -847,6 +815,58 @@ async function generateKeysAndCreateAccounts(){
     }    
 }
 
+async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
+    
+    accountAddressList.length = 0;
+    let pubkey;
+    for(var index = 0; index < inputPrivateKeys.length; index++){
+        let eachElement = inputPrivateKeys[index];
+        try{
+            let prvKey = ethUtil.toBuffer("0x" + eachElement);
+            pubkey = '0x' + ethUtil.privateToAddress(prvKey).toString('hex');
+        }
+        catch (error) {
+            console.log("Error in index.createAccountsAndManageKeysFromPrivateKeys(): " + error);
+            return "";
+        }    
+        accountAddressList.push(pubkey);
+        privateKey[pubkey] = eachElement;
+    }
+    var noOfPrivateKeys = Object.keys(privateKey).length;
+    var noOfAccounts = accountAddressList.length;
+    if(noOfAccounts > 0 && noOfPrivateKeys > 0 && (noOfAccounts == noOfPrivateKeys)){
+        console.log(accountAddressList.length + " ethereum accounts are created using private keys!");
+    }
+    global.accountAddressList = accountAddressList;
+    global.privateKey = privateKey;
+    return;
+}
+
+async function readAccountsAndKeys(){
+    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
+    if(fs.existsSync(privateKeyFileName)){
+        var keyData = fs.readFileSync(privateKeyFileName,"utf8");
+        privateKey = JSON.parse(keyData);
+        accountAddressList = Object.keys(privateKey);
+        console.log("There are", accountAddressList.length, "ethereum accounts & private keys in the privatekey file");
+        global.accountAddressList = accountAddressList;
+        global.privateKey = privateKey;
+        return true;
+    }
+    else{
+        console.log("privatekey.json file does not exist! The program may not function properly!");
+        return false;
+    }    
+}
+
+async function writeAccountsAndKeys(){
+    var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
+    var data = JSON.stringify(privateKey,null, 2);
+    fs.writeFileSync(privateKeyFileName,data);
+    console.log(accountAddressList.length + " ethereum accounts & private keys are written to the privateKey.json file");
+    return false;
+}
+
 async function createAccountsAndManageKeys(){
     
     var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
@@ -976,7 +996,7 @@ async function writeContractsINConfig(){
 }    
 
 async function accessEarlierGreeting(ethAccountToUse){
-    //var greeting1;
+    var greeting1;
 
     // Todo: Read ABI from dynamic source.
     var value = utils.readSolidityContractJSON("./build/contracts/Greeter.json");
@@ -990,16 +1010,17 @@ async function accessEarlierGreeting(ethAccountToUse){
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
     var deployedAddressGreeter = "0x0000000000000000000000000000000000000517";//await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     //var encodedABI = await utils.getContractEncodeABI(value[0], value[1],_web3,constructorParameters);
-    //var deployedAddressGreeter = await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey[ethAccountToUse],_web3,0);
+    ////var deployedAddressGreeter = await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey[ethAccountToUse],_web3,0);
     
-    console.log("Greeter deployedAddress ", deployedAddressGreeter.contractAddress);
+    //console.log("Greeter deployedAddress ", deployedAddressGreeter.contractAddress);
+    console.log("Greeter deployedAddress ", deployedAddressGreeter);
     greeting1 = new _web3.eth.Contract(JSON.parse(value[0]),deployedAddressGreeter);
 
-    var result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
+    //var result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
     console.log("getMyNumber1", result);
     
     encodedABI = greeting1.methods.setMyNumber(499).encodeABI();
-    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressGreeter,encodedABI,privateKey[ethAccountToUse],_web3,200000);
+    //var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressGreeter,encodedABI,privateKey[ethAccountToUse],_web3,200000);
     console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
 
     result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});

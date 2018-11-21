@@ -1,21 +1,13 @@
 class SimpleValidatorSet {
 
-    constructor(web3provider, utils, simpleValidatorSetAddress, abi, Web3) {
+    constructor(web3provider, utils, Web3) {
         this.web3 = new Web3(web3provider);
         this.utils = utils;
-        var value;
-        if(!abi) {
-            //Read ABI and Bytecode from dynamic source.
-            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
-        }else{
-            value = [abi, ""];
-        }
+        //Read ABI and Bytecode from dynamic source.
+        var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
         if(value.length > 0){
             this.simpleValidatorSetAbi = value[0];
             this.simpleValidatorSetByteCode = value[1];
-            this.simpleValidatorSetAddress = simpleValidatorSetAddress;
-            this.contract = new this.web3.eth.Contract(
-                JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
         }
     }
     
@@ -23,15 +15,12 @@ class SimpleValidatorSet {
         try{
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
-
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);
         }
         catch (error) {
-            console.log("Error in SimpleValidatorSet.setOwnersParameters(): " + error);
+            console.log("Error in SimpleValidatorSet:setOwnersParameters(): " + error);
             return "";
         }  
-    }    
+    }
     
     async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorAddress,otherValidatorList) {
         try {
@@ -41,27 +30,13 @@ class SimpleValidatorSet {
             var estimatedGas = 0;
             var encodedABI = await this.utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
             var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
-            this.simpleValidatorSetAddress = deployedAddress.contractAddress;    
-            return this.simpleValidatorSetAddress;
+            return deployedAddress.contractAddress;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.deployNewSimpleSetValidatorContract(): " + error);
+            console.log("Error in SimpleValidatorSet:deployNewSimpleSetValidatorContract(): " + error);
             return "";
         }
     }
     
-    async deployNewSimpleSetValidatorContract(ethAccountToUse, adminValidatorAddress) {
-        try {
-            var constructorParameters = [];
-            constructorParameters.push(adminValidatorAddress);
-            var deployedAddress = await this.utils.deployContract(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode, ethAccountToUse, constructorParameters, this.web3);//, function(returnTypeString, result){
-            this.simpleValidatorSetAddress = deployedAddress;    
-            return this.simpleValidatorSetAddress;
-        } catch (error) {
-            console.log("Error in SimpleValidatorSet.deployNewSimpleSetValidatorContract(): " + error);
-            return "";
-        }
-    }
-
     async getAllValidatorsAsync(ethAccountToUse) {
         var resultList = [];
         try {
@@ -70,7 +45,7 @@ class SimpleValidatorSet {
             console.log(resultList);
             return this.utils.split(resultList);
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.getAllValidatorsAsync(): " + error);
+            console.log("Error in SimpleValidatorSet:getAllValidatorsAsync(): " + error);
             return resultList;
         }
     }
@@ -86,7 +61,7 @@ class SimpleValidatorSet {
                 }
             });
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.getAdminValidatorsAsync(): " + error);
+            console.log("Error in SimpleValidatorSet:getAdminValidatorsAsync(): " + error);
             return "";
         }
     }
@@ -101,7 +76,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToAddValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToAddValidator(): " + error);
             return false;
         }
     }
@@ -116,7 +91,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForAddingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForAddingValidator(): " + error);
             return false;
         }
     }
@@ -131,7 +106,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstAddingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteAgainstAddingValidator(): " + error);
             return false;
         }
     }
@@ -147,7 +122,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToRemoveValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToRemoveValidator(): " + error);
             return false;
         }
     }
@@ -162,7 +137,7 @@ class SimpleValidatorSet {
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToRemoveValidatorCb(): " + error);
+            console.log("Error in SimpleValidatorSet.proposalToRemoveValidatorCb(): " + error);
             return false;
         }
     }
@@ -198,7 +173,7 @@ class SimpleValidatorSet {
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingValidatorCb(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForRemovingValidatorCb(): " + error);
             return false;
         }
     }
@@ -213,7 +188,7 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteForRemovingValidator(): " + error);
             return false;
         }
     }
@@ -228,45 +203,17 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstRemovingValidator(): " + error);
+            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidator(): " + error);
             return false;
         }
     }
     
-    // async addValidator(ethAccountToUse, privateKey, newValidator) {
-    //     try {
-    //         var encodedABI = this.contract.methods.addValidator(newValidator).encodeABI();
-    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-    //         // console.log("estimatedGas",estimatedGas);
-    //         var estimatedGas = 0;
-    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
-    //         return transactionObject.transactionHash;
-    //     } catch (error) {
-    //         console.log("Error in SimpleValidatorSet.addValidator(): " + error);
-    //         return "";
-    //     }    
-    // }
-
-    // async removeValidator(ethAccountToUse, privateKey, validatorToRemove) {
-    //     try {
-    //         var encodedABI = this.contract.methods.removeValidator(validatorToRemove).encodeABI();
-    //         // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
-    //         // console.log("estimatedGas",estimatedGas);
-    //         var estimatedGas = 0;
-    //         var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
-    //         return transactionObject.transactionHash;        
-    //     } catch (error) {
-    //         console.log("Error in SimpleValidatorSet.removeValidator(): " + error);
-    //         return "";
-    //     }
-    // }
-   
     async isActiveValidator(ethAccountToUse, validatorAddress) {
         try {
             var data = await this.contract.methods.isActiveValidator(validatorAddress).call({from : ethAccountToUse});
             return data;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.isActiveValidator(): " + error);
+            console.log("Error in SimpleValidatorSet:isActiveValidator(): " + error);
             return false;
         }
     }
@@ -279,7 +226,7 @@ class SimpleValidatorSet {
             //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            console.log("Error in SimpleValidatorSet.checkAdmin(): " + error);
             return false;
         }
     }
@@ -289,7 +236,7 @@ class SimpleValidatorSet {
             var data = await this.contract.methods.checkProposal(validatorAddress).call({from : ethAccountToUse});
             return data;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.hasProposal(): " + error);
+            console.log("Error in SimpleValidatorSet:hasProposal(): " + error);
             return false;
         }
     }
