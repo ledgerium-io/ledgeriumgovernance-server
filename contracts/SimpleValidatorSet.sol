@@ -34,7 +34,7 @@ contract SimpleValidatorSet is Voteable{
     */
 	constructor (address _adminContractAddress) public {
 		
-		address adminContractAddress = _adminContractAddress; //address(0x0000000000000000000000000000000000002018);
+		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
 		address msg_sender = address(0x44643353444f4b42b46ed28e668c204db6dbb7c3);
 		address _validator1 = address(0x43a69edd54e07b95113fed92e8c9ba004500ce12);
 		address _validator2 = address(0xd44b2838207a46f1007b3f296a599fadfb20978c);

@@ -159,6 +159,10 @@ var main = async function () {
                 }
                 break;
             }
+            case "testgreeter":
+                var ethAccountToUse = accountAddressList[0];
+                await accessEarlierGreeting(ethAccountToUse);
+                break;
             default:
                 //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
                 break;
@@ -189,23 +193,23 @@ var main = async function () {
     //     simpleValidatorSetAddress = await deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
     //     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
         
-        writeContractsINConfig();
-    }
-    //If we dont have contracts to operate, abort!!
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
-    || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
-        return;
-    }
-    adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
-    simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
+    //     writeContractsINConfig();
+    // }
+    // //If we dont have contracts to operate, abort!!
+    // if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" 
+    // || simpleValidatorSetAddress == undefined || adminValidatorSetAddress == undefined){
+    //     return;
+    // }
+    // adminValidatorSet.setOwnersParameters(ethAccountToUse,privateKey[ethAccountToUse],adminValidatorSetAddress); 
+    // simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
 
-    flag = await getListOfActiveValidators();
+    // flag = await getListOfActiveValidators();
 
-    var admins = await adminValidatorSet.getAllAdmins();
+    // var admins = await adminValidatorSet.getAllAdmins();
 
-    flag = await validatorSetup();
+    // flag = await validatorSetup();
 
-    return;
+    // return;
     /*
     var vote = await simpleValidatorSet.proposalToRemoveValidator(ethAccountToUse, privateKey[ethAccountToUse], accountAddressList[1]);
 
@@ -216,7 +220,7 @@ var main = async function () {
     return;
     */
 
-    flag = await runAdminTestCases();
+    //flag = await runAdminTestCases();
     //flag = await getListOfActiveValidators();
     //flag = await runAdminTestCases();
     // flag = await runRemoveAdminTestCases();
@@ -1020,12 +1024,13 @@ async function accessEarlierGreeting(ethAccountToUse){
     if(value.length <= 0){
         return;
     }
-
-    _web3 = new Web3(web3);
+    let URL = "http://" + "localhost" + ":" + "8545";
+    let _web3 = new Web3(new Web3.providers.HttpProvider(URL));
+    //_web3 = new Web3(web3);
     var constructorParameters = [];
     //constructorParameters.push("Hi Ledgerium");
     //value[0] = Contract ABI and value[1] =  Contract Bytecode
-    var deployedAddressGreeter = "0x0000000000000000000000000000000000000517";//await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
+    var deployedAddressGreeter = "0x0000000000000000000000000000000000002020";//await utils.deployContract(value[0], value[1], ethAccountToUse, constructorParameters, web3);
     //var encodedABI = await utils.getContractEncodeABI(value[0], value[1],_web3,constructorParameters);
     ////var deployedAddressGreeter = await utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey[ethAccountToUse],_web3,0);
     
@@ -1033,11 +1038,11 @@ async function accessEarlierGreeting(ethAccountToUse){
     console.log("Greeter deployedAddress ", deployedAddressGreeter);
     greeting1 = new _web3.eth.Contract(JSON.parse(value[0]),deployedAddressGreeter);
 
-    //var result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
+    var result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
     console.log("getMyNumber1", result);
     
-    encodedABI = greeting1.methods.setMyNumber(499).encodeABI();
-    //var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressGreeter,encodedABI,privateKey[ethAccountToUse],_web3,200000);
+    let encodedABI = greeting1.methods.setMyNumber(499).encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,deployedAddressGreeter,encodedABI,privateKey[ethAccountToUse],_web3,200000);
     console.log("TransactionLog for Greeter Setvalue -", transactionObject.transactionHash);
 
     result = await greeting1.methods.getMyNumber().call({from : ethAccountToUse});
