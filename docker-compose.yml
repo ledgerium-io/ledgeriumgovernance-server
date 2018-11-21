@@ -739,20 +739,14 @@ services:
         ipv4_address: 172.16.239.196
     restart: always
 networks:
-  app_net:
-    external: true
+ app_net:
+   external: true
 volumes:
-  "0":
-  "1":
-  "2":
-  "3":
-  "4":
-  "5":
-  "6":
-  "_val0eth":
-  "_val1eth":
-  "_val2eth":
-  "_val3eth":
-  "_val4eth":
-  "_val5eth":
-  "_val6eth":
+ "0":
+ "1":
+ "2":
+ "3":
+ "4":
+ "5":
+ "6":
+ "_0eth":

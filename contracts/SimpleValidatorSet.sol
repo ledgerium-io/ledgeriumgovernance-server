@@ -30,21 +30,23 @@ contract SimpleValidatorSet is Voteable{
 	uint32 totalActiveCount;
 
 	/**
-    * @dev Function to deploy and construct simplevalidatorset. msg.sender will be added as one of validator too
-	* @param _address _address, address of adminValidatorSet contract
-	* @param _validator1 _validator1, which is to be added as active admin
-	* @param _validator2 _validator2, which is to be added as active admin
-    * @return A success flag
+    * @dev Function to deploy and construct simplevalidatorset. These addresses are hardcoded
     */
-	constructor (address _address, address _validator1, address _validator2)public {
-		adminSet = AdminValidatorSet(_address);
+	constructor (address _adminContractAddress) public {
+		
+		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
+		address msg_sender = address(0x44643353444f4b42b46ed28e668c204db6dbb7c3);
+		address _validator1 = address(0x43a69edd54e07b95113fed92e8c9ba004500ce12);
+		address _validator2 = address(0xd44b2838207a46f1007b3f296a599fadfb20978c);
+		
+		adminSet = AdminValidatorSet(adminContractAddress);
 
 		//Adding msg.sender as first validator
-		exists[msg.sender] = true;
-		adminValidatorsMap[msg.sender].push(msg.sender);
-		activeValidators[msg.sender].isValidator = true;
-		activeValidators[msg.sender].status = Status.ACTIVE;
-		validators.push(msg.sender);
+		exists[msg_sender] = true;
+		adminValidatorsMap[msg_sender].push(msg_sender);
+		activeValidators[msg_sender].isValidator = true;
+		activeValidators[msg_sender].status = Status.ACTIVE;
+		validators.push(msg_sender);
 
 		//To add _validator1 as validator
 		exists[_validator1] = true;

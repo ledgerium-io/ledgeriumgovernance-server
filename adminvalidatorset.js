@@ -1,28 +1,18 @@
 class AdminValidatorSet {
 
-    constructor(web3provider, utils, adminValidatorSetAddress, abi, Web3) { 
-        var value;
+    constructor(web3provider, utils, Web3) { 
+        this.web3 = new Web3(web3provider);
         this.utils = utils;
-        if(!abi) {
-            //Read ABI and Bytecode from dynamic source.
-            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
-        }else{
-            value = [abi, ""];
-        }
+        //Read ABI and Bytecode from dynamic source.
+        var value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
         if(value.length > 0){
-            this.web3 = new Web3(web3provider);
             this.adminValidatorSetAbi = value[0];
             this.adminValidatorSetByteCode = value[1];
-            this.adminValidatorSetAddress = adminValidatorSetAddress;
-            this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),
-                adminValidatorSetAddress);
         }
     }
     
-    setOwnersParameters(ownerAccountAddress,privateKey,adminValidatorSetAddress){
+    setOwnersParameters(adminValidatorSetAddress){
         try{
-            this.ownerAccountAddress = ownerAccountAddress;
-            this.privateKey = privateKey;
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
             
@@ -34,7 +24,19 @@ class AdminValidatorSet {
             return "";
         }    
     }
-
+    
+    async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,otherAdminsList) {
+        try {
+            var estimatedGas = 0;
+            var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,otherAdminsList);
+            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            return deployedAddress.contractAddress;
+        } catch (error) {
+            console.log("Error in AdminValidatorSet:deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
+            return "";
+        }
+    }
+    
     GetAliasForAdmin(admin, fn) {
         fn("alias - " + admin);
     }
@@ -55,7 +57,7 @@ class AdminValidatorSet {
             console.log(resultList);
             return this.utils.split(resultList);
         } catch (error) {
-            console.log("Error in AdminValidatorSet.getAllAdminsAsync(): " + error);
+            console.log("Error in AdminValidatorSet:getAllAdminsAsync(): " + error);
             return resultList;
         }
     }
@@ -70,7 +72,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToAddAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:proposalToAddAdmin(): " + error);
             return false;
         }
     }
@@ -85,7 +87,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForAddingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:voteForAddingAdmin(): " + error);
             return false;
         }
     }
@@ -100,7 +102,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstAddingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:voteAgainstAddingAdmin(): " + error);
             return false;
         }
     }
@@ -115,7 +117,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.proposalToRemoveAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:proposalToRemoveAdmin(): " + error);
             return false;
         }
     }
@@ -130,7 +132,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteForRemovingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:voteForRemovingAdmin(): " + error);
             return false;
         }
     }
@@ -145,7 +147,7 @@ class AdminValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet.voteAgainstRemovingAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:voteAgainstRemovingAdmin(): " + error);
             return false;
         }
     }
@@ -158,7 +160,7 @@ class AdminValidatorSet {
             //return utils.convertToBool(data);
             return flag;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.isActiveAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:isActiveAdmin(): " + error);
             return false;
         }
     }
@@ -171,7 +173,7 @@ class AdminValidatorSet {
             //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:checkAdmin(): " + error);
             return false;
         }
     }
@@ -184,41 +186,11 @@ class AdminValidatorSet {
             //return this.utils.convertToBool(data);
             return whatProposal;
         } catch (error) {
-            console.log("Error in AdminValidatorSet.checkAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:checkAdmin(): " + error);
             return "none";
         }
     }
     
-    async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminValidatorAddress) {
-        try {
-            var estimatedGas = 0;
-            // var deployedAddress =  await this.utils.sendMethodTransactionDirect(ethAccountToUse,
-            //     _privateKey,
-            //     this.adminValidatorSetAbi,
-            //     this.adminValidatorSetByteCode,
-            //     adminValidatorAddress,
-            //     this.web3);
-            var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminValidatorAddress);
-            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
-            this.adminValidatorSetAddress = deployedAddress.contractAddress;
-            return this.adminValidatorSetAddress;
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
-            return "";
-        }
-    }
-    
-    async deployNewAdminSetValidatorContract(ethAccountToUse, otherAdminsList) {
-        try {
-            var deployedAddress = await this.utils.deployContract(this.adminValidatorSetAbi, this.adminValidatorSetByteCode, ethAccountToUse, otherAdminsList,this.web3);
-            this.adminValidatorSetAddress = deployedAddress;
-            return this.adminValidatorSetAddress;
-        } catch (error) {
-            console.log("Error in AdminValidatorSet.deployNewAdminSetValidatorContract(): " + error);
-            return "";
-        }
-    }
-
     subscribeForPastEvents(){
         var options = {
             fromBlock: "latest",

@@ -3,7 +3,6 @@ const EthereumTx = require('ethereumjs-tx');
 const solc = require('solc');
 const fs = require('fs');
 var keythereum = require('keythereum');
-//const async =  require('async');
 const ethUtil = require('ethereumjs-util');
 class Utils  {
     constructor(web3provider, utils) {
