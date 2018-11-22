@@ -8,8 +8,19 @@ class AdminValidator{
         this.adminValidatorSet = new AdminValidatorSet(web3, utils, Web3);
     }
 
-    setHelperParameters(adminValidatorSetAddress){
-        this.adminValidatorSet.setOwnersParameters(adminValidatorSetAddress);
+    async setHelperParameters(adminValidatorSetAddress){
+        let tranHash = await this.adminValidatorSet.setOwnersParameters(accountAddressList[0],privateKey[accountAddressList[0]],adminValidatorSetAddress);
+        return tranHash;
+    }
+    
+    async deployNewAdminSetValidatorContractWithPrivateKey(){
+        let ethAccountToUse = accountAddressList[0];
+        let privateKeyOwner = privateKey[ethAccountToUse];
+        let otherAdminsList = [];
+        // otherAdminsList.push(accountAddressList[1]);
+        // otherAdminsList.push(accountAddressList[2]);
+        var adminValrSetAddress = await this.adminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,otherAdminsList);
+        return adminValrSetAddress;
     }
     
     async runAdminTestCases(){
@@ -222,16 +233,6 @@ class AdminValidator{
             console.log("Error in AdminValidator:removeOneAdmin(): " + error);
             return false;
         }
-    }
-
-    async deployNewAdminSetValidatorContractWithPrivateKey(){
-        let ethAccountToUse = accountAddressList[0];
-        let privateKeyOwner = privateKey[ethAccountToUse];
-        let otherAdminsList = [];
-        // otherAdminsList.push(accountAddressList[1]);
-        // otherAdminsList.push(accountAddressList[2]);
-        var adminValrSetAddress = await this.adminValidatorSet.deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,otherAdminsList);
-        return adminValrSetAddress;
     }
 }
 

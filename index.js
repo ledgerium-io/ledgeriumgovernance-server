@@ -79,13 +79,15 @@ var main = async function () {
                                 return;
                             }    
                             adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
-                            console.log("adminValidatorSetAddress",adminValidatorSetAddress);
                             simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
-                            console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
                             writeContractsINConfig();
                         }
-                        adminValidator.setHelperParameters(adminValidatorSetAddress);
-                        simpleValidator.setHelperParameters(simpleValidatorSetAddress);
+                        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+                        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+                        let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
+                        console.log("tranHash of initialisation", tranHash);
+                        tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
+                        console.log("tranHash of initialisation", tranHash);
                         global.adminValidatorSetAddress = adminValidatorSetAddress;
                         global.simpleValidatorSetAddress = simpleValidatorSetAddress;
                         break;
@@ -96,10 +98,12 @@ var main = async function () {
                         }
                         adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
                         console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-                        adminValidator.setHelperParameters(adminValidatorSetAddress);
                         simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
                         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
-                        simpleValidator.setHelperParameters(simpleValidatorSetAddress);
+                        let tranHash1 = await adminValidator.setHelperParameters(adminValidatorSetAddress);
+                        console.log("tranHash of initialisation", tranHash1);
+                        tranHash1 = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
+                        console.log("tranHash of initialisation", tranHash1);
 
                         global.adminValidatorSetAddress = adminValidatorSetAddress;
                         global.simpleValidatorSetAddress = simpleValidatorSetAddress;

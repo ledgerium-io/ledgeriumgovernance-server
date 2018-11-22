@@ -78,5 +78,3 @@ typings/
 
 #pub file
 *.pub
-
-keystore/contractsConfig.json

@@ -11,10 +11,16 @@ class SimpleValidatorSet {
         }
     }
     
-    setOwnersParameters(simpleValidatorSetAddress){
+    async setOwnersParameters(ethAccountToUse,_privateKey,simpleValidatorSetAddress,adminValidatorSetAddress){
         try{
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
+
+            let transactionHash = await this.init(ethAccountToUse,_privateKey,adminValidatorSetAddress);
+            return transactionHash;
+
+            //this.subscribeForPastEvents();
+            //this.listenForContractObjectEvents(this.contract);  
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet:setOwnersParameters(): " + error);
@@ -22,18 +28,33 @@ class SimpleValidatorSet {
         }  
     }
     
-    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorAddress,otherValidatorList) {
+    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorSetAddress,otherValidatorList) {
         try {
             var constructorParameters = [];
-            constructorParameters.push(adminValidatorAddress);
+            //constructorParameters.push(adminValidatorAddress);
             constructorParameters = constructorParameters.concat(otherValidatorList);
             var estimatedGas = 0;
             var encodedABI = await this.utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
-            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
+            var deployedAddress = await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
             return deployedAddress.contractAddress;
         } catch (error) {
             console.log("Error in SimpleValidatorSet:deployNewSimpleSetValidatorContract(): " + error);
             return "";
+        }
+    }
+    
+    async init(ethAccountToUse, privateKey,adminValidatorSetAddress){
+        try{
+            var encodedABI = this.contract.methods.init(adminValidatorSetAddress).encodeABI();
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas = 0;
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet:init(): " + error);
+            return false;
         }
     }
     

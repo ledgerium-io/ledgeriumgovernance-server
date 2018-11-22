@@ -11,11 +11,13 @@ class AdminValidatorSet {
         }
     }
     
-    setOwnersParameters(adminValidatorSetAddress){
+    async setOwnersParameters(ethAccountToUse,_privateKey,adminValidatorSetAddress){
         try{
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
             
+            let transactionHash = await this.init(ethAccountToUse,_privateKey);
+            return transactionHash;
             //this.subscribeForPastEvents();
             //this.listenForContractObjectEvents(this.contract);  
         }
@@ -34,6 +36,21 @@ class AdminValidatorSet {
         } catch (error) {
             console.log("Error in AdminValidatorSet:deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
             return "";
+        }
+    }
+
+    async init(ethAccountToUse, privateKey){
+        try{
+            var encodedABI = this.contract.methods.init().encodeABI();
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas = 0;
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet:proposalToAddAdmin(): " + error);
+            return false;
         }
     }
     

@@ -8,8 +8,20 @@ class SimpleValidator{
         this.simpleValidatorSet = new SimpleValidatorSet(web3, utils, Web3);
     }
 
-    setHelperParameters(simpleValidatorSetAddress){
-        this.simpleValidatorSet.setOwnersParameters(simpleValidatorSetAddress);
+    async setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress){
+        let tranHash = await this.simpleValidatorSet.setOwnersParameters(accountAddressList[0],privateKey[accountAddressList[0]],simpleValidatorSetAddress,adminValidatorSetAddress);
+        return tranHash;
+    }
+
+    async deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress)
+    {
+        let ethAccountToUse = accountAddressList[0];
+        let privateKeyOwner = privateKey[ethAccountToUse];
+        let validatorAddressList = [];
+        // validatorAddressList.push(accountAddressList[1]);
+        // validatorAddressList.push(accountAddressList[2]);
+        let singleValrSetAddress = await this.simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,adminValidatorSetAddress,validatorAddressList);
+        return singleValrSetAddress;
     }
 
     /** This will add all the istanbul existing validator nodes as validator in SimpleValidatorSet SmartContract! Both list will come 
@@ -137,17 +149,6 @@ class SimpleValidator{
             console.log("Error in SimpleValidator:runRemoveValidatorTestCases(): " + error);
             return false;
         }
-    }
-
-    async deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress)
-    {
-        let ethAccountToUse = accountAddressList[0];
-        let privateKeyOwner = privateKey[ethAccountToUse];
-        let validatorAddressList = [];
-        // validatorAddressList.push(accountAddressList[1]);
-        // validatorAddressList.push(accountAddressList[2]);
-        let singleValrSetAddress = await this.simpleValidatorSet.deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKeyOwner,adminValidatorSetAddress,validatorAddressList);
-        return singleValrSetAddress;
     }
 
     async addSimpleSetContractValidatorForAdmin(newValidator){
