@@ -1,17 +1,8 @@
-const moment = require('moment');
 const EthereumTx = require('ethereumjs-tx');
-const solc = require('solc');
 const fs = require('fs');
 var keythereum = require('keythereum');
 const ethUtil = require('ethereumjs-util');
 class Utils  {
-    constructor(web3provider, utils) {
-    }
-    
-    async getCurrentTime () {
-        return moment().format('YYYY-MM-DD HH:mm:ss').trim();
-    }
-      
     async transaction (from,to,value,data){
         return {
             from    : from,
@@ -46,40 +37,13 @@ class Utils  {
                 gas : 5500000
                 //"privateFor" : privateFor
             });
-            // .on('error', function(error){ 
-            //     if(!error)
-            //         console.log("error", error);
-            // })
-            // .on('receipt', receipt => {
-            //     deployedAddress = receipt.contractAddress;
-            //     // implement it on asysn await.
-            //     return deployedAddress;
-            // })
-            // .on('transactionHash', function(transactionHash){
-            //     console.log('transactionHash', transactionHash);
-            //     //web3.eth.getTransaction(transactionHash);
-            //     callback("transactionHash", transactionHash);
-            // })
-            // .then(transaction => {
-            //     console.log("transaction",transaction);
-            // });
             return deployedAddress._address;
         } catch (error) {
             console.log("Exception in utils.deployContract(): " + error);
         }    
     }
-    async sendMethodTransactionDirect(fromAccountAddress, privateKey, abi, bytecode, args, web3) {
-        let nonceToUse = await web3.eth.getTransactionCount(fromAccountAddress, 'pending');
-
-        var simpleContract = web3.eth.contract(abi);
-        var contract = await simpleContract.new(args, {from: fromAccountAddress, data: bytecode, gas: 0x47b760,
-            privateFor: ["0x43a69edd54e07b95113fed92e8c9ba004500ce12"]});
-            // function(e, contract) {
-
-            // }
-    }
-
-     async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
+    
+    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
         try
         {
             var gasPrice = await web3.eth.getGasPrice();
@@ -115,20 +79,7 @@ class Utils  {
             if(transactionHash.status)
                 return transactionHash;
             else
-                return null;
-            // .once('transactionHash',(receipt)=>{
-            //     console.log('transactionHash', receipt);
-            // })
-            // .once('receipt',(receipt)=>{	
-            //     console.log('info',"transaction mined successfully");
-            //     console.log(calleeMethodName, " receipt", receipt);
-            //     return receipt;
-            //     //callback("success");
-            // })				
-            // .once('error',(error)=>{
-            //     console.log('Error in ', calleeMethodName, `ERROR:\n${error.message}:${error.stack}`);
-            // });
-        //});
+                return "";
         }
         catch (error) {
             console.log("Error in utils.sendMethodTransaction(): " + error);
@@ -157,18 +108,12 @@ class Utils  {
         return receipt;
     }
     
+    /** to get receipt of the event raised from the blockchain
+    */ 
     readSolidityContractJSON (filename) {
         var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
         let abi = JSON.stringify(json.abi);
         return [abi, json.bytecode];
-    }
-
-    compileSolidityContract (filename,contractName) {
-        let source = fs.readFileSync(filename, 'utf8');
-        let compiledContract = solc.compile(source, 1);
-        let abi = compiledContract.contracts[":"+contractName].interface;
-        let bytecode = compiledContract.contracts[":"+contractName].bytecode;
-        return [abi, bytecode];
     }
 
     keccak (web3,text){
