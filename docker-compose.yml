@@ -111,6 +111,8 @@ services:
       - /bin/sh
       - -c
       - |
+        cd /ledgerium/governanceapp/governanceApp
+        node index.js hostname=172.16.239.10 port=8545 readkeyconfig=true usecontractconfig=true privateKeys=7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3
         cd /ledgerium/governanceapp/governanceApp/app
         node governanceUI.js 172.16.239.10 8545
     networks:
