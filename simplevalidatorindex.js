@@ -5,7 +5,7 @@ const SimpleValidatorSet = require('./simplevalidatorset');
 class SimpleValidator{
     
     constructor(){
-        this.simpleValidatorSet = new SimpleValidatorSet(web3, utils, Web3);
+        this.simpleValidatorSet = new SimpleValidatorSet(web3, utils, "", undefined, Web3);
     }
 
     async setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress){
