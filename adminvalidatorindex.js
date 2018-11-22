@@ -5,7 +5,7 @@ const AdminValidatorSet = require('./adminvalidatorset');
 class AdminValidator{
     
     constructor(){
-        this.adminValidatorSet = new AdminValidatorSet(web3, utils, Web3);
+        this.adminValidatorSet = new AdminValidatorSet(web3, utils, "", undefined, Web3);
     }
 
     async setHelperParameters(adminValidatorSetAddress){

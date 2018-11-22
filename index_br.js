@@ -3,7 +3,7 @@ const Web3 = require('web3');
 //const Web3 = require('web3-quorum');
 const Utils =  require('./web3util_br');
 //const async =  require('async');
-const mnemonic = require('./mnemonic');
+//const mnemonic = require('./mnemonic');
 const SimpleValidatorSet = require('./simplevalidatorset_br');
 const AdminValidatorSet = require('./adminvalidatorset_br');
 
@@ -36,8 +36,10 @@ var main = async function () {
 
     //We need minimum 3 accounts and private keys set to continue from here!
     if((accountAddressList.length <3) || (Object.keys(privateKey).length < 3))
+    {
+        console.log("No accounts are available. The program has to exit!");
         return;
-
+    }
     // result = await web3.eth.net.getId();
     // console.log("Network ID", web3.utils.toHex(result));
 
@@ -855,31 +857,31 @@ async function createAccountsAndManageKeys(){
         privateKey = JSON.parse(keyData);
         accountAddressList = Object.keys(privateKey);
     }    
-    else{    
-        var prvkey1 = utils.keccak(web3,mnemonic['account1']);
-        var prvkey2 = utils.keccak(web3,mnemonic['account2']);
-        var prvkey3 = utils.keccak(web3,mnemonic['account3']);
-        var prvkey4 = utils.keccak(web3,mnemonic['account4']);
+    // else{    
+    //     var prvkey1 = utils.keccak(web3,mnemonic['account1']);
+    //     var prvkey2 = utils.keccak(web3,mnemonic['account2']);
+    //     var prvkey3 = utils.keccak(web3,mnemonic['account3']);
+    //     var prvkey4 = utils.keccak(web3,mnemonic['account4']);
 
-        pubkey1 = utils.generatePublicKey(prvkey1);
-        pubkey2 = utils.generatePublicKey(prvkey2);
-        pubkey3 = utils.generatePublicKey(prvkey3);
-        pubkey4 = utils.generatePublicKey(prvkey4);
+    //     pubkey1 = utils.generatePublicKey(prvkey1);
+    //     pubkey2 = utils.generatePublicKey(prvkey2);
+    //     pubkey3 = utils.generatePublicKey(prvkey3);
+    //     pubkey4 = utils.generatePublicKey(prvkey4);
         
-        accountAddressList.length = 0;
-        accountAddressList.push(pubkey1);
-        accountAddressList.push(pubkey2);
-        accountAddressList.push(pubkey3);
-        accountAddressList.push(pubkey4);
+    //     accountAddressList.length = 0;
+    //     accountAddressList.push(pubkey1);
+    //     accountAddressList.push(pubkey2);
+    //     accountAddressList.push(pubkey3);
+    //     accountAddressList.push(pubkey4);
 
-        privateKey[pubkey1] = prvkey1.slice(2,66);
-        privateKey[pubkey2] = prvkey2.slice(2,66);
-        privateKey[pubkey3] = prvkey3.slice(2,66);
-        privateKey[pubkey4] = prvkey4.slice(2,66);
+    //     privateKey[pubkey1] = prvkey1.slice(2,66);
+    //     privateKey[pubkey2] = prvkey2.slice(2,66);
+    //     privateKey[pubkey3] = prvkey3.slice(2,66);
+    //     privateKey[pubkey4] = prvkey4.slice(2,66);
 
-        var data = JSON.stringify(privateKey,null, 2);
-        fs.writeFileSync(privateKeyFileName,data);
-    }
+    //     var data = JSON.stringify(privateKey,null, 2);
+    //     fs.writeFileSync(privateKeyFileName,data);
+    // }
     var noOfPrivateKeys = Object.keys(privateKey).length;
     var noOfAccounts = accountAddressList.length;
     if(noOfAccounts > 0 && noOfPrivateKeys > 0 && (noOfAccounts == noOfPrivateKeys)){

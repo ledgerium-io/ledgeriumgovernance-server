@@ -1,13 +1,21 @@
 class AdminValidatorSet {
 
-    constructor(web3provider, utils, Web3) { 
-        this.web3 = new Web3(web3provider);
+    constructor(web3provider, utils, adminValidatorSetAddress, abi, Web3) { 
+        var value;
         this.utils = utils;
-        //Read ABI and Bytecode from dynamic source.
-        var value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
+        if(!abi) {
+            //Read ABI and Bytecode from dynamic source.
+            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
+        }else{
+            value = [abi, ""];
+        }
         if(value.length > 0){
+            this.web3 = new Web3(web3provider);
             this.adminValidatorSetAbi = value[0];
             this.adminValidatorSetByteCode = value[1];
+            this.adminValidatorSetAddress = adminValidatorSetAddress;
+            this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),
+                adminValidatorSetAddress);
         }
     }
     

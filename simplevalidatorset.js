@@ -1,13 +1,21 @@
 class SimpleValidatorSet {
 
-    constructor(web3provider, utils, Web3) {
+    constructor(web3provider, utils, simpleValidatorSetAddress, abi, Web3) {
         this.web3 = new Web3(web3provider);
         this.utils = utils;
-        //Read ABI and Bytecode from dynamic source.
-        var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
+        var value;
+        if(!abi) {
+            //Read ABI and Bytecode from dynamic source.
+            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
+        }else{
+            value = [abi, ""];
+        }
         if(value.length > 0){
             this.simpleValidatorSetAbi = value[0];
             this.simpleValidatorSetByteCode = value[1];
+            this.simpleValidatorSetAddress = simpleValidatorSetAddress;
+            this.contract = new this.web3.eth.Contract(
+                JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
         }
     }
     
