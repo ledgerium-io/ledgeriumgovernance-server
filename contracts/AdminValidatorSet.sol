@@ -33,18 +33,20 @@ contract AdminValidatorSet is Voteable, Ownable {
     }
 
 	/**
-    * @dev Function to deploy and construct adminvalidatorset. These addresses are hardcoded 
+    * @dev Function to deploy and construct adminvalidatorset. msg.sender will be added as one of admin too
+	* msg.sender address to be added as active admin
+	* @return A success flag
     */
 	constructor () public {
 	}
 
 	function init () public ifNotInitalised{
 		
-		// make sure that there are minimum of 3 admins to vote for/against
-		address msg_sender = address(0x44643353444f4b42b46ed28e668c204db6dbb7c3);
-		address _owner1 = address(0x43a69edd54e07b95113fed92e8c9ba004500ce12);
-		address _owner2 = address(0xd44b2838207a46f1007b3f296a599fadfb20978c);
+		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
+		address _owner1 = address(0x43a69eDD54e07B95113FEd92e8c9ba004500Ce12);
+		address _owner2 = address(0xd44b2838207A46F1007B3F296a599fADfb20978c);
 		
+		// make sure that there are minimum of 3 admins to vote for/against
 		owners[msg_sender] = true;
 		owners[_owner1] = true;
 		owners[_owner2] = true;

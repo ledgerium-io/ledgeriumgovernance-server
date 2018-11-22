@@ -51,7 +51,8 @@ contract SimpleValidatorSet is Voteable{
     }
 
 	/**
-    * @dev Function to deploy and construct simplevalidatorset. These addresses are hardcoded
+    * @dev Function to deploy and construct simplevalidatorset. msg.sender will be added as one of validator too
+    * @return A success flag
     */
 	constructor () public {
 	}
@@ -59,9 +60,9 @@ contract SimpleValidatorSet is Voteable{
 	function init (address _adminContractAddress) public ifNotInitalised{
 		
 		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
-		address msg_sender = address(0x44643353444f4b42b46ed28e668c204db6dbb7c3);
-		address _validator1 = address(0x43a69edd54e07b95113fed92e8c9ba004500ce12);
-		address _validator2 = address(0xd44b2838207a46f1007b3f296a599fadfb20978c);
+		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
+		address _validator1 = address(0x43a69eDD54e07B95113FEd92e8c9ba004500Ce12);
+		address _validator2 = address(0xd44b2838207A46F1007B3F296a599fADfb20978c);
 		
 		adminSet = AdminValidatorSet(adminContractAddress);
 
