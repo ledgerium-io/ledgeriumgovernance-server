@@ -12,6 +12,29 @@
             "program": "${workspaceFolder}/index.js",
             //"args":["hostname=localhost", "port=8545", "privateKeys=897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb,567521641fd972a53a9d5ac80c442f5ffc867a5242f660a6e4dfdcda33465fef,12d2bc8fc2419e9086cd38285a6a5e9c029fd5cd0a0b0c49e44d284f94ee84ae,7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3,f3b734412dd78acb34a4304c6f2a1df7bf48c42f819a86ef3306409c2c51129e,41d74f2f60da7c09beabd9e11ed6df79339a1586130d0e4275eb2c77e5450146,790afdeb16ae5c22453f8eeee25038c314f09d64fc51b8e21a5a82225e54fde6", "usecontractconfig=true", "runadminvalidator=runAdminTestCases,runRemoveAdminTestCases,getAllAdmins", "runsimplevalidator=validatorSetup,runValidatorTestCases,runRemoveValidatorTestCases,getListOfActiveValidators"]
             "args":["hostname=localhost", "port=8545", "readkeyconfig=true", "usecontractconfig=true", "runadminvalidator=runAdminTestCases"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch index.js",
+            "program": "${workspaceFolder}/index_br.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch governanceUI",
+            "program": "${workspaceFolder}/app/governanceUI.js",
+            "cwd": "${workspaceFolder}/app",
+            "args": [
+                "127.0.0.1",
+                "8545"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch getbinjs.js",
+            "program": "${workspaceFolder}/getbinjs.js"
         }
     ]
 }
