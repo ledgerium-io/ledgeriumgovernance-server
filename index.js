@@ -12,11 +12,8 @@ var web3;
 
 const utils = new Utils();
 global.utils = utils;
-
-//var host = "ws://localhost:9000";
-//web3 = new Web3(new Web3.providers.WebsocketProvider(host));
-var usecontractconfig = false;
-var readkeyconfig = false;
+var pastEventsSubscriptionFlag = false;
+global.pastEventsSubscriptionFlag = pastEventsSubscriptionFlag;
 var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
@@ -38,6 +35,8 @@ var main = async function () {
                 port = temp[1];
                 global.port = port;
                 let URL = "http://" + host + ":" + port;
+                //let URL = "ws://" + host + ":" + port;
+                //web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
                 web3 = new Web3(new Web3.providers.HttpProvider(URL));
                 global.web3 = web3;
                 adminValidator = new AdminValidator();
@@ -51,7 +50,7 @@ var main = async function () {
                 writeAccountsAndKeys();
                 break;
             case "readkeyconfig":
-            readkeyconfig = temp[1];
+                let readkeyconfig = temp[1];
                 switch(readkeyconfig){
                     case "true":
                     default: 
@@ -63,7 +62,7 @@ var main = async function () {
                 }
                 break;
             case "usecontractconfig":
-                usecontractconfig = temp[1];
+                let usecontractconfig = temp[1];
                 switch(usecontractconfig){
                     case "true":
                         readContractsFromConfig();
@@ -95,7 +94,7 @@ var main = async function () {
                         simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
                         console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
                         let tranHash1 = await adminValidator.setHelperParameters(adminValidatorSetAddress);
-                        console.log("tranHash of initialisation", tranHash1);
+                        console.log("tranHash of     initialisation", tranHash1);
                         tranHash1 = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
                         console.log("tranHash of initialisation", tranHash1);
 
@@ -157,10 +156,10 @@ var main = async function () {
                 }
                 break;
             }
-            case "rinkeby":
+            case "rinkeby":{
                 var HDWalletProvider = require("truffle-hdwallet-provider");
                 //var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";
-                var provider = new HDWalletProvider(privateKey[accountAddressList[0]], "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
+                provider = new HDWalletProvider(privateKey[accountAddressList[0]], "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
                 web3 = new Web3();
                 web3.setProvider(provider);
                 global.web3 = web3;
@@ -179,6 +178,16 @@ var main = async function () {
                 global.adminValidatorSetAddress = adminValidatorSetAddress;
                 global.simpleValidatorSetAddress = simpleValidatorSetAddress;
                 break;
+            }
+            case "pastEventsSubscription":{
+                pastEventsSubscriptionFlag = true;
+                global.pastEventsSubscriptionFlag = pastEventsSubscriptionFlag;
+                break;
+            }
+            // case "docgen":
+            //     const docgen = require('solidity-docgen').default;
+            //     docgen('.', './contracts/', './docs/', [])
+            //     break;
             default:
                 //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
                 break;

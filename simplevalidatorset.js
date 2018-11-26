@@ -24,11 +24,14 @@ class SimpleValidatorSet {
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
 
+            if(pastEventsSubscriptionFlag){
+                this.subscribeForPastEvents();
+                this.listenForContractObjectEvents(this.contract);  
+            }
+            console.log("pastEventsSubscriptionFlag", pastEventsSubscriptionFlag);
+            
             let transactionHash = await this.init(ethAccountToUse,_privateKey,adminValidatorSetAddress);
             return transactionHash;
-
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);  
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet:setOwnersParameters(): " + error);
@@ -343,35 +346,80 @@ class SimpleValidatorSet {
      }     
         
      listenForContractObjectEvents(contractObject){
-        this.utils.listen(contractObject,(events)=>{
+        this.utils.listenAllEventsContract(contractObject,(events)=>{
             console.log('SimpleValidatorSet Event Received');
             switch(events.event){
-                case "addvalidator":
-                    console.log("addvalidator:Contract address",event.address);
-                    console.log("addvalidator:admin ",event.returnValues._admin);
-                    console.log("addvalidator:validator",event.returnValues.validator);
+                case "minValidatorNeeded":
+                    console.log("minValidatorNeeded");
                     break;
-                case "removevalidator":
-                    console.log("removevalidator");
+                case "addValidator":
+                    console.log("addValidator");
                     break;
-                default:
+                case "removeValidator":
+                    console.log("removeValidator");
+                    break;
+                case "votedfor":
+                    console.log("votedfor");
+                    break;
+                case "votedagainst":
+                    console.log("votedagainst");
+                    break;
+                case "alreadyProposalForAddingValidator":
+                    console.log("alreadyProposalForAddingValidator");
+                    break;
+                case "alreadyProposalForRemovingValidator":
+                    console.log("alreadyProposalForRemovingValidator");
+                    break;
+                case "noProposalForAddingValidator":
+                    console.log("noProposalForAddingValidator");
+                    break;
+                case "noProposalForRemovingValidator":
+                    console.log("noProposalForRemovingValidator");
+                    break;
+                case "alreadyActiveValidator":
+                    console.log("alreadyActiveValidator");
+                    break;
+                case "alreadyInActiveValidator":
+                    console.log("alreadyInActiveValidator");
                     break;
             }
         });
 
-        // this.utils.subscribe("SimpleValidatorSet", this.web3, (events)=>{
+        // this.utils.subscribeForLogs("logs", this.web3, this.simpleValidatorSetAddress, (events)=>{
         //     console.log('SimpleValidatorSet subscribe Event Received');
         //     switch(events.event){
-        //         case "InitiateChange":
-        //             console.log("InitiateChange");
+        //         case "minValidatorNeeded":
+        //             console.log("minValidatorNeeded");
         //             break;
-        //         case "AddValidatorEvent":
-        //             console.log("AddValidatorEvent");
+        //         case "addValidator":
+        //             console.log("addValidator");
         //             break;
-        //         case "RemoveValidatorEvent":
-        //             console.log("RemoveValidatorEvent");
+        //         case "removeValidator":
+        //             console.log("removeValidator");
         //             break;
-        //         default:			
+        //         case "votedfor":
+        //             console.log("votedfor");
+        //             break;
+        //         case "votedagainst":
+        //             console.log("votedagainst");
+        //             break;
+        //         case "alreadyProposalForAddingValidator":
+        //             console.log("alreadyProposalForAddingValidator");
+        //             break;
+        //         case "alreadyProposalForRemovingValidator":
+        //             console.log("alreadyProposalForRemovingValidator");
+        //             break;
+        //         case "noProposalForAddingValidator":
+        //             console.log("noProposalForAddingValidator");
+        //             break;
+        //         case "noProposalForRemovingValidator":
+        //             console.log("noProposalForRemovingValidator");
+        //             break;
+        //         case "alreadyActiveValidator":
+        //             console.log("alreadyActiveValidator");
+        //             break;
+        //         case "alreadyInActiveValidator":
+        //             console.log("alreadyInActiveValidator");
         //             break;
         //     }
         // });

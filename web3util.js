@@ -134,8 +134,11 @@ class Utils  {
         return privateKey.toString('hex');
     }
 
-    async subscribe (string,web3,callback) {
-        web3.eth.subscribe(string,(error,transaction)=>{
+    async subscribeForLogs (string,web3,contractAddress, callback) {
+        await web3.eth.subscribe(string,{
+            address: contractAddress
+            //topics: ['0x12345...']
+        },(error,transaction)=>{
             if(error){
                 console.log("error",`SUBSCRIBE:\n${error.message}\n${error.stack}`);
             }else{
@@ -145,7 +148,7 @@ class Utils  {
     }
     
     // to get all events from a submitted transaction to send to node application
-    async listen(contract,callback){
+    async listenAllEventsContract(contract,callback){
         contract.events.allEvents({
             fromBlock: 0,
             toBlock  : 'latest'
@@ -156,6 +159,12 @@ class Utils  {
                 console.log('info',`:\n${event}`);
                 callback(event);
             }
+        })
+        .on("data", function(log){
+            console.log("log data",log);
+        })
+        .on("changed", function(log){
+            console.log("log changed",log);
         });
     }
 

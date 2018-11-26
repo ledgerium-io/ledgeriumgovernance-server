@@ -3,7 +3,7 @@ import "./AdminValidatorSet.sol";
 import "./Voteable.sol";
 
 /**
- * The ValidatorSet contract maintains the set of validators and Allows
+ * @title The SimpleValidatorSet contract maintains the set of validators and Allows
  * admins to add and remove members from the validator set
  */
 contract SimpleValidatorSet is Voteable{
@@ -54,9 +54,6 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to deploy and construct simplevalidatorset. msg.sender will be added as one of validator too
     * @return A success flag
     */
-	constructor () public {
-	}
-
 	function init (address _adminContractAddress) public ifNotInitalised{
 		
 		address adminContractAddress = address(0x0000000000000000000000000000000000002018);

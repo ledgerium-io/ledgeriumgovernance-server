@@ -4,7 +4,7 @@ import "./Ownable.sol";
 import "./Voteable.sol";
 
 /**
- * The AdminSet contract maintains the list of all the admin with their vote
+ * @title The AdminValidatorSet contract maintains the list of all the admin with their vote
  * to add or remove a particular member as admin
  */
 contract AdminValidatorSet is Voteable, Ownable {
@@ -37,9 +37,6 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* msg.sender address to be added as active admin
 	* @return A success flag
     */
-	constructor () public {
-	}
-
 	function init () public ifNotInitalised{
 		
 		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);

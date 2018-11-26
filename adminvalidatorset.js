@@ -24,10 +24,14 @@ class AdminValidatorSet {
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
             
+            if(pastEventsSubscriptionFlag){
+                this.subscribeForPastEvents();
+                this.listenForContractObjectEvents(this.contract);  
+            }
+            console.log("pastEventsSubscriptionFlag", pastEventsSubscriptionFlag);
+
             let transactionHash = await this.init(ethAccountToUse,_privateKey);
             return transactionHash;
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);  
         }
         catch (error) {
             console.log("Error in AdminValidatorSet.setOwnersParameters(): " + error);
@@ -248,33 +252,82 @@ class AdminValidatorSet {
      }     
         
      listenForContractObjectEvents(contractObject){
-        this.utils.listen(contractObject, (events)=>{
+        this.utils.listenAllEventsContract(contractObject, (events)=>{
             console.log('AdminValidatorSet live event Received');
             switch(events.event){
+                case "minAdminNeeded":
+                    console.log("minAdminNeeded");
+                    break;
+                case "addAdmin":
+                    console.log("addAdmin");
+                    break;
+                case "removeAdmin":
+                    console.log("removeAdmin");
+                    break;
                 case "votedfor":
-                    console.log("votedfor:Contract address",events.address);
-                    console.log("votedfor:admin ",events.returnValues[0]);
-                    console.log("votedfor:validator",events.returnValues[1]);
+                    console.log("votedfor");
                     break;
                 case "votedagainst":
                     console.log("votedagainst");
-                    console.log("votedfor:Contract address",events.address);
-                    console.log("votedfor:admin ",events.returnValues[0]);
-                    console.log("votedfor:validator",events.returnValues[1]);
                     break;
-                default:
+                case "alreadyProposalForAddingAdmin":
+                    console.log("alreadyProposalForAddingAdmin");
+                    break;
+                case "alreadyProposalForRemovingAdmin":
+                    console.log("alreadyProposalForRemovingAdmin");
+                    break;
+                case "noProposalForAddingAdmin":
+                    console.log("noProposalForAddingAdmin");
+                    break;
+                case "noProposalForRemovingAdmin":
+                    console.log("noProposalForRemovingAdmin");
+                    break;
+                case "alreadyActiveAdmin":
+                    console.log("alreadyActiveAdmin");
+                    break;
+                case "alreadyInActiveAdmin":
+                    console.log("alreadyInActiveAdmin");
+                    break;
+                default:			
                     break;
             }
         });
 
-        // this.utils.subscribe("AdminValidatorSet", this.web3, (events)=>{
-        //     console.log('AdminValidatorSet subscribe Event Received');
+        // this.utils.subscribeForLogs('logs', this.web3, this.adminValidatorSetAddress, (events)=>{
+        //     console.log('AdminValidatorSet subscribeForLogs Received');
         //     switch(events.event){
+        //         case "minAdminNeeded":
+        //             console.log("minAdminNeeded");
+        //             break;
+        //         case "addAdmin":
+        //             console.log("addAdmin");
+        //             break;
+        //         case "removeAdmin":
+        //             console.log("removeAdmin");
+        //             break;
         //         case "votedfor":
         //             console.log("votedfor");
         //             break;
         //         case "votedagainst":
         //             console.log("votedagainst");
+        //             break;
+        //         case "alreadyProposalForAddingAdmin":
+        //             console.log("alreadyProposalForAddingAdmin");
+        //             break;
+        //         case "alreadyProposalForRemovingAdmin":
+        //             console.log("alreadyProposalForRemovingAdmin");
+        //             break;
+        //         case "noProposalForAddingAdmin":
+        //             console.log("noProposalForAddingAdmin");
+        //             break;
+        //         case "noProposalForRemovingAdmin":
+        //             console.log("noProposalForRemovingAdmin");
+        //             break;
+        //         case "alreadyActiveAdmin":
+        //             console.log("alreadyActiveAdmin");
+        //             break;
+        //         case "alreadyInActiveAdmin":
+        //             console.log("alreadyInActiveAdmin");
         //             break;
         //         default:			
         //             break;
