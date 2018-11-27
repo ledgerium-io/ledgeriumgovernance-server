@@ -14,7 +14,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	bool isInit; 
 	address[] admins;
 	mapping (address => bool) exists;
-	uint32 totalActiveCount; //
+	uint32 totalActiveCount;
 
 	event AddAdmin(address indexed proposer, address indexed admin);
 	event RemoveAdmin(address indexed proposer, address indexed admin);
@@ -80,7 +80,13 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @return A success flag
     */
 	function proposalToAddAdmin(address _address) public isOwner isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.NOT_CREATED);
+		
+		//Lets check if the _address is already active!
+		if(isActiveAdmin(_address)){
+			emit AlreadyActiveAdmin(_address);
+			return false;
+		}
+
 		if(votes[_address].proposal != Proposal.NOT_CREATED) {
 			if(votes[_address].proposal == Proposal.ADD){
 				emit AlreadyProposalForAddingAdmin(_address);
@@ -155,6 +161,13 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* @return Emits event minAdminNeeded in case the no of existing active admins are less than 3
     */
   	function proposalToRemoveAdmin(address _address) public isOwner isInitalised returns (bool) {
+		
+		//Lets check if the _address is already inActive!
+		if(!isActiveAdmin(_address)){
+			emit AlreadyInActiveAdmin(_address);
+			return false;
+		}
+		
 		if(totalActiveCount <= 3){
 			emit MinAdminNeeded(3);
 			return false;

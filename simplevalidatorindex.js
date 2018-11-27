@@ -152,6 +152,7 @@ class SimpleValidator{
     }
 
     async addSimpleSetContractValidatorForAdmin(newValidator){
+        console.log("****************** Running addSimpleSetContractValidatorForAdmin ******************");
         try{
             var from = accountAddressList[0];
             var ethAccountToPropose = accountAddressList[0];
@@ -163,7 +164,7 @@ class SimpleValidator{
             console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
             var transactionhash = await this.simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
-            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator, "by admin", from);
 
             whatProposal = await this.simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
             console.log(newValidator, "checked proposal for the validator ?", whatProposal);
@@ -181,7 +182,7 @@ class SimpleValidator{
                     continue;
                 let votingFor = activeValidatorList[indexAV];
                 transactionhash = await this.simpleValidatorSet.voteForAddingValidator(votingFor, privateKey[votingFor], newValidator);
-                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator, "by validator", votingFor);
 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 let votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
@@ -193,7 +194,7 @@ class SimpleValidator{
                     break;
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 transactionhash = await this.simpleValidatorSet.voteAgainstAddingValidator(votingAgainst, privateKey[votingAgainst], newValidator);
-                console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator);
+                console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator, "by validator", votingAgainst);
                 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
@@ -207,6 +208,7 @@ class SimpleValidator{
                     break; 
             }
             this.istanbulAddValidator(newValidator);
+            console.log("****************** Ending addSimpleSetContractValidatorForAdmin ******************");
             return true;
         }
         catch (error) {
@@ -216,6 +218,7 @@ class SimpleValidator{
     }
 
     async removeSimpleSetContractValidatorForAdmin(removeValidator){
+        console.log("****************** Running removeSimpleSetContractValidatorForAdmin ******************");
         try{
             var ethAccountToPropose = accountAddressList[0];
 
@@ -234,7 +237,7 @@ class SimpleValidator{
             * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
             */
             var transactionhash = await this.simpleValidatorSet.proposalToRemoveValidator(ethAccountToPropose, privateKey[ethAccountToPropose], removeValidator);
-            console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", removeValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", removeValidator, "by admin", ethAccountToPropose);
 
             /* Since REMOVE the validator proposal is raised, checkProposal should return "remove"*/
             var whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose,removeValidator);
@@ -252,9 +255,9 @@ class SimpleValidator{
             for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
                 if(ethAccountToPropose == activeValidatorList[indexAV])
                     continue;
-                let votingFrom = activeValidatorList[indexAV];
-                transactionhash = await this.simpleValidatorSet.voteForRemovingValidator(votingFrom, privateKey[votingFrom], removeValidator);
-                console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+                let votingFor = activeValidatorList[indexAV];
+                transactionhash = await this.simpleValidatorSet.voteForRemovingValidator(votingFor, privateKey[votingFor], removeValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator, "by validator", votingFor);
 
                 whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose, removeValidator);
                 console.log(removeValidator, "checked proposal for the validator ?", whatProposal);
@@ -269,7 +272,7 @@ class SimpleValidator{
                     break;
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 transactionhash = await this.simpleValidatorSet.voteAgainstRemovingValidator(votingAgainst, privateKey[votingAgainst], removeValidator);
-                console.log("submitted transactionhash ",transactionhash, "against voting to add ", removeValidator);
+                console.log("submitted transactionhash ",transactionhash, "against voting to add ", removeValidator, "by validator", votingAgainst);
                 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, removeValidator);
@@ -289,6 +292,7 @@ class SimpleValidator{
             console.log(removeValidator, "still an validator ?", flag);
 
             this.istanbulRemoveValidator(removeValidator);
+            console.log("****************** Ending removeSimpleSetContractValidatorForAdmin ******************");
             return flag;
         }
         catch (error) {

@@ -273,7 +273,7 @@ class AdminValidatorSet {
                 case "VotedAgainstAdd":
                     console.log("VotedAgainstAdd:Contract address",events.address);
                     console.log("VotedAgainstAdd:Voting admin ",events.returnValues.admin);
-                    console.log("votedAgVotedAgainstAddainstAdd:admin",events.returnValues.voted);
+                    console.log("VotedAgainstAdd:admin",events.returnValues.voted);
                     break;
                 case "VotedAgainstRemove":
                     console.log("VotedAgainstRemove:Contract address",events.address);

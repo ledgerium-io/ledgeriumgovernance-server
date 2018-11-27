@@ -112,7 +112,11 @@ contract SimpleValidatorSet is Voteable{
     * @return A success flag
     */
   	function proposalToAddValidator(address _address) public isAdmin isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.NOT_CREATED);
+		//Lets check if the _address is already active!
+		if(isActiveValidator(_address)){
+			emit AlreadyActiveValidator(_address);
+			return false;
+		}
 		if(votes[_address].proposal != Proposal.NOT_CREATED) {
 			if(votes[_address].proposal == Proposal.ADD){
 				emit AlreadyProposalForAddingValidator(_address);
@@ -190,6 +194,13 @@ contract SimpleValidatorSet is Voteable{
 	* @return Emits event alreadyProposalForRemovingValidator() in case some proposal already exists
     */
   	function proposalToRemoveValidator(address _address) public isValidator isInitalised returns (bool) {
+		
+		//Lets check if the _address is already inActive!
+		if(!isActiveValidator(_address)){
+			emit AlreadyInActiveValidator(_address);
+			return false;
+		}
+
 		if(totalActiveCount <= 3) {
 			emit MinValidatorNeeded(3);
 			return false;
