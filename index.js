@@ -148,10 +148,10 @@ var main = async function () {
                             var result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
                             break;
-                        case "addNewAdmin":
+                        case "addOneAdmin":
                             var adminToAdd = list[++j];
                             console.log("adminToAdd ", adminToAdd);
-                            var result = await adminValidator.addNewAdmin(adminToAdd);
+                            var result = await adminValidator.addOneAdmin(adminToAdd);
                             result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
                             break;

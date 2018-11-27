@@ -27,11 +27,11 @@ class AdminValidator{
         console.log("****************** Running Admin Test cases ******************");
         console.log("****************** Start Admin Test cases ******************");
         var adminToAdd = accountAddressList[3];
-        var flag = await this.addNewAdmin(adminToAdd);
+        var flag = await this.addOneAdmin(adminToAdd);
         console.log("return flag for proposalToAddAdmin ",flag);
 
         adminToAdd = accountAddressList[4];
-        flag = await this.addNewAdmin(adminToAdd);
+        flag = await this.addOneAdmin(adminToAdd);
         console.log("return flag for proposalToAddAdmin ",flag);
 
         var activeAdminList;
@@ -85,7 +85,7 @@ class AdminValidator{
         return activeAdminList;
     }
 
-    async addNewAdmin(adminToAdd){
+    async addOneAdmin(adminToAdd){
         try{
             var ethAccountToPropose = accountAddressList[0];
             
@@ -159,7 +159,7 @@ class AdminValidator{
             return flag;
         }
         catch (error) {
-            console.log("Error in AdminValidator:addNewAdmin(): " + error);
+            console.log("Error in AdminValidator:addOneAdmin(): " + error);
             return false;
         }
     }

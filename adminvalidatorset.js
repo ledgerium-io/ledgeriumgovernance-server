@@ -244,6 +244,7 @@ class AdminValidatorSet {
                 if(events.length > 0){
                     events.forEach(eachElement => {
                         if(eachElement.event == "AddAdmin") {
+                            console.log("listenContractPastEvents for AddAdmin Event");
                             console.log("AddAdmin:Contract address",eachElement.address);
                             console.log("AddAdmin:Transaction Hash",eachElement.transactionHash);
                             console.log("AddAdmin:Block Hash",eachElement.blockHash);
@@ -287,7 +288,7 @@ class AdminValidatorSet {
                 case "RemoveAdmin":
                     console.log("RemoveAdmin:Contract address",events.address);
                     console.log("RemoveAdmin:proposer ",events.returnValues.proposer);
-                    console.log("removRemoveAdmineAdmin:admin",events.returnValues.admin);
+                    console.log("RemoveAdmin:admin",events.returnValues.admin);
                     break;
                 case "AlreadyProposalForAddingAdmin":
                     console.log("AlreadyProposalForAddingAdmin:Contract address",events.address);
