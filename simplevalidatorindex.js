@@ -171,6 +171,10 @@ class SimpleValidator{
             votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
             console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
+            /* Lets see who proposed this validator for add*/
+            var proposer = await this.simpleValidatorSet.getProposer(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked proposer for the validator ?", proposer);
+
             var activeValidatorList = await this.getListOfActiveValidators();
             for(var indexAV = 0; indexAV < activeValidatorList.length;indexAV++){
                 if(ethAccountToPropose == activeValidatorList[indexAV])
@@ -223,7 +227,7 @@ class SimpleValidator{
             var flag = await this.simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
             console.log(removeValidator, "already an validator ?", flag);
             if(!flag) 
-                return true;
+               return true;
 
             /*We are testing REMOVE validator functionality here with one proposal FOR removing and one more vote FOR removing,
             * makes more than 3/2 brings this a majority and validator will be removed. And proposal will be cleared off!
@@ -239,6 +243,10 @@ class SimpleValidator{
             /* Lets see how voting looks at the moment! It should return 1,0*/
             var votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
             console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
+
+            /* Lets see who proposed this validator for removal*/
+            var proposer = await this.simpleValidatorSet.getProposer(ethAccountToPropose, removeValidator);
+            console.log(removeValidator, "checked proposer for the validator ?", proposer);
 
             var activeValidatorList = await this.getListOfActiveValidators();
             for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
@@ -316,31 +324,32 @@ class SimpleValidator{
 
     async istanbulAddValidator(validatorAddress)
     {
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         
-        this.addIstanbulValidator(8545,validatorAddress);
-        this.addIstanbulValidator(8546,validatorAddress);
-        this.addIstanbulValidator(8547,validatorAddress);
-        this.addIstanbulValidator(8548,validatorAddress);
-        this.addIstanbulValidator(8549,validatorAddress);
-        this.addIstanbulValidator(8550,validatorAddress);
+        await this.addIstanbulValidator(8545,validatorAddress);
+        await this.addIstanbulValidator(8546,validatorAddress);
+        await this.addIstanbulValidator(8547,validatorAddress);
+        await this.addIstanbulValidator(8548,validatorAddress);
+        await this.addIstanbulValidator(8549,validatorAddress);
+        await this.addIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
-    }    
+    }
 
     async istanbulRemoveValidator(validatorAddress){
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
 
-        this.removeIstanbulValidator(8545,validatorAddress);
-        this.removeIstanbulValidator(8546,validatorAddress);
-        this.removeIstanbulValidator(8547,validatorAddress);
-        this.removeIstanbulValidator(8548,validatorAddress);
-        this.removeIstanbulValidator(8549,validatorAddress);
+        await this.removeIstanbulValidator(8545,validatorAddress);
+        await this.removeIstanbulValidator(8546,validatorAddress);
+        await this.removeIstanbulValidator(8547,validatorAddress);
+        await this.removeIstanbulValidator(8548,validatorAddress);
+        await this.removeIstanbulValidator(8549,validatorAddress);
+        await this.removeIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
     }
 
@@ -358,12 +367,16 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
+        //var err,result = await web3.currentProvider.send(message);//,(err,result)=>{
         web3.currentProvider.send(message,(err,result)=>{
-            console.log("received results:addIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:addIstanbulValidator", err);
+        console.log("received results:addIstanbulValidator");
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:addIstanbulValidator", err);
         });
         return;
     }
@@ -382,12 +395,16 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
+        //var err,result = await web3.currentProvider.send(message);//,(err,result)=>{
         web3.currentProvider.send(message,(err,result)=>{
             console.log("received results:removeIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:removeIstanbulValidator", err);
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:removeIstanbulValidator", err);
         });
         return;
     }
@@ -404,21 +421,22 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
         web3.currentProvider.send(message,(err,result)=>{
             console.log("received results:listIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:listIstanbulValidator", err);
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:listIstanbulValidator", err);
         });
         return;
     }
 
     delay(ms){
         new Promise(function(res) {
-                console.log(new Date().getTime()); 
                 setTimeout(res, ms); 
-                console.log(new Date().getTime());
             }
         );
     }

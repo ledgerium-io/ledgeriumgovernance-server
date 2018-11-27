@@ -78,3 +78,6 @@ typings/
 
 #pub file
 *.pub
+
+#vscode launch file
+.vscode/launch.json

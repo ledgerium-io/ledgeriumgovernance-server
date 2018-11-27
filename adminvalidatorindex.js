@@ -114,6 +114,10 @@ class AdminValidator{
             var votes = await this.adminValidatorSet.checkVotes(ethAccountToPropose,adminToAdd);
             console.log(adminToAdd, "checked votes for adding as admin ?", votes[0], votes[1]);
 
+            /* Lets see who proposed this validator for adding*/
+            var proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, adminToAdd);
+            console.log(adminToAdd, "checked proposer for the validator ?", proposer);
+            
             var activeAdminList = await this.getAllAdmins();
             for(var indexAV = 0; indexAV < activeAdminList.length; indexAV++){
                 if(ethAccountToPropose == activeAdminList[indexAV])
@@ -189,6 +193,10 @@ class AdminValidator{
             var votes = await this.adminValidatorSet.checkVotes(ethAccountToPropose,adminToRemove);
             console.log(adminToRemove, "checked votes for removing as admin ?", votes[0], votes[1]);
 
+            /* Lets see who proposed this validator for removing*/
+            var proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, adminToRemove);
+            console.log(adminToRemove, "checked proposer for the validator ?", proposer);
+            
             var activeAdminList = await this.getAllAdmins();
             for(var indexAV = 0; indexAV < activeAdminList.length; indexAV++){
                 if(ethAccountToPropose == activeAdminList[indexAV])

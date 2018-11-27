@@ -14,20 +14,22 @@ class AdminValidatorSet {
             this.adminValidatorSetAbi = value[0];
             this.adminValidatorSetByteCode = value[1];
             this.adminValidatorSetAddress = adminValidatorSetAddress;
-            this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),
-                adminValidatorSetAddress);
+            this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),adminValidatorSetAddress);
         }
     }
     
-    async setOwnersParameters(ethAccountToUse,_privateKey,adminValidatorSetAddress){
+    async setOwnersParameters(ethAccountToUse,_privateKey,adminValidatorSetAddress) {
         try{
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
             
+            if(webSocketProtocolFlag){
+                if(subscribePastEventsFlag)
+                    this.listenContractPastEvents();
+                this.listenContractAllEvents(this.contract);  
+            }
             let transactionHash = await this.init(ethAccountToUse,_privateKey);
             return transactionHash;
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);  
         }
         catch (error) {
             console.log("Error in AdminValidatorSet.setOwnersParameters(): " + error);
@@ -47,7 +49,7 @@ class AdminValidatorSet {
         }
     }
 
-    async init(ethAccountToUse, privateKey){
+    async init(ethAccountToUse, privateKey) {
         try{
             var encodedABI = this.contract.methods.init().encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -66,7 +68,7 @@ class AdminValidatorSet {
         fn("alias - " + admin);
     }
 
-    async getAllAdmins2(){
+    async getAllAdmins2() {
         return await this.contract.methods.getAllAdmins().call({});
         // var encodedABI = this.contract.methods.getAllAdmins().encodeABI();
         // return await web3.eth.call({
@@ -87,7 +89,7 @@ class AdminValidatorSet {
         }
     }
     
-    async proposalToAddAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
+    async proposalToAddAdmin(ethAccountToUse, otherAdminToAdd, privateKey) {
         try{
             var encodedABI = this.contract.methods.proposalToAddAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -102,7 +104,7 @@ class AdminValidatorSet {
         }
     }
 
-    async voteForAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
+    async voteForAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey) {
         try{
             var encodedABI = this.contract.methods.voteForAddingAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -117,7 +119,7 @@ class AdminValidatorSet {
         }
     }
 
-    async voteAgainstAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey){
+    async voteAgainstAddingAdmin(ethAccountToUse, otherAdminToAdd, privateKey) {
         try{
             var encodedABI = this.contract.methods.voteAgainstAddingAdmin(otherAdminToAdd).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -132,7 +134,7 @@ class AdminValidatorSet {
         }
     }
     
-    async proposalToRemoveAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
+    async proposalToRemoveAdmin(ethAccountToUse, otherAdminToRemove, privateKey) {
         try{
             var encodedABI = this.contract.methods.proposalToRemoveAdmin(otherAdminToRemove).encodeABI();
             //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -147,7 +149,7 @@ class AdminValidatorSet {
         }
     }
 
-    async voteForRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
+    async voteForRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey) {
         try{
             var encodedABI = this.contract.methods.voteForRemovingAdmin(otherAdminToRemove).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -162,7 +164,7 @@ class AdminValidatorSet {
         }
     }
     
-    async voteAgainstRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey){
+    async voteAgainstRemovingAdmin(ethAccountToUse, otherAdminToRemove, privateKey) {
         try{
             var encodedABI = this.contract.methods.voteAgainstRemovingAdmin(otherAdminToRemove).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -177,12 +179,9 @@ class AdminValidatorSet {
         }
     }
     
-    async isActiveAdmin(ethAccountToUse, otherAdminToCheck){
+    async isActiveAdmin(ethAccountToUse, otherAdminToCheck) {
         try {
             var flag = await this.contract.methods.isActiveAdmin(otherAdminToCheck).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkActiveAdmin(otherAdminToCheck).encodeABI();
-            //var data = await utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return utils.convertToBool(data);
             return flag;
         } catch (error) {
             console.log("Error in AdminValidatorSet:isActiveAdmin(): " + error);
@@ -190,96 +189,138 @@ class AdminValidatorSet {
         }
     }
 
-    async checkVotes(ethAccountToUse, otherAdminToCheck){
+    async checkVotes(ethAccountToUse, otherAdminToCheck) {
         try {
             var votes = await this.contract.methods.checkVotes(otherAdminToCheck).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkVotes(otherAdminToCheck).encodeABI();
-            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return this.utils.convertToBool(data);
             return votes;
         } catch (error) {
-            console.log("Error in AdminValidatorSet:checkAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:checkVotes(): " + error);
             return false;
         }
     }
 
-    async checkProposal(ethAccountToUse, otherAdminToCheck){
+    async checkProposal(ethAccountToUse, otherAdminToCheck) {
         try {
             var whatProposal = await this.contract.methods.checkProposal(otherAdminToCheck).call({from : ethAccountToUse});
-            //var encodedABI = this.contract.methods.checkProposal(otherAdminToCheck).encodeABI();
-            //var data = await this.utils.getData(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,this.web3);
-            //return this.utils.convertToBool(data);
             return whatProposal;
         } catch (error) {
-            console.log("Error in AdminValidatorSet:checkAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:checkProposal(): " + error);
             return "none";
         }
     }
     
-    subscribeForPastEvents(){
-        var options = {
-            fromBlock: "latest",
-            address: this.adminValidatorSetAddress
-        };
-        this.contract.getPastEvents(
-            'AllEvents',
-            {
-              fromBlock: 0,
-              toBlock: 'latest'
-            },
+    async clearProposal(ethAccountToUse, otherAdminToCheck) {
+        try{
+            var estimatedGas = 0;
+            var encodedABI = this.contract.methods.clearProposal(otherAdminToCheck).encodeABI();
+            
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in AdminValidatorSet:clearProposal(): " + error);
+            return "";
+        }
+    }
+
+    async getProposer(ethAccountToUse, otherAdminToCheck) {
+        try {
+            var data = await this.contract.methods.getProposer(otherAdminToCheck).call({from : ethAccountToUse});
+            return data;
+        } catch (error) {
+            console.log("Error in AdminValidatorSet:getProposer(): " + error);
+            return false;
+        }
+    }
+
+    listenContractPastEvents() {
+        this.contract.getPastEvents('AddAdmin',{fromBlock: 0, toBlock: 'latest',filter: {_admin: "0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a"}},
             (err, events) => {
                 if(events.length > 0){
-                    console.log('AdminValidatorSet past event Received');
                     events.forEach(eachElement => {
-                        if(eachElement.event == "votedfor"){
-                            console.log("votedfor:Contract address",eachElement.address);
-                            console.log("votedfor:admin ",eachElement.returnValues[0]);
-                            console.log("votedfor:validator",eachElement.returnValues[1]);
-                        }
-                        else if(eachElement.event == "votedagainst"){
-                            console.log("votedagainst:Contract address",eachElement.address);
-                            console.log("votedagainst:Transaction Hash",eachElement.transactionHash);
-                            console.log("votedagainst:Block Hash",eachElement.blockHash);
-                            console.log("votedagainst:calleeAdminAccount",eachElement.returnValues[0]);
+                        if(eachElement.event == "AddAdmin") {
+                            console.log("AddAdmin:Contract address",eachElement.address);
+                            console.log("AddAdmin:Transaction Hash",eachElement.transactionHash);
+                            console.log("AddAdmin:Block Hash",eachElement.blockHash);
+                            console.log("AddAdmin:proposer",eachElement.returnValues[0]);
+                            console.log("AddAdmin:admin",eachElement.returnValues[1]);
                         }
                     })
                 }
             });
      }     
         
-     listenForContractObjectEvents(contractObject){
-        this.utils.listen(contractObject, (events)=>{
+     listenContractAllEvents(contractObject) {
+        this.utils.listenContractAllEvents(contractObject, (events)=> {
             console.log('AdminValidatorSet live event Received');
-            switch(events.event){
-                case "votedfor":
-                    console.log("votedfor:Contract address",events.address);
-                    console.log("votedfor:admin ",events.returnValues[0]);
-                    console.log("votedfor:validator",events.returnValues[1]);
+            switch(events.event) {
+                case "VotedForAdd":
+                    console.log("VotedForAdd:Contract address",events.address);
+                    console.log("VotedForAdd:Voting admin ",events.returnValues.admin);
+                    console.log("VotedForAdd:admin",events.returnValues.voted);
                     break;
-                case "votedagainst":
-                    console.log("votedagainst");
-                    console.log("votedfor:Contract address",events.address);
-                    console.log("votedfor:admin ",events.returnValues[0]);
-                    console.log("votedfor:validator",events.returnValues[1]);
+                case "VotedForRemove":
+                    console.log("VotedForRemove:Contract address",events.address);
+                    console.log("VotedForRemove:Voting admin ",events.returnValues.admin);
+                    console.log("VotedForRemove:admin",events.returnValues.voted);
+                    break;
+                case "VotedAgainstAdd":
+                    console.log("VotedAgainstAdd:Contract address",events.address);
+                    console.log("VotedAgainstAdd:Voting admin ",events.returnValues.admin);
+                    console.log("votedAgVotedAgainstAddainstAdd:admin",events.returnValues.voted);
+                    break;
+                case "VotedAgainstRemove":
+                    console.log("VotedAgainstRemove:Contract address",events.address);
+                    console.log("VotedAgainstRemove:Voting admin ",events.returnValues.admin);
+                    console.log("VotedAgainstRemove:admin",events.returnValues.voted);
+                    break;
+                case "AddAdmin":
+                    console.log("AddAdmin:Contract address",events.address);
+                    console.log("AddAdmin:proposer ",events.returnValues.proposer);
+                    console.log("AddAdmin:admin",events.returnValues.admin);
+                    break;
+                case "RemoveAdmin":
+                    console.log("RemoveAdmin:Contract address",events.address);
+                    console.log("RemoveAdmin:proposer ",events.returnValues.proposer);
+                    console.log("removRemoveAdmineAdmin:admin",events.returnValues.admin);
+                    break;
+                case "AlreadyProposalForAddingAdmin":
+                    console.log("AlreadyProposalForAddingAdmin:Contract address",events.address);
+                    console.log("AlreadyProposalForAddingAdmin:Admin",events.returnValues._address);
+                    break;
+                case "AlreadyProposalForRemovingAdmin":
+                    console.log("AlreadyProposalForRemovingAdmin:Contract address",events.address);
+                    console.log("AlreadyProposalForRemovingAdmin:Admin",events.returnValues._address);
+                    break;
+                case "NoProposalForAddingAdmin":
+                    console.log("NoProposalForAddingAdmin:Contract address",events.address);
+                    console.log("NoProposalForAddingAdmin:Admin",events.returnValues._address);
+                    break;
+                case "NoProposalForRemovingAdmin":
+                    console.log("NoProposalForRemovingAdmin:Contract address",events.address);
+                    console.log("NoProposalForRemovingAdmin:Admin",events.returnValues._address);
+                    break;
+                case "AlreadyActiveAdmin":
+                    console.log("AlreadyActiveAdmin:Contract address",events.address);
+                    console.log("AlreadyActiveAdmin:Admin",events.returnValues._address);
+                    break;
+                case "AlreadyInActiveAdmin":
+                    console.log("AlreadyInActiveAdmin:Contract address",events.address);
+                    console.log("AlreadyInActiveAdmin:Admin",events.returnValues._address);
+                    break;
+                case "MinAdminNeeded":
+                    console.log("MinAdminNeeded:Contract address",events.address);
+                    console.log("MinAdminNeeded:min no of admins needed",events.returnValues.minNoOfAdmin);
                     break;
                 default:
                     break;
             }
         });
-
-        // this.utils.subscribe("AdminValidatorSet", this.web3, (events)=>{
-        //     console.log('AdminValidatorSet subscribe Event Received');
-        //     switch(events.event){
-        //         case "votedfor":
-        //             console.log("votedfor");
-        //             break;
-        //         case "votedagainst":
-        //             console.log("votedagainst");
-        //             break;
-        //         default:			
-        //             break;
-        //     }
-        // });
     }  
 }
 

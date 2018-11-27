@@ -14,21 +14,22 @@ class SimpleValidatorSet {
             this.simpleValidatorSetAbi = value[0];
             this.simpleValidatorSetByteCode = value[1];
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
-            this.contract = new this.web3.eth.Contract(
-                JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
+            this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi), simpleValidatorSetAddress);
         }
     }
     
-    async setOwnersParameters(ethAccountToUse,_privateKey,simpleValidatorSetAddress,adminValidatorSetAddress){
+    async setOwnersParameters(ethAccountToUse,_privateKey,simpleValidatorSetAddress,adminValidatorSetAddress) {
         try{
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
 
-            let transactionHash = await this.init(ethAccountToUse,_privateKey,adminValidatorSetAddress);
+            if(webSocketProtocolFlag){
+                if(subscribePastEventsFlag)
+                    this.listenContractPastEvents();
+                this.listenContractAllEvents(this.contract);  
+            }
+            let transactionHash = await this.init(ethAccountToUse,_privateKey);
             return transactionHash;
-
-            //this.subscribeForPastEvents();
-            //this.listenForContractObjectEvents(this.contract);  
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet:setOwnersParameters(): " + error);
@@ -51,9 +52,9 @@ class SimpleValidatorSet {
         }
     }
     
-    async init(ethAccountToUse, privateKey,adminValidatorSetAddress){
+    async init(ethAccountToUse, privateKey) {
         try{
-            var encodedABI = this.contract.methods.init(adminValidatorSetAddress).encodeABI();
+            var encodedABI = this.contract.methods.init().encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
@@ -62,7 +63,7 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in AdminValidatorSet:init(): " + error);
-            return false;
+            return "";
         }
     }
     
@@ -95,7 +96,7 @@ class SimpleValidatorSet {
         }
     }
     
-    async proposalToAddValidator(ethAccountToUse, privateKey, newValidator){
+    async proposalToAddValidator(ethAccountToUse, privateKey, newValidator) {
         try{
             var encodedABI = this.contract.methods.proposalToAddValidator(newValidator).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -106,11 +107,11 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.proposalToAddValidator(): " + error);
-            return false;
+            return "";
         }
     }
 
-    async voteForAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd){
+    async voteForAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd) {
         try{
             var encodedABI = this.contract.methods.voteForAddingValidator(otherValidatorToAdd).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -121,11 +122,11 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.voteForAddingValidator(): " + error);
-            return false;
+            return "";
         }
     }
 
-    async voteAgainstAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd){
+    async voteAgainstAddingValidator(ethAccountToUse, privateKey, otherValidatorToAdd) {
         try{
             var encodedABI = this.contract.methods.voteAgainstAddingValidator(otherValidatorToAdd).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -136,11 +137,11 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.voteAgainstAddingValidator(): " + error);
-            return false;
+            return "";
         }
     }
     
-    async proposalToRemoveValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
+    async proposalToRemoveValidator(ethAccountToUse, privateKey, otherValidatorToRemove) {
         try{
             var encodedABI = this.contract.methods.proposalToRemoveValidator(otherValidatorToRemove).encodeABI();
             //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -152,11 +153,11 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.proposalToRemoveValidator(): " + error);
-            return false;
+            return "";
         }
     }
 
-    proposalToRemoveValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+    proposalToRemoveValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn) {
         try{
             var encodedABI = this.contract.methods.proposalToRemoveValidator(otherValidatorToRemove).encodeABI();
             //var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
@@ -167,7 +168,7 @@ class SimpleValidatorSet {
         }
         catch (error) {
             console.log("Error in SimpleValidatorSet.proposalToRemoveValidatorCb(): " + error);
-            return false;
+            return "";
         }
     }
 
@@ -213,7 +214,7 @@ class SimpleValidatorSet {
         return;
     }
 
-    voteForRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+    voteForRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn) {
         try{
             var estimatedGas = 0;
             var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
@@ -222,12 +223,12 @@ class SimpleValidatorSet {
                 this.contract._address,encodedABI,privateKey,this.web3, estimatedGas, fn);
         }
         catch (error) {
-            console.log("Error in SimpleValidatorSet.voteForRemovingValidatorCb(): " + error);
-            return false;
+            console.log("Error in SimpleValidatorSet:voteForRemovingValidatorCb(): " + error);
+            return "";
         }
     }
 
-    async voteForRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
+    async voteForRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove) {
         try{
             var estimatedGas = 0;
             var encodedABI = this.contract.methods.voteForRemovingValidator(otherValidatorToRemove).encodeABI();
@@ -236,12 +237,12 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in SimpleValidatorSet.voteForRemovingValidator(): " + error);
-            return false;
+            console.log("Error in SimpleValidatorSet:voteForRemovingValidator(): " + error);
+            return "";
         }
     }
     
-    async voteAgainstRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove){
+    async voteAgainstRemovingValidator(ethAccountToUse, privateKey, otherValidatorToRemove) {
         try{
             var estimatedGas = 0;
             var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
@@ -255,12 +256,12 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidator(): " + error);
-            return false;
+            console.log("Error in SimpleValidatorSet:voteAgainstRemovingValidator(): " + error);
+            return "";
         }
     }
 
-    voteAgainstRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn){
+    voteAgainstRemovingValidatorCb(ethAccountToUse, privateKey, otherValidatorToRemove, fn) {
         try{
             var estimatedGas = 0;
             var encodedABI = this.contract.methods.voteAgainstRemovingValidator(otherValidatorToRemove).encodeABI();
@@ -275,8 +276,8 @@ class SimpleValidatorSet {
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in SimpleValidatorSet.voteAgainstRemovingValidatorCb(): " + error);
-            return false;
+            console.log("Error in SimpleValidatorSet:voteAgainstRemovingValidatorCb(): " + error);
+            return "";
         }
     }
    
@@ -290,13 +291,13 @@ class SimpleValidatorSet {
         }
     }
 
-    async checkVotes(ethAccountToUse, validatorAddress){
+    async checkVotes(ethAccountToUse, validatorAddress) {
         try {
             var votes = await this.contract.methods.checkVotes(validatorAddress).call({from : ethAccountToUse});
             return votes;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet.checkAdmin(): " + error);
-            return false;
+            console.log("Error in SimpleValidatorSet.checkVotes(): " + error);
+            return [0,0];
         }
     }
     
@@ -305,76 +306,123 @@ class SimpleValidatorSet {
             var data = await this.contract.methods.checkProposal(validatorAddress).call({from : ethAccountToUse});
             return data;
         } catch (error) {
-            console.log("Error in SimpleValidatorSet:hasProposal(): " + error);
+            console.log("Error in SimpleValidatorSet:checkProposal(): " + error);
             return false;
         }
     }
 
-    subscribeForPastEvents(){
-        var options = {
-            fromBlock: "latest",
-            address: this.simpleValidatorSetAddress
-        };
-        this.contract.getPastEvents(
-            'AllEvents',
-            {
-              fromBlock: 0,
-              toBlock: 'latest'
-            },
+    async clearProposal(ethAccountToUse, validatorAddress) {
+        try{
+            var estimatedGas = 0;
+            var encodedABI = this.contract.methods.clearProposal(validatorAddress).encodeABI();
+            
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
+                this.contract._address,
+                encodedABI,
+                privateKey,
+                this.web3,
+                estimatedGas);
+            return transactionObject.transactionHash;
+        }
+        catch (error) {
+            console.log("Error in SimpleValidatorSet:clearProposal(): " + error);
+            return "";
+        }
+    }
+
+    async getProposer(ethAccountToUse, validatorAddress) {
+        try {
+            var data = await this.contract.methods.getProposer(validatorAddress).call({from : ethAccountToUse});
+            return data;
+        } catch (error) {
+            console.log("Error in SimpleValidatorSet:getProposer(): " + error);
+            return false;
+        }
+    }
+
+    listenContractPastEvents() {
+       this.contract.getPastEvents('AddValidator',{fromBlock: 0, toBlock: 'latest',filter: {validator: "0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a"}},
             (err, events) => {
-                if(events.length > 0){
+                if(events.length > 0) {
                     events.forEach(eachElement => {
-                        if(eachElement.event == "addvalidator"){
-                            console.log("addvalidator:Contract address",eachElement.address);
-                            console.log("addvalidator:Transaction Hash",eachElement.transactionHash);
-                            console.log("addvalidator:Block Hash",eachElement.blockHash);
-                            console.log("addvalidator:calleeAdminAccount",eachElement.returnValues[0]);
-                        }
-                        else if(eachElement.event == "removevalidator"){
-                            console.log("removevalidator:Contract address",eachElement.address);
-                            console.log("removevalidator:Transaction Hash",eachElement.transactionHash);
-                            console.log("removevalidator:Block Hash",eachElement.blockHash);
-                            console.log("removevalidator:calleeAdminAccount",eachElement.returnValues[0]);
+                        if(eachElement.event == "AddValidator") {
+                            console.log("AddValidator:Contract address",eachElement.address);
+                            console.log("AddValidator:Transaction Hash",eachElement.transactionHash);
+                            console.log("AddValidator:Block Hash",eachElement.blockHash);
+                            console.log("AddValidator:proposer",eachElement.returnValues[0]);
+                            console.log("AddValidator:validator",eachElement.returnValues[1]);
                         }
                     })
                 }
-                
             });
      }     
         
-     listenForContractObjectEvents(contractObject){
-        this.utils.listen(contractObject,(events)=>{
-            console.log('SimpleValidatorSet Event Received');
-            switch(events.event){
-                case "addvalidator":
-                    console.log("addvalidator:Contract address",event.address);
-                    console.log("addvalidator:admin ",event.returnValues._admin);
-                    console.log("addvalidator:validator",event.returnValues.validator);
+     listenContractAllEvents(contractObject) {
+        this.utils.listenContractAllEvents(contractObject,(events)=> {
+            console.log('SimpleValidatorSet live Event Received');
+            switch(events.event) {
+                case "VotedForAdd":
+                    console.log("VotedForAdd:Contract address",events.address);
+                    console.log("VotedForAdd:voting admin ",events.returnValues.admin);
+                    console.log("VotedForAdd:validator",events.returnValues.voted);
                     break;
-                case "removevalidator":
-                    console.log("removevalidator");
+                case "VotedForRemove":
+                    console.log("VotedForRemove:Contract address",events.address);
+                    console.log("VotedForRemove:voting admin ",events.returnValues.admin);
+                    console.log("VotedForRemove:validator",events.returnValues.voted);
+                    break;
+                case "VotedAgainstAdd":
+                    console.log("VotedAgainstAdd:Contract address",events.address);
+                    console.log("VotedAgainstAdd:voting admin ",events.returnValues.admin);
+                    console.log("VotedAgainstAdd:validator",events.returnValues.voted);
+                    break;
+                case "VotedAgainstRemove":
+                    console.log("VotedAgainstRemove:Contract address",events.address);
+                    console.log("VotedAgainstRemove:voting admin ",events.returnValues.admin);
+                    console.log("VotedAgainstRemove:validator",events.returnValues.voted);
+                    break;
+                case "AddValidator":
+                    console.log("AddValidator:Contract address",events.address);
+                    console.log("AddValidator:proposer ",events.returnValues.proposer);
+                    console.log("AddValidator:validator",events.returnValues.validator);
+                    break;
+                case "RemoveValidator":
+                    console.log("RemoveValidator:Contract address",events.address);
+                    console.log("RemoveValidator:proposer ",events.returnValues.proposer);
+                    console.log("RemoveValidator:validator",events.returnValues.validator);
+                    break;
+                case "AlreadyProposalForAddingValidator":
+                    console.log("AlreadyProposalForAddingValidator:Contract address",events.address);
+                    console.log("AlreadyProposalForAddingValidator:Validator",events.returnValues._address);
+                    break;
+                case "AlreadyProposalForRemovingValidator":
+                    console.log("AlreadyProposalForRemovingValidator:Contract address",events.address);
+                    console.log("AlreadyProposalForRemovingValidator:Validator",events.returnValues._address);
+                    break;
+                case "NoProposalForAddingValidator":
+                    console.log("NoProposalForAddingValidator:Contract address",events.address);
+                    console.log("NoProposalForAddingValidator:Validator",events.returnValues._address);
+                    break;
+                case "NoProposalForRemovingValidator":
+                    console.log("NoProposalForRemovingValidator:Contract address",events.address);
+                    console.log("NoProposalForRemovingValidator:Validator",events.returnValues._address);
+                    break;
+                case "AlreadyActiveValidator":
+                    console.log("AlreadyActiveValidator:Contract address",events.address);
+                    console.log("AlreadyActiveValidator:Validator",events.returnValues._address);
+                    break;
+                case "AlreadyInActiveValidator":
+                    console.log("AlreadyInActiveValidator:Contract address",events.address);
+                    console.log("AlreadyInActiveValidator:Validator",events.returnValues._address);
+                    break;
+                case "MinValidatorNeeded":
+                    console.log("MinValidatorNeeded:Contract address",events.address);
+                    console.log("MinValidatorNeeded:min no of validators needed",events.returnValues.minNoOfValidator);
                     break;
                 default:
                     break;
             }
         });
-
-        // this.utils.subscribe("SimpleValidatorSet", this.web3, (events)=>{
-        //     console.log('SimpleValidatorSet subscribe Event Received');
-        //     switch(events.event){
-        //         case "InitiateChange":
-        //             console.log("InitiateChange");
-        //             break;
-        //         case "AddValidatorEvent":
-        //             console.log("AddValidatorEvent");
-        //             break;
-        //         case "RemoveValidatorEvent":
-        //             console.log("RemoveValidatorEvent");
-        //             break;
-        //         default:			
-        //             break;
-        //     }
-        // });
     }
 }
 

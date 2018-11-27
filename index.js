@@ -7,14 +7,15 @@ const AdminValidator = require('./adminvalidatorindex');
 const ethUtil = require('ethereumjs-util');
 
 var provider;
-var host,port;
-var web3;
+var protocol,host,port,web3;
+
+var subscribePastEventsFlag = false;
+var webSocketProtocolFlag = false;
+global.subscribePastEventsFlag = subscribePastEventsFlag;
 
 const utils = new Utils();
 global.utils = utils;
 
-//var host = "ws://localhost:9000";
-//web3 = new Web3(new Web3.providers.WebsocketProvider(host));
 var usecontractconfig = false;
 var readkeyconfig = false;
 var contractsList = {};
@@ -30,6 +31,18 @@ var main = async function () {
     for (let i=0; i<args.length ; i++) {
         let temp = args[i].split("=");
         switch (temp[0]) {
+            case "ws":
+                protocol = "ws://";
+                global.protocol = protocol;
+                webSocketProtocolFlag = true;
+                global.webSocketProtocolFlag = webSocketProtocolFlag;
+                break;
+            case "http":
+                protocol = "http://";
+                global.protocol = protocol;
+                webSocketProtocolFlag = false;
+                global.webSocketProtocolFlag = webSocketProtocolFlag;
+                break;
             case "hostname":
                 host = temp[1];
                 global.host = host;
@@ -37,13 +50,25 @@ var main = async function () {
             case "port":
                 port = temp[1];
                 global.port = port;
-                let URL = "http://" + host + ":" + port;
-                web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                let URL = protocol + host + ":" + port;
+                switch(protocol){
+                    case "http://":
+                    default:
+                        web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                        break;
+                    case "ws://":
+                        web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
+                        break;
+                }
                 global.web3 = web3;
                 adminValidator = new AdminValidator();
                 global.adminValidator = adminValidator;
                 simpleValidator = new SimpleValidator();
                 global.simpleValidator = simpleValidator;
+                break;
+            case "subscribePastEvents":
+                subscribePastEventsFlag = true;
+                global.subscribePastEventsFlag = subscribePastEventsFlag;
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
@@ -51,7 +76,7 @@ var main = async function () {
                 writeAccountsAndKeys();
                 break;
             case "readkeyconfig":
-            readkeyconfig = temp[1];
+                readkeyconfig = temp[1];
                 switch(readkeyconfig){
                     case "true":
                     default: 
@@ -123,6 +148,20 @@ var main = async function () {
                             var result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
                             break;
+                        case "addNewAdmin":
+                            var adminToAdd = list[++j];
+                            console.log("adminToAdd ", adminToAdd);
+                            var result = await adminValidator.addNewAdmin(adminToAdd);
+                            result = await adminValidator.getAllAdmins();
+                            console.log("No of admins",result.length);
+                            break;
+                        case "removeOneAdmin":
+                            var adminToRemove = list[++j];
+                            console.log("adminToRemove ", adminToRemove);
+                            var result = await adminValidator.removeOneAdmin(adminToRemove);
+                            result = await adminValidator.getAllAdmins();
+                            console.log("No of admins",result.length);
+                            break;
                         default:
                             console.log("Given runadminvalidator option not supported! Provide correct details");
                             break;
@@ -150,6 +189,20 @@ var main = async function () {
                             var result = await simpleValidator.getListOfActiveValidators();
                             console.log("No of validators",result.length);
                             break;
+                        case "addSimpleSetContractValidatorForAdmin":
+                            var validator = list[++j];
+                            console.log("validator ", validator);
+                            var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validator);
+                            result = await simpleValidator.getListOfActiveValidators();
+                            console.log("No of validators",result.length);
+                            break;
+                        case "removeSimpleSetContractValidatorForAdmin":
+                            var validator = list[++j];
+                            console.log("validator ", validator);
+                            var result = await simpleValidator.removeSimpleSetContractValidatorForAdmin(validator);
+                            result = await simpleValidator.getListOfActiveValidators();
+                            console.log("No of validators",result.length);
+                            break;
                         default:
                             console.log("Given runsimplevalidator option not supported! Provide correct details");
                             break;
@@ -157,10 +210,10 @@ var main = async function () {
                 }
                 break;
             }
-            case "rinkeby":
+            case "rinkeby":{
                 var HDWalletProvider = require("truffle-hdwallet-provider");
                 //var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";
-                var provider = new HDWalletProvider(privateKey[accountAddressList[0]], "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
+                provider = new HDWalletProvider(privateKey[accountAddressList[0]], "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
                 web3 = new Web3();
                 web3.setProvider(provider);
                 global.web3 = web3;
@@ -179,12 +232,15 @@ var main = async function () {
                 global.adminValidatorSetAddress = adminValidatorSetAddress;
                 global.simpleValidatorSetAddress = simpleValidatorSetAddress;
                 break;
+            }
             default:
                 //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
                 break;
         }
     }
-
+    if(web3 != undefined)
+        web3.currentProvider.disconnect();
+    
     if(provider)
         provider.engine.stop();
     return;

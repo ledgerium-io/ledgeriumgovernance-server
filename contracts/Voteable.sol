@@ -35,30 +35,55 @@ contract Voteable{
 	
 	mapping (address => Vote) votes;
 
-	event votedfor(address by,address vfor);
-	event votedagainst(address by,address vfor);
-
-	function voteFor (address _address,address voter) internal returns(bool) {
+	event VotedForAdd(address indexed admin, address indexed voted);
+	event VotedForRemove(address indexed admin, address indexed voted);
+	
+	event VotedAgainstAdd(address indexed admin, address indexed voted);
+	event VotedAgainstRemove(address indexed admin, address indexed voted);
+	
+	/**
+    * @dev Function to add vote for specific address from the voter
+    * @return A success flag
+    */
+	function voteFor(address _address, address voter) internal returns (bool) {
 		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
 		uint32 count = votes[_address].countFor.add(1);
 		votes[_address].countFor = count;
 		votes[_address].vote[voter] = Decision.FOR;
 		votes[_address].voted.push(voter);
-		emit votedfor(voter,_address);
+		if(votes[_address].proposal == Proposal.ADD){
+			emit VotedForAdd(voter,_address);
+		}
+		else if (votes[_address].proposal == Proposal.REMOVE){
+			emit VotedForRemove(voter,_address);
+		}
 		return true;
 	}
 
-	function voteAgainst (address _address,address voter) internal returns(bool) {
+	/**
+    * @dev Function to add vote against specific address from the voter
+    * @return A success flag
+    */
+	function voteAgainst(address _address, address voter) internal returns (bool) {
 		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
 		uint32 count = votes[_address].countAgainst.add(1);
 		votes[_address].countAgainst = count;
 		votes[_address].vote[voter] = Decision.AGAINST;
 		votes[_address].voted.push(voter);
-		emit votedagainst(voter,_address);
+		if(votes[_address].proposal == Proposal.ADD){
+			emit VotedAgainstAdd(voter,_address);
+		}
+		else if (votes[_address].proposal == Proposal.REMOVE){
+			emit VotedAgainstRemove(voter,_address);
+		}
 		return true;
 	}
 
-	function clearVotes (address _address)internal returns (bool){
+	/**
+    * @dev Function to clear out votes against specific address
+    * @return A success flag
+    */
+	function clearVotes(address _address) internal returns (bool) {
 		address[] memory list = votes[_address].voted;
 		address[] memory empty;
 		votes[_address].countFor = 0;
@@ -72,7 +97,11 @@ contract Voteable{
         return true;
 	}
 
-	function internalChangeVote (address _address) internal returns(bool res){
+	/**
+    * @dev Function to change vote by specific address
+    * @return A success flag
+    */
+	function internalChangeVote(address _address) internal returns (bool) {
 		require (votes[_address].vote[msg.sender] != Decision.NOT_DECIDED);
 		require (votes[_address].proposal != Proposal.NOT_CREATED);
 		uint32 cfor = votes[_address].countFor;
@@ -90,14 +119,22 @@ contract Voteable{
 		return true;
 	}
 
-	function internalCheckVotes (address _address) internal view returns(uint32[2] res){
+	/**
+    * @dev Function to retrieve votes for specific address
+    * @return the count of 'for' and 'against' votes
+    */
+	function internalCheckVotes(address _address) internal view returns (uint32[2]) {
 		uint32[2] memory a;
 		a[0] = votes[_address].countFor;
 		a[1] = votes[_address].countAgainst;
 		return a;
 	}
 
-	function internalCheckProposal (address _address) internal view returns(string res){
+	/**
+    * @dev Function to check proposal by specific address
+    * @return the string for either "add", "remove" or "proposal not created" based on the ongoing proposal for specific address
+    */
+	function internalCheckProposal(address _address) internal view returns (string) {
 		if(votes[_address].proposal == Proposal.ADD)
 			return "add";
 		else if(votes[_address].proposal == Proposal.REMOVE)
@@ -106,7 +143,11 @@ contract Voteable{
 			return "proposal not created";
 	}
 
-	function internalGetVoted(address _address) internal view returns(address[]){
+	/**
+    * @dev Function to retrieve the list of voters for specific address
+    * @return the array of all current voters for specific address
+    */
+	function internalGetVoted(address _address) internal view returns (address[]) {
 	    address[] memory arr = votes[_address].voted;
 	    return arr;
 	}	

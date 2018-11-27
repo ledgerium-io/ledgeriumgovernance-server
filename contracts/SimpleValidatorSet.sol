@@ -30,6 +30,20 @@ contract SimpleValidatorSet is Voteable{
 	uint32 totalCount;
 	uint32 totalActiveCount;
 
+	event AddValidator(address indexed proposer, address indexed validator);
+	event RemoveValidator(address indexed proposer, address indexed validator);
+
+	event AlreadyProposalForAddingValidator(address indexed _address);
+	event AlreadyProposalForRemovingValidator(address indexed _address);
+
+	event NoProposalForAddingValidator(address indexed _address);
+	event NoProposalForRemovingValidator(address indexed _address);
+
+	event AlreadyActiveValidator(address indexed _address);
+	event AlreadyInActiveValidator(address indexed _address);
+
+	event MinValidatorNeeded(uint8 minNoOfValidator);
+
 	modifier isAdmin() {
 		require (adminSet.isActiveAdmin(msg.sender));
 		_;
@@ -51,13 +65,10 @@ contract SimpleValidatorSet is Voteable{
     }
 
 	/**
-    * @dev Function to deploy and construct simplevalidatorset. msg.sender will be added as one of validator too
+    * @dev Function to initiate contract with adding first 3 valid valdiators and the contract's owner. The pre-deployed contract will be the owner
     * @return A success flag
     */
-	constructor () public {
-	}
-
-	function init (address _adminContractAddress) public ifNotInitalised{
+	function init() public ifNotInitalised {
 		
 		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
 		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
@@ -93,23 +104,6 @@ contract SimpleValidatorSet is Voteable{
 		isInit = true;
 	}
 	
-	event minValidatorNeeded(uint8 minNoOfValidator);
-
-	event addValidator(address indexed validator,address _admin);
-	event removeValidator(address indexed validator,address _admin);
-
-	event votedfor(address by,address vfor);
-	event votedagainst(address by,address vfor);
-
-	event alreadyProposalForAddingValidator(address indexed _address);
-	event alreadyProposalForRemovingValidator(address indexed _address);
-
-	event noProposalForAddingValidator(address indexed _address);
-	event noProposalForRemovingValidator(address indexed _address);
-
-	event alreadyActiveValidator(address indexed _address);
-	event alreadyInActiveValidator(address indexed _address);
-
 	/**
     * @dev Function to propose adding new validator. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin, who can start the proposal
@@ -117,15 +111,15 @@ contract SimpleValidatorSet is Voteable{
 	* @return Emits event alreadyProposalForAddingValidator() in case some proposal already exists
     * @return A success flag
     */
-  	function proposalToAddValidator (address _address) public isAdmin isInitalised returns(bool res){
+  	function proposalToAddValidator(address _address) public isAdmin isInitalised returns (bool) {
 		//require(votes[_address].proposal == Proposal.NOT_CREATED);
-		if(votes[_address].proposal != Proposal.NOT_CREATED){
+		if(votes[_address].proposal != Proposal.NOT_CREATED) {
 			if(votes[_address].proposal == Proposal.ADD){
-				emit alreadyProposalForAddingValidator(_address);
+				emit AlreadyProposalForAddingValidator(_address);
 				return false;
 			}
-			if(votes[_address].proposal == Proposal.REMOVE){
-				emit alreadyProposalForRemovingValidator(_address);
+			if(votes[_address].proposal == Proposal.REMOVE) {
+				emit AlreadyProposalForRemovingValidator(_address);
 				return false;
 			}
 		}
@@ -143,14 +137,14 @@ contract SimpleValidatorSet is Voteable{
 	* @return Emits event addValidator() once valdiator is successfully added
 	* @return A success flag
     */
-	function voteForAddingValidator (address _address) public isValidator isInitalised returns(bool res){
+	function voteForAddingValidator(address _address) public isValidator isInitalised returns (bool) {
 		//require(votes[_address].proposal == Proposal.ADD);
-		if(votes[_address].proposal != Proposal.ADD){
-			emit noProposalForAddingValidator(_address);
+		if(votes[_address].proposal != Proposal.ADD) {
+			emit NoProposalForAddingValidator(_address);
 			return false;
 		}
 		require(voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
+		if(votes[_address].countFor >= totalActiveCount / 2 + 1) {
 			if(!exists[_address]){
 				adminValidatorsMap[msg.sender].push(_address);
 				validators.push(_address);
@@ -160,8 +154,8 @@ contract SimpleValidatorSet is Voteable{
     		activeValidators[_address].isValidator = true;
     		activeValidators[_address].status = Status.ACTIVE;
 			totalActiveCount = totalActiveCount.add(1);
+		    emit AddValidator(votes[_address].proposer, _address);
     		require(clearVotes(_address));
-		    emit addValidator(_address,msg.sender);
 		}	
 		return true;
 	}
@@ -173,14 +167,14 @@ contract SimpleValidatorSet is Voteable{
     * @return Emits event noProposalForAddingValidator() in case the ADD validator proposal is not started already
 	* @return A success flag
     */
-	function voteAgainstAddingValidator (address _address) public isValidator isInitalised returns(bool res){
+	function voteAgainstAddingValidator(address _address) public isValidator isInitalised returns (bool) {
 		//require(votes[_address].proposal == Proposal.ADD);
-		if(votes[_address].proposal != Proposal.ADD){
-			emit noProposalForAddingValidator(_address);
+		if(votes[_address].proposal != Proposal.ADD) {
+			emit NoProposalForAddingValidator(_address);
 			return false;
 		}
 		require(voteAgainst(_address,msg.sender));
-		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1){
+		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1) {
 			assert(clearVotes(_address));
 		}
 		return true;
@@ -192,22 +186,22 @@ contract SimpleValidatorSet is Voteable{
 	* System needs min 3 active admins for voting mechanism to function
     * @param _address address The address which is one of the admin.
     * @return A success flag
-	* @return Emits event minValidatorNeeded() in case the no of existing active validators are less than 3
+	* @return Emits event MinValidatorNeeded() in case the no of existing active validators are less than 3
 	* @return Emits event alreadyProposalForRemovingValidator() in case some proposal already exists
     */
-  	function proposalToRemoveValidator (address _address) public isValidator isInitalised returns(bool res){
-		if(totalActiveCount <= 3){
-			emit minValidatorNeeded(3);
+  	function proposalToRemoveValidator(address _address) public isValidator isInitalised returns (bool) {
+		if(totalActiveCount <= 3) {
+			emit MinValidatorNeeded(3);
 			return false;
 		}
 		//require(votes[_address].proposal == Proposal.NOT_CREATED);
-		if(votes[_address].proposal != Proposal.NOT_CREATED){
+		if(votes[_address].proposal != Proposal.NOT_CREATED) {
 			if(votes[_address].proposal == Proposal.ADD){
-				emit alreadyProposalForAddingValidator(_address);
+				emit AlreadyProposalForAddingValidator(_address);
 				return false;
 			}
-			if(votes[_address].proposal == Proposal.REMOVE){
-				emit alreadyProposalForRemovingValidator(_address);
+			if(votes[_address].proposal == Proposal.REMOVE) {
+				emit AlreadyProposalForRemovingValidator(_address);
 				return false;
 			}
 		}
@@ -225,19 +219,19 @@ contract SimpleValidatorSet is Voteable{
 	* @return Emits event removeValidator() once valdiator is successfully removed
 	* @return A success flag
     */
-	function voteForRemovingValidator (address _address) public isValidator isInitalised returns(bool res){
+	function voteForRemovingValidator(address _address) public isValidator isInitalised returns (bool) {
 		//require(votes[_address].proposal == Proposal.REMOVE);
-		if(votes[_address].proposal != Proposal.REMOVE){
-			emit noProposalForRemovingValidator(_address);
+		if(votes[_address].proposal != Proposal.REMOVE) {
+			emit NoProposalForRemovingValidator(_address);
 			return false;
 		}
 		require(voteFor(_address,msg.sender));
-		if(votes[_address].countFor >= totalActiveCount / 2 + 1){
+		if(votes[_address].countFor >= totalActiveCount / 2 + 1) {
 			activeValidators[_address].isValidator = false;
     		activeValidators[_address].status = Status.INACTIVE;
 			totalActiveCount = totalActiveCount.sub(1);
+			emit RemoveValidator(votes[_address].proposer, _address);
     		require(clearVotes(_address));
-    		emit removeValidator(_address,msg.sender);
 		}	
 		return true;
 	}
@@ -249,86 +243,25 @@ contract SimpleValidatorSet is Voteable{
     * @return Emits event noProposalForRemovingValidator() in case the REMOVE validator proposal is not started already
 	* @return A success flag
     */
-	function voteAgainstRemovingValidator (address _address) public isValidator isInitalised returns(bool res){
+	function voteAgainstRemovingValidator(address _address) public isValidator isInitalised returns (bool) {
 		//require(votes[_address].proposal == Proposal.REMOVE);
-		if(votes[_address].proposal != Proposal.REMOVE){
-			emit noProposalForRemovingValidator(_address);
+		if(votes[_address].proposal != Proposal.REMOVE) {
+			emit NoProposalForRemovingValidator(_address);
 			return false;
 		}
 		require(voteAgainst(_address,msg.sender));
-		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1){
+		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1) {
 			assert(clearVotes(_address));
 		}
 		return true;
 	}
 	
-	// function addValidator (address _address) public isValidator returns(bool res)  {
-	// 	assert (!activeValidators[_address].isValidator);
-	// 	assert (activeValidators[_address].status == Status.INACTIVE);
-	// 	assert (voteFor(_address,msg.sender));
-	// 	if(votes[_address].countFor >= totalActiveCount / 2 + 1){
-    // 		if(!exists[_address]){
-	// 			adminValidatorsMap[msg.sender].push(_address);
-	// 			validators.push(_address);
-	// 			totalCount = totalCount.add(1);
-    // 		}		
-    // 		exists[_address] = true;
-    // 		activeValidators[_address].isValidator = true;
-	// 		totalActiveCount = totalActiveCount.add(1);
-    // 		//activeValidators[_address].lop = LastOp.ADD;
-    // 		activeValidators[_address].status = Status.ACTIVE;
-    // 		require(clearVotes(_address));
-	// 		votes[_address].proposal = Proposal.NOT_CREATED;
-	// 	    emit addvalidator(_address,msg.sender);
-	// 	}
-	// 	else {
-	// 		votes[_address].proposal = Proposal.ADD;
-	// 	}
-	// 	if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
-	// 	    require(clearVotes(_address));
-	// 	}
-	// 	return true;
-	// }
-
-	// function removeValidator (address _address) public isValidator returns(bool res)  {
-	// 	assert (activeValidators[_address].isValidator);
-	// 	assert (activeValidators[_address].status == Status.ACTIVE);
-	// 	assert (voteFor(_address,msg.sender));
-	// 	if(votes[_address].countFor >= totalActiveCount / 2 + 1){
-    // 		activeValidators[_address].isValidator = false;
-    // 		//activeValidators[_address].lop = LastOp.REMOVE;
-    // 		activeValidators[_address].status = Status.INACTIVE;
-	// 		totalActiveCount = totalActiveCount.sub(1);
-    // 		require(clearVotes(_address));
-	// 		votes[_address].proposal = Proposal.NOT_CREATED;
-    // 		emit removevalidator(_address,msg.sender);
-	// 	}
-	// 	else {
-	// 		votes[_address].proposal = Proposal.REMOVE;
-	// 	}
-	// 	if(votes[_address].countAgainst >= totalActiveCount / 2 +1){
-	// 	    require(clearVotes(_address));
-	// 	}
-	// 	return true;
-	// }
-
-	/*function lastOp (address _address)public view isAdmin returns(string res){
-		if(activeValidators[_address].lop == LastOp.ADD){
-			return "add";
-		}
-		else if(activeValidators[_address].lop == LastOp.REMOVE){
-			return "remove";
-		}else{
-			return "no op";	
-		}
-	}*/
-
 	/**
     * @dev Function to check current voting status. It checks validity of msg.sender with isValidator modifier
 	* @param _address address
 	* @return returns the bool
     */
-	function checkVotes (address _address) public view isValidator returns(uint32[2] res){
+	function checkVotes(address _address) public view isValidator returns (uint32[2]) {
 		return internalCheckVotes(_address);
 	}
 	
@@ -337,7 +270,7 @@ contract SimpleValidatorSet is Voteable{
 	* @param _address address
 	* @return returns the array of no of votes FOR and AGAINST
     */
-	function checkProposal (address _address) public view isValidator returns(string res){
+	function checkProposal(address _address) public view isValidator returns (string) {
 		return internalCheckProposal(_address);
 	}
 
@@ -346,7 +279,7 @@ contract SimpleValidatorSet is Voteable{
 	* It checks validity of msg.sender with isAdmin modifier
 	* @return returns the list
     */
-	function getValidatorsForAdmin() public view isAdmin returns (address[] a){
+	function getValidatorsForAdmin() public view isAdmin returns (address[]) {
 	    return adminValidatorsMap[msg.sender];
 	}
 
@@ -355,7 +288,7 @@ contract SimpleValidatorSet is Voteable{
 	* @param _address address
 	* @return returns bool as active or non-active validator
     */
-	function isActiveValidator(address _address) public view returns(bool a){
+	function isActiveValidator(address _address) public view returns (bool) {
 	    return activeValidators[_address].isValidator;
 	}
 
@@ -363,7 +296,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to return list of all validators active/non-active
 	* @return returns the list
     */
-	function getAllValidators()public view isValidator returns(address[] a){
+	function getAllValidators() public view isValidator returns(address[]) {
 	    return validators;
 	}
 
@@ -371,7 +304,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to get total admin
 	* @return returns the number
     */
-	function getValidatorsCount()public view isValidator returns(uint32){
+	function getValidatorsCount() public view isValidator returns (uint32) {
 	    return totalCount;
 	}
 
@@ -379,7 +312,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to get total active validators
 	* @return returns the number
     */
-	function getActiveValidatorsCount()public view isValidator returns(uint32){
+	function getActiveValidatorsCount() public view isValidator returns (uint32) {
 	    return totalActiveCount;
 	}
 
@@ -388,9 +321,20 @@ contract SimpleValidatorSet is Voteable{
 	* @param _address address of the admin
 	* @return returns the status true/false
     */
-	function clearProposal(address _address)public isValidator isInitalised returns(bool res){
+	function clearProposal(address _address) public isValidator isInitalised returns (bool) {
 	    if(_address==address(0))
 			return false;
 		return clearVotes(_address);
+	}
+
+	/**
+    * @dev Function to retrieve the proposer for the given address
+	* @param _address address of the admin
+	* @return returns the address of the proposer
+    */
+	function getProposer(address _address) public view isValidator isInitalised returns (address) {
+	    if(_address==address(0))
+			return address(0);
+		return votes[_address].proposer;
 	}
 }
