@@ -144,6 +144,10 @@ var main = async function () {
                             var result = await adminValidator.runRemoveAdminTestCases();
                             console.log("result",result);
                             break;
+                        case "getAllActiveAdmins":
+                            var result = await adminValidator.getAllActiveAdmins();
+                            console.log("No of active admins",result.length);
+                            break;
                         case "getAllAdmins":
                             var result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
@@ -161,6 +165,10 @@ var main = async function () {
                             var result = await adminValidator.removeOneAdmin(adminToRemove);
                             result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
+                            break;
+                        case "runClearProposalsAdminTestCases":
+                            var result = await adminValidator.runClearProposalsAdminTestCases();
+                            console.log("result",result);
                             break;
                         default:
                             console.log("Given runadminvalidator option not supported! Provide correct details");

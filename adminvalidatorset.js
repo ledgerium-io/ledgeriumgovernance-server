@@ -209,25 +209,21 @@ class AdminValidatorSet {
         }
     }
     
-    async clearProposal(ethAccountToUse, otherAdminToCheck) {
+    async clearProposal(ethAccountToUse, otherAdminToCheck, privateKey) {
         try{
-            var estimatedGas = 0;
             var encodedABI = this.contract.methods.clearProposal(otherAdminToCheck).encodeABI();
-            
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,
-                this.contract._address,
-                encodedABI,
-                privateKey,
-                this.web3,
-                estimatedGas);
+            // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
+            // console.log("estimatedGas",estimatedGas);
+            var estimatedGas = 0;
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
             return transactionObject.transactionHash;
         }
         catch (error) {
             console.log("Error in AdminValidatorSet:clearProposal(): " + error);
-            return "";
+            return false;
         }
     }
-
+    
     async getProposer(ethAccountToUse, otherAdminToCheck) {
         try {
             var data = await this.contract.methods.getProposer(otherAdminToCheck).call({from : ethAccountToUse});

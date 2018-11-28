@@ -35,33 +35,35 @@ class AdminValidator{
         console.log("return flag for proposalToAddAdmin ",flag);
 
         var activeAdminList;
-        activeAdminList = await this.getAllAdmins();
-        console.log("return list for getAllAdmins",activeAdminList.length);
+        activeAdminList = await this.getAllActiveAdmins();
+        console.log("return list for getAllActiveAdmins",activeAdminList.length);
 
         var adminToRemove = accountAddressList[3];
         flag = await this.removeOneAdmin(adminToRemove);
         console.log("return flag for removeOneAdmin ",flag);
 
-        activeAdminList = await this.getAllAdmins();
-        console.log("return list for getAllAdmins",activeAdminList.length);
+        activeAdminList = await this.getAllActiveAdmins();
+        console.log("return list for getAllActiveAdmins",activeAdminList.length);
         
         console.log("****************** End Admin Test cases ******************");
+        return true;
     }
 
     async runRemoveAdminTestCases(){
         console.log("****************** Running Remove Admin Test cases ******************");
-        var activeAdminList = await this.getAllAdmins();
+        var activeAdminList = await this.getAllActiveAdmins();
         for(var indexAV = 1; indexAV < activeAdminList.length; indexAV++){
             let removeAdmin = activeAdminList[indexAV];
             let flag = await this.removeOneAdmin(removeAdmin);
             console.log("return flag for removeOneAdmin",flag);
-            let activeAdminCurrentList = await this.getAllAdmins();
-            console.log("return list for updated getAllAdmins",activeAdminCurrentList.length);
+            let activeAdminCurrentList = await this.getAllActiveAdmins();
+            console.log("return list for updated getAllActiveAdmins",activeAdminCurrentList.length);
         }
         console.log("****************** End Remove Admin Test cases ******************");
+        return true;
     }
 
-    async getAllAdmins(){
+    async getAllActiveAdmins(){
         var activeAdminList = [];
         try{
             var noOfActiveAdmin = 0;
@@ -80,11 +82,28 @@ class AdminValidator{
             }
         }
         catch (error) {
-            console.log("Error in AdminValidator:getAllAdmins(): " + error);
+            console.log("Error in AdminValidator:getAllActiveAdmins(): " + error);
         }
         return activeAdminList;
     }
 
+    async getAllAdmins(){
+        var adminList = [];
+        try{
+            adminList = await this.adminValidatorSet.getAllAdmins(accountAddressList[0]);
+            if (adminList != undefined && adminList.length > 0) {
+                for(var index = 0; index < adminList.length; index++ ){
+                    console.log("admin[", index+1,"] ",adminList[index]);
+                }
+            }
+            console.log("Number of admins " + adminList.length);
+        }
+        catch (error) {
+            console.log("Error in AdminValidator:getAllAdmins(): " + error);
+        }
+        return adminList;
+    }
+    
     async addOneAdmin(adminToAdd){
         console.log("****************** Running addOneAdmin ******************");
         try{
@@ -119,7 +138,7 @@ class AdminValidator{
             var proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, adminToAdd);
             console.log(adminToAdd, "checked proposer for the admin ?", proposer);
             
-            var activeAdminList = await this.getAllAdmins();
+            var activeAdminList = await this.getAllActiveAdmins();
             for(var indexAV = 0; indexAV < activeAdminList.length; indexAV++){
                 if(ethAccountToPropose == activeAdminList[indexAV])
                     continue;
@@ -200,7 +219,7 @@ class AdminValidator{
             var proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, adminToRemove);
             console.log(adminToRemove, "checked proposer for the admin ?", proposer);
             
-            var activeAdminList = await this.getAllAdmins();
+            var activeAdminList = await this.getAllActiveAdmins();
             for(var indexAV = 0; indexAV < activeAdminList.length; indexAV++){
                 if(ethAccountToPropose == activeAdminList[indexAV])
                     continue;
@@ -245,6 +264,20 @@ class AdminValidator{
             console.log("Error in AdminValidator:removeOneAdmin(): " + error);
             return false;
         }
+    }
+
+    async runClearProposalsAdminTestCases(){
+        console.log("****************** Running Clear Proposal Test cases ******************");
+        var adminList = await this.getAllAdmins();
+        for(var indexAV = 1; indexAV < adminList.length; indexAV++){
+            let admin = adminList[indexAV];
+            let flag = await this.adminValidatorSet.clearProposal(accountAddressList[0],admin,privateKey[accountAddressList[0]]);
+            console.log("return flag for clearing proposal for", admin,"is", flag);
+            let adminCurrentList = await this.getAllAdmins();
+            console.log("return list for updated getAllAdmins",adminCurrentList.length);
+        }
+        console.log("****************** End Clear Proposal Test cases ******************");
+        return true;
     }
 }
 
