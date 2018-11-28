@@ -1,11 +1,11 @@
 const fs = require('fs');
 const Web3 = require('web3');
 //const Web3 = require('web3-quorum');
-const Utils =  require('./web3util_br');
+const Utils =  require('./web3util');
 //const async =  require('async');
 //const mnemonic = require('./mnemonic');
-const SimpleValidatorSet = require('./simplevalidatorset_br');
-const AdminValidatorSet = require('./adminvalidatorset_br');
+const SimpleValidatorSet = require('./simplevalidatorset');
+const AdminValidatorSet = require('./adminvalidatorset');
 
 // var HDWalletProvider = require("truffle-hdwallet-provider");
 // var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";

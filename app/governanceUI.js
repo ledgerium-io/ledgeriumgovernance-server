@@ -284,7 +284,7 @@ function getActiveNodeDetails(leasedList) {
 
       var promise = new Promise(function (resolve, reject) {
         resolve(getNodeInfo(filecontent, result[1]));
-        //resolve('getNodeInfo(filecontent, "localhost")');
+        // resolve(getNodeInfo(filecontent, "localhost"));
       });
 
       nodePromiseArray.push(promise);
@@ -371,7 +371,7 @@ app.get('/networkinfo', function (req, res) {
       networkInfo.recentBlock = recentBlock;
       networkInfo.paritySpec = '{ "params": {"networkID":"2018"} }';
 
-      networkInfo.adminContract = fs.readFileSync("../contracts//AdminValidatorSet.sol")
+      networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
       networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
       res.send(JSON.stringify(networkInfo));
     })
