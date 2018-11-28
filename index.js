@@ -7,13 +7,17 @@ const AdminValidator = require('./adminvalidatorindex');
 const ethUtil = require('ethereumjs-util');
 
 var provider;
-var host,port;
-var web3;
+var protocol,host,port,web3;
+
+var subscribePastEventsFlag = false;
+var webSocketProtocolFlag = false;
+global.subscribePastEventsFlag = subscribePastEventsFlag;
 
 const utils = new Utils();
 global.utils = utils;
-var pastEventsSubscriptionFlag = false;
-global.pastEventsSubscriptionFlag = pastEventsSubscriptionFlag;
+
+var usecontractconfig = false;
+var readkeyconfig = false;
 var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
@@ -27,6 +31,18 @@ var main = async function () {
     for (let i=0; i<args.length ; i++) {
         let temp = args[i].split("=");
         switch (temp[0]) {
+            case "ws":
+                protocol = "ws://";
+                global.protocol = protocol;
+                webSocketProtocolFlag = true;
+                global.webSocketProtocolFlag = webSocketProtocolFlag;
+                break;
+            case "http":
+                protocol = "http://";
+                global.protocol = protocol;
+                webSocketProtocolFlag = false;
+                global.webSocketProtocolFlag = webSocketProtocolFlag;
+                break;
             case "hostname":
                 host = temp[1];
                 global.host = host;
@@ -34,15 +50,25 @@ var main = async function () {
             case "port":
                 port = temp[1];
                 global.port = port;
-                let URL = "http://" + host + ":" + port;
-                //let URL = "ws://" + host + ":" + port;
-                //web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
-                web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                let URL = protocol + host + ":" + port;
+                switch(protocol){
+                    case "http://":
+                    default:
+                        web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                        break;
+                    case "ws://":
+                        web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
+                        break;
+                }
                 global.web3 = web3;
                 adminValidator = new AdminValidator();
                 global.adminValidator = adminValidator;
                 simpleValidator = new SimpleValidator();
                 global.simpleValidator = simpleValidator;
+                break;
+            case "subscribePastEvents":
+                subscribePastEventsFlag = true;
+                global.subscribePastEventsFlag = subscribePastEventsFlag;
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
@@ -50,7 +76,7 @@ var main = async function () {
                 writeAccountsAndKeys();
                 break;
             case "readkeyconfig":
-                let readkeyconfig = temp[1];
+                readkeyconfig = temp[1];
                 switch(readkeyconfig){
                     case "true":
                     default: 
@@ -118,9 +144,31 @@ var main = async function () {
                             var result = await adminValidator.runRemoveAdminTestCases();
                             console.log("result",result);
                             break;
+                        case "getAllActiveAdmins":
+                            var result = await adminValidator.getAllActiveAdmins();
+                            console.log("No of active admins",result.length);
+                            break;
                         case "getAllAdmins":
                             var result = await adminValidator.getAllAdmins();
                             console.log("No of admins",result.length);
+                            break;
+                        case "addOneAdmin":
+                            var adminToAdd = list[++j];
+                            console.log("adminToAdd ", adminToAdd);
+                            var result = await adminValidator.addOneAdmin(adminToAdd);
+                            result = await adminValidator.getAllAdmins();
+                            console.log("No of admins",result.length);
+                            break;
+                        case "removeOneAdmin":
+                            var adminToRemove = list[++j];
+                            console.log("adminToRemove ", adminToRemove);
+                            var result = await adminValidator.removeOneAdmin(adminToRemove);
+                            result = await adminValidator.getAllAdmins();
+                            console.log("No of admins",result.length);
+                            break;
+                        case "runClearProposalsAdminTestCases":
+                            var result = await adminValidator.runClearProposalsAdminTestCases();
+                            console.log("result",result);
                             break;
                         default:
                             console.log("Given runadminvalidator option not supported! Provide correct details");
@@ -147,6 +195,20 @@ var main = async function () {
                             break;
                         case "getListOfActiveValidators":
                             var result = await simpleValidator.getListOfActiveValidators();
+                            console.log("No of validators",result.length);
+                            break;
+                        case "addSimpleSetContractValidatorForAdmin":
+                            var validator = list[++j];
+                            console.log("validator ", validator);
+                            var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validator);
+                            result = await simpleValidator.getListOfActiveValidators();
+                            console.log("No of validators",result.length);
+                            break;
+                        case "removeSimpleSetContractValidatorForAdmin":
+                            var validator = list[++j];
+                            console.log("validator ", validator);
+                            var result = await simpleValidator.removeSimpleSetContractValidatorForAdmin(validator);
+                            result = await simpleValidator.getListOfActiveValidators();
                             console.log("No of validators",result.length);
                             break;
                         default:
@@ -179,21 +241,14 @@ var main = async function () {
                 global.simpleValidatorSetAddress = simpleValidatorSetAddress;
                 break;
             }
-            case "pastEventsSubscription":{
-                pastEventsSubscriptionFlag = true;
-                global.pastEventsSubscriptionFlag = pastEventsSubscriptionFlag;
-                break;
-            }
-            // case "docgen":
-            //     const docgen = require('solidity-docgen').default;
-            //     docgen('.', './contracts/', './docs/', [])
-            //     break;
             default:
                 //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
                 break;
         }
     }
-
+    if(web3 != undefined)
+        web3.currentProvider.disconnect();
+    
     if(provider)
         provider.engine.stop();
     return;

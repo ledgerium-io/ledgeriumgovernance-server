@@ -152,6 +152,7 @@ class SimpleValidator{
     }
 
     async addSimpleSetContractValidatorForAdmin(newValidator){
+        console.log("****************** Running addSimpleSetContractValidatorForAdmin ******************");
         try{
             var from = accountAddressList[0];
             var ethAccountToPropose = accountAddressList[0];
@@ -163,7 +164,7 @@ class SimpleValidator{
             console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
             var transactionhash = await this.simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
-            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator, "by admin", from);
 
             whatProposal = await this.simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
             console.log(newValidator, "checked proposal for the validator ?", whatProposal);
@@ -171,13 +172,17 @@ class SimpleValidator{
             votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
             console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
 
+            /* Lets see who proposed this validator for add*/
+            var proposer = await this.simpleValidatorSet.getProposer(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked proposer for the validator ?", proposer);
+
             var activeValidatorList = await this.getListOfActiveValidators();
             for(var indexAV = 0; indexAV < activeValidatorList.length;indexAV++){
                 if(ethAccountToPropose == activeValidatorList[indexAV])
                     continue;
                 let votingFor = activeValidatorList[indexAV];
                 transactionhash = await this.simpleValidatorSet.voteForAddingValidator(votingFor, privateKey[votingFor], newValidator);
-                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator, "by validator", votingFor);
 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 let votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
@@ -189,7 +194,7 @@ class SimpleValidator{
                     break;
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 transactionhash = await this.simpleValidatorSet.voteAgainstAddingValidator(votingAgainst, privateKey[votingAgainst], newValidator);
-                console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator);
+                console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator, "by validator", votingAgainst);
                 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
@@ -203,6 +208,7 @@ class SimpleValidator{
                     break; 
             }
             this.istanbulAddValidator(newValidator);
+            console.log("****************** Ending addSimpleSetContractValidatorForAdmin ******************");
             return true;
         }
         catch (error) {
@@ -212,6 +218,7 @@ class SimpleValidator{
     }
 
     async removeSimpleSetContractValidatorForAdmin(removeValidator){
+        console.log("****************** Running removeSimpleSetContractValidatorForAdmin ******************");
         try{
             var ethAccountToPropose = accountAddressList[0];
 
@@ -223,14 +230,14 @@ class SimpleValidator{
             var flag = await this.simpleValidatorSet.isActiveValidator(ethAccountToPropose,removeValidator);
             console.log(removeValidator, "already an validator ?", flag);
             if(!flag) 
-                return true;
+               return true;
 
             /*We are testing REMOVE validator functionality here with one proposal FOR removing and one more vote FOR removing,
             * makes more than 3/2 brings this a majority and validator will be removed. And proposal will be cleared off!
             * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
             */
             var transactionhash = await this.simpleValidatorSet.proposalToRemoveValidator(ethAccountToPropose, privateKey[ethAccountToPropose], removeValidator);
-            console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", removeValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", removeValidator, "by admin", ethAccountToPropose);
 
             /* Since REMOVE the validator proposal is raised, checkProposal should return "remove"*/
             var whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose,removeValidator);
@@ -240,13 +247,17 @@ class SimpleValidator{
             var votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose,removeValidator);
             console.log(removeValidator, "checked votes for removing as validator ?", votes[0], votes[1]);
 
+            /* Lets see who proposed this validator for removal*/
+            var proposer = await this.simpleValidatorSet.getProposer(ethAccountToPropose, removeValidator);
+            console.log(removeValidator, "checked proposer for the validator ?", proposer);
+
             var activeValidatorList = await this.getListOfActiveValidators();
             for(var indexAV = 0; indexAV < activeValidatorList.length; indexAV++){
                 if(ethAccountToPropose == activeValidatorList[indexAV])
                     continue;
-                let votingFrom = activeValidatorList[indexAV];
-                transactionhash = await this.simpleValidatorSet.voteForRemovingValidator(votingFrom, privateKey[votingFrom], removeValidator);
-                console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator);
+                let votingFor = activeValidatorList[indexAV];
+                transactionhash = await this.simpleValidatorSet.voteForRemovingValidator(votingFor, privateKey[votingFor], removeValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to remove ", removeValidator, "by validator", votingFor);
 
                 whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose, removeValidator);
                 console.log(removeValidator, "checked proposal for the validator ?", whatProposal);
@@ -261,7 +272,7 @@ class SimpleValidator{
                     break;
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 transactionhash = await this.simpleValidatorSet.voteAgainstRemovingValidator(votingAgainst, privateKey[votingAgainst], removeValidator);
-                console.log("submitted transactionhash ",transactionhash, "against voting to add ", removeValidator);
+                console.log("submitted transactionhash ",transactionhash, "against voting to add ", removeValidator, "by validator", votingAgainst);
                 
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, removeValidator);
@@ -281,6 +292,7 @@ class SimpleValidator{
             console.log(removeValidator, "still an validator ?", flag);
 
             this.istanbulRemoveValidator(removeValidator);
+            console.log("****************** Ending removeSimpleSetContractValidatorForAdmin ******************");
             return flag;
         }
         catch (error) {
@@ -316,31 +328,32 @@ class SimpleValidator{
 
     async istanbulAddValidator(validatorAddress)
     {
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         
-        this.addIstanbulValidator(8545,validatorAddress);
-        this.addIstanbulValidator(8546,validatorAddress);
-        this.addIstanbulValidator(8547,validatorAddress);
-        this.addIstanbulValidator(8548,validatorAddress);
-        this.addIstanbulValidator(8549,validatorAddress);
-        this.addIstanbulValidator(8550,validatorAddress);
+        await this.addIstanbulValidator(8545,validatorAddress);
+        await this.addIstanbulValidator(8546,validatorAddress);
+        await this.addIstanbulValidator(8547,validatorAddress);
+        await this.addIstanbulValidator(8548,validatorAddress);
+        await this.addIstanbulValidator(8549,validatorAddress);
+        await this.addIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
-    }    
+    }
 
     async istanbulRemoveValidator(validatorAddress){
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
 
-        this.removeIstanbulValidator(8545,validatorAddress);
-        this.removeIstanbulValidator(8546,validatorAddress);
-        this.removeIstanbulValidator(8547,validatorAddress);
-        this.removeIstanbulValidator(8548,validatorAddress);
-        this.removeIstanbulValidator(8549,validatorAddress);
+        await this.removeIstanbulValidator(8545,validatorAddress);
+        await this.removeIstanbulValidator(8546,validatorAddress);
+        await this.removeIstanbulValidator(8547,validatorAddress);
+        await this.removeIstanbulValidator(8548,validatorAddress);
+        await this.removeIstanbulValidator(8549,validatorAddress);
+        await this.removeIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
     }
 
@@ -358,12 +371,16 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
+        //var err,result = await web3.currentProvider.send(message);//,(err,result)=>{
         web3.currentProvider.send(message,(err,result)=>{
-            console.log("received results:addIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:addIstanbulValidator", err);
+        console.log("received results:addIstanbulValidator");
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:addIstanbulValidator", err);
         });
         return;
     }
@@ -382,12 +399,16 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
+        //var err,result = await web3.currentProvider.send(message);//,(err,result)=>{
         web3.currentProvider.send(message,(err,result)=>{
             console.log("received results:removeIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:removeIstanbulValidator", err);
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:removeIstanbulValidator", err);
         });
         return;
     }
@@ -404,21 +425,22 @@ class SimpleValidator{
             id: new Date().getTime()
             };
         
+        ///!!!!!!!!we can not call await here as httpprovider only supports callback!!!!!!
         web3.currentProvider.send(message,(err,result)=>{
             console.log("received results:listIstanbulValidator");
-            if(result)
-                console.log("results", result.result);
-            else if(err)
-            console.log("Error in SimpleValidator:listIstanbulValidator", err);
+            if(!err){
+                if(result != undefined && result.result != undefined)
+                    console.log("results", result.result);
+            }
+            else
+                console.log("Error in SimpleValidator:listIstanbulValidator", err);
         });
         return;
     }
 
     delay(ms){
         new Promise(function(res) {
-                console.log(new Date().getTime()); 
                 setTimeout(res, ms); 
-                console.log(new Date().getTime());
             }
         );
     }

@@ -32,7 +32,12 @@ NOTE: If there are existing docker instances (sudo docker ps -a), stop and remov
 
 ### Run the smart contracts
 - npm install
-- node index.js
+
+#### Running with events ON - provide the ws switch
+node index.js ws hostname=localhost subscribePastEvents port=9000 readkeyconfig=true usecontractconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
+
+#### Running without events ON - provide the http switch
+node index.js http hostname=localhost port=8545 readkeyconfig=true usecontractconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
 
 This will bring up 
 - 7 geth node docker instances

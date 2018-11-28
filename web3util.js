@@ -3,7 +3,7 @@ const fs = require('fs');
 var keythereum = require('keythereum');
 const ethUtil = require('ethereumjs-util');
 class Utils  {
-    async transaction (from,to,value,data){
+    async transaction (from,to,value,data) {
         return {
             from    : from,
             to      : to,
@@ -14,7 +14,7 @@ class Utils  {
         }
     }
 
-    async getContractEncodeABI(abi,bytecode,web3,arg){
+    async getContractEncodeABI(abi,bytecode,web3,arg) {
         try{
             let contract = new web3.eth.Contract(JSON.parse(abi));
             return await contract.deploy({ data : bytecode, arguments : arg, privateFor: ["0x43a69edd54e07b95113fed92e8c9ba004500ce12"]}).encodeABI();
@@ -43,7 +43,7 @@ class Utils  {
         }    
     }
     
-    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){//, calleeMethodName,callback) {
+    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas) {//, calleeMethodName,callback) {
         try
         {
             var gasPrice = await web3.eth.getGasPrice();
@@ -101,7 +101,7 @@ class Utils  {
 
     /** to get receipt of the event raised from the blockchain
     */ 
-    async getReceipt(transactionHash,web3){
+    async getReceipt(transactionHash,web3) {
         var receipt = web3.eth.getTransactionReceipt(transactionHash);
         if(!receipt)
             console.log("Transaction",transactionHash,"did not get mined!");
@@ -116,11 +116,11 @@ class Utils  {
         return [abi, json.bytecode];
     }
 
-    keccak (web3,text){
+    keccak (web3,text) {
         return web3.utils.keccak256(text);
     }
 
-    async sendTransaction(web3,transaction){
+    async sendTransaction(web3,transaction) {
         return await web3.eth.sendTransaction(transaction);
     }
 
@@ -134,29 +134,25 @@ class Utils  {
         return privateKey.toString('hex');
     }
 
-    async subscribeForLogs (string,web3,contractAddress, callback) {
-        await web3.eth.subscribe(string,{
-            address: contractAddress
-            //topics: ['0x12345...']
-        },(error,transaction)=>{
+    async subscribe (string,web3,callback) {
+        web3.eth.subscribe(string,(error,transaction)=> {
             if(error){
                 console.log("error",`SUBSCRIBE:\n${error.message}\n${error.stack}`);
-            }else{
+            } else{
                 callback(transaction);
             }
         });
     }
     
     // to get all events from a submitted transaction to send to node application
-    async listenAllEventsContract(contract,callback){
+    async listenContractAllEvents(contract,callback) {
         contract.events.allEvents({
             fromBlock: 0,
             toBlock  : 'latest'
-        },(err,event)=>{
-            if(err){
+        }, (err,event) => {
+            if(err) {
                 console.log('error',`\n${err.message}\n${err.stack}`)
-            }else{
-                console.log('info',`:\n${event}`);
+            } else {
                 callback(event);
             }
         })
@@ -168,7 +164,7 @@ class Utils  {
         });
     }
 
-    async getData(fromAccount,toContract,endata,web3){
+    async getData(fromAccount,toContract,endata,web3) {
         return await web3.eth.call({
             from : fromAccount,
             to: toContract,
@@ -176,20 +172,20 @@ class Utils  {
         });
     }
 
-    split(array){
+    split(array) {
         let temp = [];
         let add = [];
-        array = array.slice(2,array.length);
-        for(var i=0;i<array.length;i+=64){
+        array = array.slice(2, array.length);
+        for(var i = 0; i < array.length; i+=64) {
             temp.push(array.slice(i,i+64));
         }
-        for(var j=0;j<temp.length;j++){
+        for(var j = 0; j < temp.length; j++) {
             add.push("0x"+temp[j].slice(24,64));
         }
         return add.splice(2, add.length);
     }
 
-    convertToBool(inputString){
+    convertToBool(inputString) {
         if(inputString == "0x0000000000000000000000000000000000000000000000000000000000000001")
             return true;
         else (inputString == "0x0000000000000000000000000000000000000000000000000000000000000000")
