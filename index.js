@@ -11,13 +11,14 @@ var protocol,host,port,web3;
 
 var subscribePastEventsFlag = false;
 var webSocketProtocolFlag = false;
+global.webSocketProtocolFlag = webSocketProtocolFlag;
 global.subscribePastEventsFlag = subscribePastEventsFlag;
 
 const utils = new Utils();
 global.utils = utils;
 
-var usecontractconfig = false;
-var readkeyconfig = false;
+//var usecontractconfig = false;
+//var readkeyconfig = false;
 var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
@@ -31,108 +32,74 @@ var main = async function () {
     for (let i=0; i<args.length ; i++) {
         let temp = args[i].split("=");
         switch (temp[0]) {
-            case "ws":
-                protocol = "ws://";
-                global.protocol = protocol;
-                webSocketProtocolFlag = true;
-                global.webSocketProtocolFlag = webSocketProtocolFlag;
-                break;
-            case "http":
-                protocol = "http://";
-                global.protocol = protocol;
-                webSocketProtocolFlag = false;
-                global.webSocketProtocolFlag = webSocketProtocolFlag;
-                break;
-            case "hostname":
-                host = temp[1];
-                global.host = host;
-                break;
-            case "port":
-                port = temp[1];
-                global.port = port;
-                let URL = protocol + host + ":" + port;
-                switch(protocol){
-                    case "http://":
+            case "protocol":
+                switch (temp[1]) {
+                    case "ws":
                     default:
-                        web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                        protocol = "ws://";
+                        global.protocol = protocol;
+                        webSocketProtocolFlag = true;
+                        global.webSocketProtocolFlag = webSocketProtocolFlag;
                         break;
-                    case "ws://":
-                        web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
+                    case "http":
+                        protocol = "http://";
+                        global.protocol = protocol;
+                        webSocketProtocolFlag = false;
+                        global.webSocketProtocolFlag = webSocketProtocolFlag;
                         break;
                 }
-                global.web3 = web3;
-                adminValidator = new AdminValidator();
-                global.adminValidator = adminValidator;
-                simpleValidator = new SimpleValidator();
-                global.simpleValidator = simpleValidator;
                 break;
-            case "subscribePastEvents":
-                subscribePastEventsFlag = true;
-                global.subscribePastEventsFlag = subscribePastEventsFlag;
+            case "hostname":{
+                    host = temp[1];
+                    global.host = host;
+                }
+                break;
+            case "port":{
+                    port = temp[1];
+                    global.port = port;
+                    let URL = protocol + host + ":" + port;
+                    switch(protocol){
+                        case "ws://":
+                        default:
+                            web3 = new Web3(new Web3.providers.WebsocketProvider(URL));
+                            break;
+                        case "http://":
+                            web3 = new Web3(new Web3.providers.HttpProvider(URL));
+                            break;
+                    }
+                    global.web3 = web3;
+                    adminValidator = new AdminValidator();
+                    global.adminValidator = adminValidator;
+                    simpleValidator = new SimpleValidator();
+                    global.simpleValidator = simpleValidator;
+                }
+                break;
+            // case "subscribePastEvents":{
+            //         subscribePastEventsFlag = true;
+            //         global.subscribePastEventsFlag = subscribePastEventsFlag;
+            //     }
+            //     break;
+            case "readkeyconfig":
+                readAccountsAndKeys();
+                // readkeyconfig = temp[1];
+                // switch(readkeyconfig){
+                //     case "true":
+                //     default: 
+                //         readAccountsAndKeys();
+                //         break;
+                //     case "false":
+                //         console.log("Given readkeyconfig option not supported! Provide correct details");
+                //         break;     
+                // }
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
                 writeAccountsAndKeys();
                 break;
-            case "readkeyconfig":
-                readkeyconfig = temp[1];
-                switch(readkeyconfig){
-                    case "true":
-                    default: 
-                        readAccountsAndKeys();
-                        break;
-                    case "false":
-                        console.log("Given readkeyconfig option not supported! Provide correct details");
-                        break;     
-                }
-                break;
-            case "usecontractconfig":
-                let usecontractconfig = temp[1];
-                switch(usecontractconfig){
-                    case "true":
-                        readContractsFromConfig();
-                        if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
-                            if(accountAddressList.length < 3){
-                                console.log("Ethereum accounts are not available! Can not proceed further!!");
-                                return;
-                            }    
-                            adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
-                            simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
-                            writeContractsINConfig();
-                        }
-                        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-                        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
-                        let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
-                        console.log("tranHash of initialisation", tranHash);
-                        tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
-                        console.log("tranHash of initialisation", tranHash);
-                        global.adminValidatorSetAddress = adminValidatorSetAddress;
-                        global.simpleValidatorSetAddress = simpleValidatorSetAddress;
-                        break;
-                    case "false":
-                        if(accountAddressList.length < 3){
-                            console.log("Ethereum accounts are not available! Can not proceed further!!");
-                            return;
-                        }
-                        adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
-                        console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-                        simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
-                        console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
-                        let tranHash1 = await adminValidator.setHelperParameters(adminValidatorSetAddress);
-                        console.log("tranHash of     initialisation", tranHash1);
-                        tranHash1 = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
-                        console.log("tranHash of initialisation", tranHash1);
-
-                        global.adminValidatorSetAddress = adminValidatorSetAddress;
-                        global.simpleValidatorSetAddress = simpleValidatorSetAddress;
-                        break;
-                    default:
-                        console.log("Given usecontractconfig option not supported! Provide correct details");
-                        break;
-                }
-                break;
             case "runadminvalidator":{
+                //Initiate App before any function gets executed
+                await initiateApp();
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
                     switch (list[j]) {
@@ -156,19 +123,23 @@ var main = async function () {
                             var adminToAdd = list[++j];
                             console.log("adminToAdd ", adminToAdd);
                             var result = await adminValidator.addOneAdmin(adminToAdd);
-                            result = await adminValidator.getAllAdmins();
+                            result = await adminValidator.getAllActiveAdmins();
                             console.log("No of admins",result.length);
                             break;
                         case "removeOneAdmin":
                             var adminToRemove = list[++j];
                             console.log("adminToRemove ", adminToRemove);
                             var result = await adminValidator.removeOneAdmin(adminToRemove);
-                            result = await adminValidator.getAllAdmins();
+                            result = await adminValidator.getAllActiveAdmins();
                             console.log("No of admins",result.length);
                             break;
                         case "runClearProposalsAdminTestCases":
-                            var result = await adminValidator.runClearProposalsAdminTestCases();
+                            var otherAdminToCheck = list[++j];
+                            console.log("otherAdminToCheck ", otherAdminToCheck);
+                            var result = await adminValidator.runClearProposalsAdminTestCases(otherAdminToCheck);
                             console.log("result",result);
+                            result = await adminValidator.getAllActiveAdmins();
+                            console.log("No of admins",result.length);
                             break;
                         default:
                             console.log("Given runadminvalidator option not supported! Provide correct details");
@@ -178,6 +149,8 @@ var main = async function () {
                 break;
             }
             case "runsimplevalidator":{
+                //Initiate App before any function gets executed
+                await initiateApp();
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
                     switch (list[j]) {
@@ -218,29 +191,6 @@ var main = async function () {
                 }
                 break;
             }
-            case "rinkeby":{
-                var HDWalletProvider = require("truffle-hdwallet-provider");
-                //var privateKey1 = "79fe2e5ef4cb81e1dd04f236e66c793d152eb372234c487405aa71cce90db9c7";
-                provider = new HDWalletProvider(privateKey[accountAddressList[0]], "https://rinkeby.infura.io/v3/931eac1d45254c16acc71d0fc11b88f0");
-                web3 = new Web3();
-                web3.setProvider(provider);
-                global.web3 = web3;
-                adminValidator = new AdminValidator();
-                global.adminValidator = adminValidator;
-                simpleValidator = new SimpleValidator();
-                global.simpleValidator = simpleValidator;
-                adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
-                simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
-                console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-                console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
-                let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
-                console.log("tranHash of initialisation", tranHash);
-                tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
-                console.log("tranHash of initialisation", tranHash);
-                global.adminValidatorSetAddress = adminValidatorSetAddress;
-                global.simpleValidatorSetAddress = simpleValidatorSetAddress;
-                break;
-            }
             default:
                 //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
                 break;
@@ -255,6 +205,28 @@ var main = async function () {
 }
 
 main();
+
+async function initiateApp() {
+
+    readContractsFromConfig();
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+        if(accountAddressList.length < 3){
+            console.log("Ethereum accounts are not available! Can not proceed further!!");
+            return;
+        }    
+        adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
+        simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
+        writeContractsINConfig();
+    }
+    console.log("adminValidatorSetAddress",adminValidatorSetAddress);
+    console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
+    console.log("tranHash of initialisation", tranHash);
+    tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
+    console.log("tranHash of initialisation", tranHash);
+    global.adminValidatorSetAddress = adminValidatorSetAddress;
+    global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+}
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
     

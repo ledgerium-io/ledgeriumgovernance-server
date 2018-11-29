@@ -28,11 +28,11 @@ class AdminValidator{
         console.log("****************** Start Admin Test cases ******************");
         var adminToAdd = accountAddressList[3];
         var flag = await this.addOneAdmin(adminToAdd);
-        console.log("return flag for proposalToAddAdmin ",flag);
+        console.log("return flag for addOneAdmin ",flag);
 
         adminToAdd = accountAddressList[4];
         flag = await this.addOneAdmin(adminToAdd);
-        console.log("return flag for proposalToAddAdmin ",flag);
+        console.log("return flag for addOneAdmin ",flag);
 
         var activeAdminList;
         activeAdminList = await this.getAllActiveAdmins();
@@ -112,7 +112,7 @@ class AdminValidator{
             var flag = await this.adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToAdd);
             console.log(adminToAdd, "got added as admin ?", flag);
             if(flag)
-            return true;
+                return true;
 
             /* Testing the functionality of adding or removing a admin with votes FOR and votes AGAINST.
             * There are 3 admin in the beginning. More than 3/2 votes are needed to make any decision (FOR or AGINST)
@@ -176,6 +176,10 @@ class AdminValidator{
             }
             flag = await this.adminValidatorSet.isActiveAdmin(ethAccountToPropose,adminToAdd);
             console.log(adminToAdd, "got added as admin ?", flag);
+
+            var activeAdminList;
+            activeAdminList = await this.getAllActiveAdmins();
+            console.log("return list for getAllActiveAdmins",activeAdminList.length);
             console.log("****************** Ending addOneAdmin ******************");
             return flag;
         }
@@ -266,18 +270,52 @@ class AdminValidator{
         }
     }
 
-    async runClearProposalsAdminTestCases(){
+    async runClearProposalsAdminTestCases(otherAdminToCheck){
         console.log("****************** Running Clear Proposal Test cases ******************");
-        var adminList = await this.getAllAdmins();
-        for(var indexAV = 1; indexAV < adminList.length; indexAV++){
-            let admin = adminList[indexAV];
-            let flag = await this.adminValidatorSet.clearProposal(accountAddressList[0],admin,privateKey[accountAddressList[0]]);
-            console.log("return flag for clearing proposal for", admin,"is", flag);
-            let adminCurrentList = await this.getAllAdmins();
-            console.log("return list for updated getAllAdmins",adminCurrentList.length);
+        try{
+            let flag = await this.addOneAdmin(otherAdminToCheck);
+            console.log("return flag for addOneAdmin ",flag);
+            
+            var ethAccountToPropose = accountAddressList[0];
+            /*We are testing REMOVE admin functionality here with one proposal FOR removing and one more vote FOR removing,
+            * makes more than 3/2 brings this a majority and admin will be removed. And proposal will be cleared off!
+            * voting AGAINST proposal will add the AGAINST number. FOR/AGAINST vote should get majority to do any final action
+            */
+            var transactionhash = await this.adminValidatorSet.proposalToRemoveAdmin(ethAccountToPropose,otherAdminToCheck,privateKey[ethAccountToPropose]);
+            console.log("submitted transactionhash ",transactionhash, "for proposal of removing ", otherAdminToCheck, "by admin", ethAccountToPropose);
+
+            /* Since REMOVE the admin proposal is raised, checkProposal should return "remove"*/
+            var whatProposal = await this.adminValidatorSet.checkProposal(ethAccountToPropose,otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked proposal for the admin ?", whatProposal);
+            
+            /* Lets see how voting looks at the moment! It should return 1,0*/
+            var votes = await this.adminValidatorSet.checkVotes(ethAccountToPropose,otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked votes for removing as admin ?", votes[0], votes[1]);
+
+            /* Lets see who proposed this admin for removing*/
+            var proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked proposer for the admin ?", proposer);
+
+            flag = await this.adminValidatorSet.clearProposal(ethAccountToPropose,otherAdminToCheck,privateKey[ethAccountToPropose]);
+            console.log("return flag for clearing proposal for", otherAdminToCheck,"is", flag);
+
+            /* Since REMOVE the admin proposal is raised, checkProposal should return "remove"*/
+            whatProposal = await this.adminValidatorSet.checkProposal(ethAccountToPropose,otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked proposal for the admin ?", whatProposal);
+            
+            /* Lets see how voting looks at the moment! It should return 1,0*/
+            votes = await this.adminValidatorSet.checkVotes(ethAccountToPropose,otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked votes for removing as admin ?", votes[0], votes[1]);
+
+            /* Lets see who proposed this admin for removing*/
+            proposer = await this.adminValidatorSet.getProposer(ethAccountToPropose, otherAdminToCheck);
+            console.log(otherAdminToCheck, "checked proposer for the admin ?", proposer);
+            return true;
         }
-        console.log("****************** End Clear Proposal Test cases ******************");
-        return true;
+        catch (error) {
+            console.log("Error in AdminValidator:runClearProposalsAdminTestCases(): " + error);
+            return false;
+        }    
     }
 }
 

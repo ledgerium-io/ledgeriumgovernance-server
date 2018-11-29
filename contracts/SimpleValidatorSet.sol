@@ -152,9 +152,9 @@ contract SimpleValidatorSet is Voteable{
 			if(!exists[_address]){
 				adminValidatorsMap[msg.sender].push(_address);
 				validators.push(_address);
+				exists[_address] = true;
 				totalCount = totalCount.add(1);
     		}		
-    		exists[_address] = true;
     		activeValidators[_address].isValidator = true;
     		activeValidators[_address].status = Status.ACTIVE;
 			totalActiveCount = totalActiveCount.add(1);
@@ -311,6 +311,14 @@ contract SimpleValidatorSet is Voteable{
 	    return validators;
 	}
 
+	/**
+    * @dev Function to get who all have voted for current proposal. It checks validity of msg.sender with isAdmin modifier
+	* @return returns the array of no of votes FOR and AGAINST
+    */
+	function getVoted(address _address) public view isAdmin returns (address[]) {
+	    return internalGetVoted(_address);
+	}
+	
 	/**
     * @dev Function to get total admin
 	* @return returns the number

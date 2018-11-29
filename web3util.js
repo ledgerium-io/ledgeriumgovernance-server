@@ -156,12 +156,6 @@ class Utils  {
                 callback(event);
             }
         })
-        .on("data", function(log){
-            console.log("log data",log);
-        })
-        .on("changed", function(log){
-            console.log("log changed",log);
-        });
     }
 
     async getData(fromAccount,toContract,endata,web3) {

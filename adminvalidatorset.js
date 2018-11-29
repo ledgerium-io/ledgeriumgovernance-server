@@ -235,9 +235,9 @@ class AdminValidatorSet {
     }
 
     listenContractPastEvents() {
-        this.contract.getPastEvents('AddAdmin',{fromBlock: 0, toBlock: 'latest',filter: {_admin: "0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a"}},
-            (err, events) => {
-                if(events.length > 0){
+        this.contract.getPastEvents('AddAdmin',{fromBlock: 0, toBlock: 'latest'/*,filter: {_admin: "0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a"}*/},
+            (error, events) => {
+                if(!error && events.length > 0){
                     events.forEach(eachElement => {
                         if(eachElement.event == "AddAdmin") {
                             console.log("listenContractPastEvents for AddAdmin Event");
@@ -249,6 +249,8 @@ class AdminValidatorSet {
                         }
                     })
                 }
+                else
+                    console.log("Error in processing AdminValidatorSet:AddAdmin event: " + error);
             });
      }     
         

@@ -18,33 +18,83 @@ It is designed to work along with yml file which is part of the repo. The IBFT t
 
 ### Bring up the geth nodes using docker compose
 NOTE: If there are existing docker instances (sudo docker ps -a), stop and remove them
- - sudo docker stop $(sudo docker ps -aq)
- - sudo docker rm $(sudo docker ps -aq)
+```
+sudo docker stop $(sudo docker ps -aq)
+```
+
+```
+sudo docker rm $(sudo docker ps -aq)
+```
  
 1. Create docker network by running this command
-- docker network create -d bridge --subnet 172.16.239.0/24 --gateway 172.16.239.1 app_net
-2. Run the geth nodes by running
-- docker-compose up -d
+   ```
+   docker network create -d bridge --subnet 172.16.239.0/24 --gateway 172.16.239.1 app_net
+   ```
+2. Ensure **genesis/led_genesis.json** file available at hostmachine **'~'** level
+3. Run the geth nodes by running
+   **docker-compose up -d**
 
 ### We also use truffle for compiling smart contract so truffle can be installed and run compile
+``` 
 - sudo npm install -g truffle
-- truffle compile
-
-### Run the smart contracts
+- truffle compile 
 - npm install
+```
 
-#### Running with events ON - provide the ws switch
-node index.js ws hostname=localhost subscribePastEvents port=9000 readkeyconfig=true usecontractconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
+### Run the smart contracts - Usages
+The governanceApp can be used with different switches
 
-#### Running without events ON - provide the http switch
-node index.js http hostname=localhost port=8545 readkeyconfig=true usecontractconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
+**protocol**
+- ws
+- http
+
+**hostname**
+- localhost
+- XXX.XXX.XXX.XXX
+
+**port**
+- e.g. 9000 for Websocket
+- e.g. 8545 for http
+
+**readkeyconfig**
+- if keystore\privatekey.json needs to be used for accounts and respective their private keys
+
+or **privateKeys**
+- provide comma-seperated valid private keys like "897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb" to be used
+
+**runadminvalidator** - for AdminValidatorSet tests 
+- runAdminTestCases 
+- runRemoveAdminTestCases
+- getAllActiveAdmins
+- getAllAdmins
+- addOneAdmin
+- removeOneAdmin
+- runClearProposalsAdminTestCases -- provide valid ethereum address with comma e.g.0xc2cb28fad9b82036c9f32cbd6c84343612ee0323
+
+**runsimplevalidator** - for SimpleValidatorSet tests 
+- validatorSetup 
+- runValidatorTestCases
+- runRemoveValidatorTestCases
+- getListOfActiveValidators
+- addSimpleSetContractValidatorForAdmin -- provide valid ethereum address with comma e.g. "0xc2cb28fad9b82036c9f32cbd6c84343612ee0323"
+- removeSimpleSetContractValidatorForAdmin -- provide valid ethereum address with comma e.g. "0xc2cb28fad9b82036c9f32cbd6c84343612ee0323"
+
+**Sample usages**
+- Running with events ON - with the ws switch
+```
+node index.js protocol=ws hostname=localhost port=9000 readkeyconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
+```
+
+- Running 'without' events ON - with the http switch
+```
+node index.js protocol=http hostname=localhost port=8545 readkeyconfig=true unadminvalidator=addOneAdmin,0x3a91fd8517b58470c85fd570913b358c4db916bc,runClearProposalsAdminTestCases,0xc2cb28fad9b82036c9f32cbd6c84343612ee0323,getAllActiveAdmins
+```
 
 This will bring up 
 - 7 geth node docker instances
-- 7 correspnding constellation node docker instances
+- 7 corresponding constellation node docker instances
 - 1 quorum-maker front end app docker instance
 - 1 eth-stat front end app docker instance
-
 
 # governanceUI
 The Ledgerium governance app UI
