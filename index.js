@@ -81,6 +81,7 @@ var main = async function () {
             //     break;
             case "readkeyconfig":
                 readAccountsAndKeys();
+                await initiateApp();
                 // readkeyconfig = temp[1];
                 // switch(readkeyconfig){
                 //     case "true":
