@@ -95,11 +95,11 @@ var main = async function () {
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
-                writeAccountsAndKeys();
+                //writeAccountsAndKeys();
+                await initiateApp();
                 break;
             case "runadminvalidator":{
                 //Initiate App before any function gets executed
-                await initiateApp();
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
                     switch (list[j]) {
@@ -150,7 +150,6 @@ var main = async function () {
             }
             case "runsimplevalidator":{
                 //Initiate App before any function gets executed
-                await initiateApp();
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
                     switch (list[j]) {

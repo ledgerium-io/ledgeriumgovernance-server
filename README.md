@@ -80,6 +80,8 @@ or **privateKeys**
 - removeSimpleSetContractValidatorForAdmin -- provide valid ethereum address with comma e.g. "0xc2cb28fad9b82036c9f32cbd6c84343612ee0323"
 
 **Sample usages**
+node index.js protocol=ws hostname=localhost port=9000 privateKeys=7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3
+
 - Running with events ON - with the ws switch
 ```
 node index.js protocol=ws hostname=localhost port=9000 readkeyconfig=true runsimplevalidator=getListOfActiveValidators,addSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a,removeSimpleSetContractValidatorForAdmin,0xf1cba7514dcf9d1e8b1151bcfa05db467c0dcf1a
