@@ -20,7 +20,7 @@ services:
     volumes:
       - 0:/constellation:z
       - _val0eth:/eth:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-0
     environment:
@@ -127,7 +127,7 @@ services:
     volumes:
       - 1:/constellation:z
       - _val1eth:/eth:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-1
     environment:
@@ -226,7 +226,7 @@ services:
     volumes:
       - 2:/constellation:z
       - _val2eth:/eth:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-2
     environment:
@@ -326,7 +326,7 @@ services:
     volumes:
       - 3:/constellation:z
       - _val3eth:/eth:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-3
     environment:
@@ -425,7 +425,7 @@ services:
       - '9004:9000'
     volumes:
       - 4:/constellation:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-4
     environment:
@@ -524,7 +524,7 @@ services:
       - '9005:9000'
     volumes:
       - 5:/constellation:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-5
     environment:
@@ -623,7 +623,7 @@ services:
       - '9006:9000'
     volumes:
       - 6:/constellation:z
-      - ~/genesis:/genesis:ro
+      - ../genesis:/genesis:ro
     depends_on:
       - constellation-6
     environment:
