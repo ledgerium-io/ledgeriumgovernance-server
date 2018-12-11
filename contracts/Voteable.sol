@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.1;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 
@@ -123,7 +123,7 @@ contract Voteable{
     * @dev Function to retrieve votes for specific address
     * @return the count of 'for' and 'against' votes
     */
-	function internalCheckVotes(address _address) internal view returns (uint32[2]) {
+	function internalCheckVotes(address _address) internal view returns (uint32[2] memory) {
 		uint32[2] memory a;
 		a[0] = votes[_address].countFor;
 		a[1] = votes[_address].countAgainst;
@@ -134,7 +134,7 @@ contract Voteable{
     * @dev Function to check proposal by specific address
     * @return the string for either "add", "remove" or "proposal not created" based on the ongoing proposal for specific address
     */
-	function internalCheckProposal(address _address) internal view returns (string) {
+	function internalCheckProposal(address _address) internal view returns (string memory) {
 		if(votes[_address].proposal == Proposal.ADD)
 			return "add";
 		else if(votes[_address].proposal == Proposal.REMOVE)
@@ -147,7 +147,7 @@ contract Voteable{
     * @dev Function to retrieve the list of voters for specific address
     * @return the array of all current voters for specific address
     */
-	function internalGetVoted(address _address) internal view returns (address[]) {
+	function internalGetVoted(address _address) internal view returns (address[] memory) {
 	    address[] memory arr = votes[_address].voted;
 	    return arr;
 	}	

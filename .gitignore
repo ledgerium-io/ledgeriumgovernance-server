@@ -81,3 +81,6 @@ typings/
 
 #vscode launch file
 .vscode/launch.json
+
+#vs code-workspace
+governanceapp.code-workspace

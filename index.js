@@ -35,13 +35,13 @@ var main = async function () {
             case "protocol":
                 switch (temp[1]) {
                     case "ws":
-                    default:
                         protocol = "ws://";
                         global.protocol = protocol;
                         webSocketProtocolFlag = true;
                         global.webSocketProtocolFlag = webSocketProtocolFlag;
                         break;
                     case "http":
+                    default:
                         protocol = "http://";
                         global.protocol = protocol;
                         webSocketProtocolFlag = false;

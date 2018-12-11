@@ -112,8 +112,10 @@ class Utils  {
     */ 
     readSolidityContractJSON (filename) {
         var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
-        let abi = JSON.stringify(json.abi);
-        return [abi, json.bytecode];
+        //let abi = JSON.stringify(json.abi);
+        let abi = JSON.stringify(json);
+        //return [abi, json.bytecode];
+        return [abi, ""];
     }
 
     keccak (web3,text) {

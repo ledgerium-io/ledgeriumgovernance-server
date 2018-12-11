@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.5.1;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./Voteable.sol";
@@ -270,7 +270,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* @param _address address
 	* @return returns the bool
     */
-	function checkVotes(address _address) public view isAdmin returns (uint32[2]) {
+	function checkVotes(address _address) public view isAdmin returns (uint32[2] memory) {
 		return internalCheckVotes(_address);
 	}
 
@@ -279,7 +279,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* @param _address address
 	* @return returns the array of no of votes FOR and AGAINST
     */
-	function checkProposal(address _address) public view isAdmin returns (string) {
+	function checkProposal(address _address) public view isAdmin returns (string memory) {
 		return internalCheckProposal(_address);
 	}
 
@@ -296,7 +296,7 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @dev Function to return list of all admins
 	* @return returns the list
     */
-	function getAllAdmins() public view returns (address[]) {
+	function getAllAdmins() public view returns (address[] memory) {
 		return admins;
 	}
 
@@ -304,7 +304,7 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @dev Function to get who all have voted for current proposal. It checks validity of msg.sender with isAdmin modifier
 	* @return returns the array of no of votes FOR and AGAINST
     */
-	function getVoted(address _address) public view isAdmin returns (address[]) {
+	function getVoted(address _address) public view isAdmin returns (address[] memory) {
 	    return internalGetVoted(_address);
 	}
 	

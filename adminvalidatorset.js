@@ -5,7 +5,7 @@ class AdminValidatorSet {
         this.utils = utils;
         if(!abi) {
             //Read ABI and Bytecode from dynamic source.
-            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.json");
+            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.abi");
         }else{
             value = [abi, ""];
         }

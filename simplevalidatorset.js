@@ -6,7 +6,7 @@ class SimpleValidatorSet {
         var value;
         if(!abi) {
             //Read ABI and Bytecode from dynamic source.
-            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.json");
+            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.abi");
         }else{
             value = [abi, ""];
         }

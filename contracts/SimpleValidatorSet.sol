@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.5.1;
 import "./AdminValidatorSet.sol";
 import "./Voteable.sol";
 
@@ -272,7 +272,7 @@ contract SimpleValidatorSet is Voteable{
 	* @param _address address
 	* @return returns the bool
     */
-	function checkVotes(address _address) public view isValidator returns (uint32[2]) {
+	function checkVotes(address _address) public view isValidator returns (uint32[2] memory) {
 		return internalCheckVotes(_address);
 	}
 	
@@ -281,7 +281,7 @@ contract SimpleValidatorSet is Voteable{
 	* @param _address address
 	* @return returns the array of no of votes FOR and AGAINST
     */
-	function checkProposal(address _address) public view isValidator returns (string) {
+	function checkProposal(address _address) public view isValidator returns (string memory) {
 		return internalCheckProposal(_address);
 	}
 
@@ -290,7 +290,7 @@ contract SimpleValidatorSet is Voteable{
 	* It checks validity of msg.sender with isAdmin modifier
 	* @return returns the list
     */
-	function getValidatorsForAdmin() public view isAdmin returns (address[]) {
+	function getValidatorsForAdmin() public view isAdmin returns (address[]memory) {
 	    return adminValidatorsMap[msg.sender];
 	}
 
@@ -307,7 +307,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to return list of all validators active/non-active
 	* @return returns the list
     */
-	function getAllValidators() public view isValidator returns(address[]) {
+	function getAllValidators() public view isValidator returns(address[] memory) {
 	    return validators;
 	}
 
@@ -315,7 +315,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to get who all have voted for current proposal. It checks validity of msg.sender with isAdmin modifier
 	* @return returns the array of no of votes FOR and AGAINST
     */
-	function getVoted(address _address) public view isAdmin returns (address[]) {
+	function getVoted(address _address) public view isAdmin returns (address[] memory) {
 	    return internalGetVoted(_address);
 	}
 	
