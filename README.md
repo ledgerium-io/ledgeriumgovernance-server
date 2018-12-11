@@ -90,7 +90,7 @@ node index.js protocol=ws hostname=localhost port=9000 readkeyconfig=true runsim
 
 - Running 'without' events ON - with the http switch
 ```
-node index.js protocol=http hostname=localhost port=8545 readkeyconfig=true unadminvalidator=addOneAdmin,0x3a91fd8517b58470c85fd570913b358c4db916bc,runClearProposalsAdminTestCases,0xc2cb28fad9b82036c9f32cbd6c84343612ee0323,getAllActiveAdmins
+node index.js protocol=http hostname=localhost port=8545 readkeyconfig=true runadminvalidator=addOneAdmin,0x3a91fd8517b58470c85fd570913b358c4db916bc,runClearProposalsAdminTestCases,0xc2cb28fad9b82036c9f32cbd6c84343612ee0323,getAllActiveAdmins
 ```
 
 This will bring up 
