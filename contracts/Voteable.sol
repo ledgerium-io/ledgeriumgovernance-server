@@ -2,7 +2,11 @@ pragma solidity 0.5.1;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 
-contract Voteable{
+/**
+ * @title The Voteable contract maintains the data structures of Decision, Proposal and corresponding votes 
+ * to maintain the workflow of the entire voting process
+ */
+contract Voteable {
 
 	using SafeMath for uint32;
 
@@ -27,14 +31,18 @@ contract Voteable{
 		address[] voted;
 	}
 
+	/**
+    * @dev check whether msg.sender is the original proposer of the voting process
+    */
 	modifier isProposer(address _address) {
 		require(_address != address(0));
 		require (votes[_address].proposer == msg.sender);
 		_; 
 	}
 	
-	mapping (address => Vote) votes;
+	mapping (address => Vote) internal votes;
 
+	//List of events
 	event VotedForAdd(address indexed admin, address indexed voted);
 	event VotedForRemove(address indexed admin, address indexed voted);
 	
@@ -43,7 +51,11 @@ contract Voteable{
 	
 	/**
     * @dev Function to add vote for specific address from the voter
-    * @return A success flag
+	* @param _address address, which is under voting for or against
+	* @param _address voter, the voter
+    * @return Emits event VotedForAdd in case the vote is to add
+	* @return Emits event VotedForRemove in case the vote is to remove
+	* @return A success flag
     */
 	function voteFor(address _address, address voter) internal returns (bool) {
 		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
@@ -62,7 +74,11 @@ contract Voteable{
 
 	/**
     * @dev Function to add vote against specific address from the voter
-    * @return A success flag
+    * @param _address address, which is under voting for or against
+	* @param _address voter, the voter
+    * @return Emits event VotedForAdd in case the vote is to add
+	* @return Emits event VotedForRemove in case the vote is to remove
+	* @return A success flag
     */
 	function voteAgainst(address _address, address voter) internal returns (bool) {
 		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
@@ -81,6 +97,7 @@ contract Voteable{
 
 	/**
     * @dev Function to clear out votes against specific address
+	* @param _address address, which is under voting for or against
     * @return A success flag
     */
 	function clearVotes(address _address) internal returns (bool) {
@@ -99,6 +116,7 @@ contract Voteable{
 
 	/**
     * @dev Function to change vote by specific address
+    * @param _address address, which is under voting for or against
     * @return A success flag
     */
 	function internalChangeVote(address _address) internal returns (bool) {
@@ -120,7 +138,8 @@ contract Voteable{
 	}
 
 	/**
-    * @dev Function to retrieve votes for specific address
+    * @dev Function to retrieve current state votes for specific address
+    * @param _address address, which is under voting for or against
     * @return the count of 'for' and 'against' votes
     */
 	function internalCheckVotes(address _address) internal view returns (uint32[2] memory) {
@@ -132,6 +151,7 @@ contract Voteable{
 
 	/**
     * @dev Function to check proposal by specific address
+    * @param _address address, which is under voting for or against
     * @return the string for either "add", "remove" or "proposal not created" based on the ongoing proposal for specific address
     */
 	function internalCheckProposal(address _address) internal view returns (string memory) {
@@ -145,6 +165,7 @@ contract Voteable{
 
 	/**
     * @dev Function to retrieve the list of voters for specific address
+    * @param _address address, which is under voting for or against
     * @return the array of all current voters for specific address
     */
 	function internalGetVoted(address _address) internal view returns (address[] memory) {

@@ -6,7 +6,7 @@ import "./Voteable.sol";
  * @title The SimpleValidatorSet contract maintains the set of validators and Allows
  * admins to add and remove members from the validator set
  */
-contract SimpleValidatorSet is Voteable{
+contract SimpleValidatorSet is Voteable {
 
 	enum Status {
 		INACTIVE,
@@ -19,17 +19,17 @@ contract SimpleValidatorSet is Voteable{
 		Status status;
 	}
 
-	AdminValidatorSet adminSet;
-
-	mapping (address => Validator) activeValidators;
-	mapping (address => address[]) adminValidatorsMap;
-	address[] validators;
-	mapping (address => bool) exists;
+	AdminValidatorSet private adminSet;
+	mapping (address => Validator) private activeValidators;
+	mapping (address => address[]) private adminValidatorsMap;
+	address[] private validators;
+	mapping (address => bool) private exists;
 	
-	bool isInit;
-	uint32 totalCount;
-	uint32 totalActiveCount;
+	bool private isInit;			 //To check if 3 initial owners are set or not already
+	uint32 private totalCount;		 //Total count of Simple Validators
+	uint32 private totalActiveCount; //Total count of active Simple Validators
 
+	//List of events
 	event AddValidator(address indexed proposer, address indexed validator);
 	event RemoveValidator(address indexed proposer, address indexed validator);
 
@@ -44,21 +44,33 @@ contract SimpleValidatorSet is Voteable{
 
 	event MinValidatorNeeded(uint8 minNoOfValidator);
 
+	/**
+    * @dev check whether msg.sender is one of the active admin
+    */
 	modifier isAdmin() {
 		require (adminSet.isActiveAdmin(msg.sender));
 		_;
 	}
 
+	/**
+    * @dev check whether msg.sender is active validator or not
+    */
 	modifier isValidator() {
 		require (activeValidators[msg.sender].isValidator);
 		_; 
 	}
 
+	/**
+    * @dev check whether isInit is set true or not
+    */
 	modifier isInitalised() {
 		// make sure isInit is set before any logical execution on the contract
         if(isInit){_;}
     }
 
+	/**
+    * @dev Ensure isInit is set before any logical execution on the contract
+    */
 	modifier ifNotInitalised() {
 		// make sure isInit is set before any logical execution on the contract
         if(!isInit){_;}
@@ -100,15 +112,16 @@ contract SimpleValidatorSet is Voteable{
 
 		totalCount = 3;
 		totalActiveCount = 3;
-
-		isInit = true;
+		isInit = true;	//Important flag!
 	}
 	
 	/**
     * @dev Function to propose adding new validator. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin, who can start the proposal
 	* @param _address address, which is to be added as new active admin
-	* @return Emits event alreadyProposalForAddingValidator() in case some proposal already exists
+	* @return Emits event AlreadyActiveValidator() in case address already an active validator
+	* @return Emits event AlreadyProposalForAddingValidator() in case some proposal already exists for adding
+	* @return Emits event AlreadyProposalForRemovingValidator() in case some proposal already exists for removing
     * @return A success flag
     */
   	function proposalToAddValidator(address _address) public isAdmin isInitalised returns (bool) {
@@ -137,8 +150,8 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to vote FOR adding one validator. It checks validity of msg.sender with isValidator modifier
     * msg.sender address should be one of the active validator
 	* @param _address address, which is to be proposed to add as active admin
-    * @return Emits event noProposalForAddingValidator() in case the ADD validator proposal is not started already
-	* @return Emits event addValidator() once valdiator is successfully added
+    * @return Emits event NoProposalForAddingValidator() in case the ADD validator proposal is not started already
+	* @return Emits event AddValidator() once valdiator is successfully added
 	* @return A success flag
     */
 	function voteForAddingValidator(address _address) public isValidator isInitalised returns (bool) {
@@ -168,7 +181,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to vote AGAINST adding one validator. It checks validity of msg.sender with isValidator modifier
     * msg.sender address should be one of the active validator
 	* @param _address address, which is to be proposed to add as active admin
-    * @return Emits event noProposalForAddingValidator() in case the ADD validator proposal is not started already
+    * @return Emits event NoProposalForAddingValidator() in case the ADD validator proposal is not started already
 	* @return A success flag
     */
 	function voteAgainstAddingValidator(address _address) public isValidator isInitalised returns (bool) {
@@ -190,8 +203,10 @@ contract SimpleValidatorSet is Voteable{
 	* System needs min 3 active admins for voting mechanism to function
     * @param _address address The address which is one of the admin.
     * @return A success flag
+	* @return Emits event AlreadyInActiveValidator() in case the _address is already Inactive validator
 	* @return Emits event MinValidatorNeeded() in case the no of existing active validators are less than 3
-	* @return Emits event alreadyProposalForRemovingValidator() in case some proposal already exists
+	* @return Emits event AlreadyProposalForAddingValidator() in case some proposal already exists for Adding
+	* @return Emits event alreadyProposalForRemovingValidator() in case some proposal already exists for Removing
     */
   	function proposalToRemoveValidator(address _address) public isValidator isInitalised returns (bool) {
 		
@@ -200,7 +215,6 @@ contract SimpleValidatorSet is Voteable{
 			emit AlreadyInActiveValidator(_address);
 			return false;
 		}
-
 		if(totalActiveCount <= 3) {
 			emit MinValidatorNeeded(3);
 			return false;
@@ -226,8 +240,8 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to vote FOR remving one active validatoe. It checks validity of msg.sender with isValidator modifier
     * msg.sender address should be one of the active validator
 	* @param _address address, which is to be proposed to remove as active admin
-    * @return Emits event noProposalForRemovingValidator() in case the REMOVE validator proposal is not started already
-	* @return Emits event removeValidator() once valdiator is successfully removed
+    * @return Emits event NoProposalForRemovingValidator() in case the REMOVE validator proposal is not started already
+	* @return Emits event RemoveValidator() once valdiator is successfully removed
 	* @return A success flag
     */
 	function voteForRemovingValidator(address _address) public isValidator isInitalised returns (bool) {
@@ -251,7 +265,7 @@ contract SimpleValidatorSet is Voteable{
     * @dev Function to vote AGAINST remving one active validatoe. It checks validity of msg.sender with isValidator modifier
     * msg.sender address should be one of the active validator
 	* @param _address address, which is to be proposed to remove as active admin
-    * @return Emits event noProposalForRemovingValidator() in case the REMOVE validator proposal is not started already
+    * @return Emits event NoProposalForRemovingValidator() in case the REMOVE validator proposal is not started already
 	* @return A success flag
     */
 	function voteAgainstRemovingValidator(address _address) public isValidator isInitalised returns (bool) {
@@ -341,7 +355,7 @@ contract SimpleValidatorSet is Voteable{
 	* @return returns the status true/false
     */
 	function clearProposal(address _address) public isValidator isInitalised returns (bool) {
-	    if(_address==address(0))
+	    if(_address == address(0))
 			return false;
 		return clearVotes(_address);
 	}
@@ -352,7 +366,7 @@ contract SimpleValidatorSet is Voteable{
 	* @return returns the address of the proposer
     */
 	function getProposer(address _address) public view isValidator isInitalised returns (address) {
-	    if(_address==address(0))
+	    if(_address == address(0))
 			return address(0);
 		return votes[_address].proposer;
 	}

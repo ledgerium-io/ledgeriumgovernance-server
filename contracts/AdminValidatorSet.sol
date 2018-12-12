@@ -1,13 +1,12 @@
 pragma solidity 0.5.1;
 import "./SafeMath.sol";
-import "./Ownable.sol";
 import "./Voteable.sol";
 
 /**
  * @title The AdminValidatorSet contract maintains the list of all the admin with their vote
  * to add or remove a particular member as admin
  */
-contract AdminValidatorSet is Voteable, Ownable {
+contract AdminValidatorSet is Voteable {
 
 	using SafeMath for uint32;
 
@@ -22,12 +21,14 @@ contract AdminValidatorSet is Voteable, Ownable {
 		Status status;
 	}
 	
-	bool isInit; 
-	address[] admins;
-	mapping (address => Admin) activeAdmins;
-	mapping (address => bool) exists;
-	uint32 totalActiveCount;
+	bool private isInit; 								//To check if 3 initial owners are set or not already
+	address[] private admins;
+	mapping (address => Admin) private activeAdmins;
+	mapping (address => bool) private exists;
+	uint32 private totalCount;							//Total count of Admin Validators
+	uint32 private totalActiveCount;					//Total count of active Admin Validators
 
+	//List of events
 	event AddAdmin(address indexed proposer, address indexed admin);
 	event RemoveAdmin(address indexed proposer, address indexed admin);
 
@@ -42,19 +43,28 @@ contract AdminValidatorSet is Voteable, Ownable {
 
 	event MinAdminNeeded(uint8 minNoOfAdmin);
 
+	/**
+    * @dev check whether msg.sender is one of the active admin
+    */
 	modifier isAdmin() {
 		// make sure only activeAdmin can operate
         require(activeAdmins[msg.sender].isActive);
         _;
     }
 
+	/**
+    * @dev check whether isInit is set true or not
+    */
 	modifier isInitalised() {
-		// make sure isInit is set before any logical execution on the contract
+		// make sure isInit flag is set before any logical execution on the contract
         if(isInit){_;}
     }
 
+	/**
+    * @dev Ensure isInit is set before any logical execution on the contract
+    */
 	modifier ifNotInitalised() {
-		// make sure isInit is set before any logical execution on the contract
+		// 
         if(!isInit){_;}
     }
 
@@ -63,7 +73,7 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @return A success flag
     */
 	function init() public ifNotInitalised {
-		
+
 		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
 		address _owner1 = address(0x43a69eDD54e07B95113FEd92e8c9ba004500Ce12);
 		address _owner2 = address(0xd44b2838207A46F1007B3F296a599fADfb20978c);
@@ -84,30 +94,21 @@ contract AdminValidatorSet is Voteable, Ownable {
 		activeAdmins[_owner2].status = Status.ACTIVE;
 		admins.push(_owner2);
 		
-		// owners[msg_sender] = true;
-		// owners[_owner1] = true;
-		// owners[_owner2] = true;
-		// admins.push(msg_sender);
-		// admins.push(_owner1);
-		// admins.push(_owner2);
-		// exists[msg_sender] = true;
-		// exists[_owner1] = true;
-		// exists[_owner2] = true;
 		totalActiveCount = 3;
-
-		isInit = true;
+		isInit = true;  //Important flag!
 	}
 
 	/**
     * @dev Function to propose adding new admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin
-	* @return Emits event alreadyProposalForAddingAdmin() in case the ADD admin proposal is started already
-	* @return Emits event alreadyProposalForRemovingAdmin() in case the REMOVE admin proposal is started already
 	* @param _address address, which is to be added as new active admin
-    * @return A success flag
+    * @return Emits event AlreadyActiveAdmin() in case the _address is already an active admin
+	* @return Emits event AlreadyProposalForAddingAdmin() in case the ADD admin proposal is started already
+	* @return Emits event AlreadyProposalForRemovingAdmin() in case the REMOVE admin proposal is started already
+	* @return A success flag
     */
 	function proposalToAddAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		
+
 		//Lets check if the _address is already active!
 		if(isActiveAdmin(_address)){
 			emit AlreadyActiveAdmin(_address);
@@ -134,12 +135,12 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @dev Function to vote FOR adding new admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin
 	* @param _address address, which is to be added as new active admin
-	* @return Emits event noProposalForAddingAdmin() in case the ADD admin proposal is not started already
-	* @return Emits event addAdmin() in case the ADD admin is successfully completed
+	* @return Emits event NoProposalForAddingAdmin() in case the ADD admin proposal is not started already
+	* @return Emits event AddAdmin() in case the ADD admin is successfully completed
     * @return A success flag
     */
 	function voteForAddingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.ADD);
+
 		if(votes[_address].proposal != Proposal.ADD) {
 			emit NoProposalForAddingAdmin(_address);
 			return false;
@@ -164,11 +165,11 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @dev Function to vote AGAINST adding new admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin
 	* @param _address address, which is to be proposed as new active admin
-    * @return Emits event noProposalForAddingAdmin() in case the ADD admin proposal is not started already
+    * @return Emits event NoProposalForAddingAdmin() in case the ADD admin proposal is not started already
 	* @return A success flag
     */
 	function voteAgainstAddingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.ADD);
+
 		if(votes[_address].proposal != Proposal.ADD) {
 			emit NoProposalForAddingAdmin(_address);
 			return false;
@@ -186,8 +187,10 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* System needs min 3 active admins for voting mechanism to function
     * @param _address address The address which is one of the admin.
     * @return A success flag
-	* @return Emits event alreadyProposalForAddingAdmin() in case the ADD admin proposal is started already
-	* @return Emits event alreadyProposalForRemovingAdmin() in case the REMOVE admin proposal is started already
+	* @return Emits event AlreadyInActiveAdmin() in case the _address is already Inactive admin
+	* @return Emits event MinAdminNeeded() we need minimum 3 admins in the system, emit event in case it can bring this condition
+	* @return Emits event AlreadyProposalForAddingAdmin() in case the ADD admin proposal is started already
+	* @return Emits event AlreadyProposalForRemovingAdmin() in case the REMOVE admin proposal is started already
 	* @return Emits event minAdminNeeded in case the no of existing active admins are less than 3
     */
   	function proposalToRemoveAdmin(address _address) public isAdmin isInitalised returns (bool) {
@@ -197,7 +200,6 @@ contract AdminValidatorSet is Voteable, Ownable {
 			emit AlreadyInActiveAdmin(_address);
 			return false;
 		}
-		
 		if(totalActiveCount <= 3){
 			emit MinAdminNeeded(3);
 			return false;
@@ -223,12 +225,12 @@ contract AdminValidatorSet is Voteable, Ownable {
     * @dev Function to vote FOR remving one active admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin
 	* @param _address address, which is to be proposed to remove as active admin
-    * @return Emits event noProposalForRemovingAdmin() in case the REMOVE admin proposal is not started already
-	* @return Emits event removeAdmin() in case the REMOVE admin is successfully completed
+    * @return Emits event NoProposalForRemovingAdmin() in case the REMOVE admin proposal is not started already
+	* @return Emits event RemoveAdmin() in case the REMOVE admin is successfully completed
 	* @return A success flag
     */
 	function voteForRemovingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.REMOVE);
+
 		if(votes[_address].proposal != Proposal.REMOVE){
 			emit NoProposalForRemovingAdmin(_address);
 			return false;
@@ -238,7 +240,6 @@ contract AdminValidatorSet is Voteable, Ownable {
 			activeAdmins[_address].isActive = false;
     		activeAdmins[_address].status = Status.INACTIVE;
 			totalActiveCount = totalActiveCount.sub(1);
-			
 			emit RemoveAdmin(votes[_address].proposer, _address);
 			require(clearVotes(_address));
 		}
@@ -246,14 +247,14 @@ contract AdminValidatorSet is Voteable, Ownable {
 	}
 
 	/**
-    * @dev Function to vote AGAINST one active admin. It checks validity of msg.sender with isAdmin modifier
+    * @dev Function to vote AGAINST Removing active admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin
 	* @param _address address, which is to be proposed to remove as active admin
-    * @return Emits event noProposalForRemovingAdmin() in case the REMOVE admin proposal is not started already
+    * @return Emits event NoProposalForRemovingAdmin() in case the REMOVE admin proposal is not started already
 	* @return A success flag
     */
 	function voteAgainstRemovingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		//require(votes[_address].proposal == Proposal.REMOVE);
+		
 		if(votes[_address].proposal != Proposal.REMOVE) {
 			emit NoProposalForRemovingAdmin(_address);
 			return false;
@@ -268,7 +269,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	/**
     * @dev Function to check current voting status. It checks validity of msg.sender with isAdmin modifier
 	* @param _address address
-	* @return returns the bool
+	* @return returns the array of no of votes FOR and AGAINST
     */
 	function checkVotes(address _address) public view isAdmin returns (uint32[2] memory) {
 		return internalCheckVotes(_address);
@@ -277,7 +278,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	/**
     * @dev Function to check current proposal for the _address. It checks validity of msg.sender with isAdmin modifier
 	* @param _address address
-	* @return returns the array of no of votes FOR and AGAINST
+	* @return returns the current proposal i.e. add, remove or proposal not created
     */
 	function checkProposal(address _address) public view isAdmin returns (string memory) {
 		return internalCheckProposal(_address);
@@ -330,7 +331,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* @return returns the status true/false
     */
 	function clearProposal(address _address) public isAdmin isInitalised returns (bool) {
-	    if(_address==address(0))
+	    if(_address == address(0))
 			return false;
 		return clearVotes(_address);
 	}
@@ -341,7 +342,7 @@ contract AdminValidatorSet is Voteable, Ownable {
 	* @return returns the address of the proposer
     */
 	function getProposer(address _address) public view isAdmin isInitalised returns (address) {
-	    if(_address==address(0))
+	    if(_address == address(0))
 			return address(0);
 		return votes[_address].proposer;
 	}
