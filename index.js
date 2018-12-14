@@ -22,6 +22,12 @@ global.utils = utils;
 var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
+
+adminValidator = new AdminValidator();
+global.adminValidator = adminValidator;
+simpleValidator = new SimpleValidator();
+global.simpleValidator = simpleValidator;
+
 var privateKey = {};
 var accountAddressList = [];
 var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
@@ -311,3 +317,10 @@ async function writeContractsINConfig(){
         console.log("Error in writeContractsINConfig: " + error);
     }
 }
+
+async function test() {
+    await readAccountsAndKeys;
+    await initiateApp;
+}
+
+test();
