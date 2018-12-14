@@ -8,6 +8,8 @@ const ethUtil = require('ethereumjs-util');
 
 var provider;
 var protocol,host,port,web3;
+web3 = new Web3(new Web3.providers.WebsocketProvider('http://localhost:8545'));
+global.web3 = web3;
 
 var subscribePastEventsFlag = false;
 var webSocketProtocolFlag = false;
