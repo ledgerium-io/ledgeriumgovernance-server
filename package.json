@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ./test/testadminvalidatorset.js --timeout=100000 --recursive --delay"
+    "test": "mocha --require ./setup.js --timeout=100000 --recursive --delay"
   },
   "repository": {
     "type": "git",
