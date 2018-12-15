@@ -5,26 +5,30 @@ var expect = chai.expect;
 chai.use(require('chai-bignumber')())
 chai.should();
 
+//const Web3 = require('web3');
+//var web3;
+//web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+global.web3 = web3;
+const Utils =  require('../web3util');
+const utils = new Utils();
+global.utils = utils;
 
 setTimeout( () => {
 
-  describe('AdminValidator', () => {
-
+  describe('AdminValidator', async () => {
       this.web3 = web3;
       this.utils = utils;
       this.adminValidatorSetAddress = adminValidatorSetAddress;
 
-      // const ethAccountToPropose = accountAddressList[0];
       const ethAccountToUse = accountAddressList[0];
       const recipient = accountAddressList[1];
       const anotherAccount = accountAddressList[2];
       
-
       before( async () => {
           this.contract = adminValidatorContract;
       })
 
-      describe('All Admins', () => {
+      describe('All Admins', async () => {
         it('returns all active admins', async () => {
           //   var encodedABI = await this.contract.methods.getAllAdmins().call();
 
@@ -43,7 +47,7 @@ setTimeout( () => {
         })
       })
 
-      describe('Clear Proposal', () => {
+      describe('Clear Proposal', async () => {
         
         const otherAdmin = accountAddressList[3];
         
@@ -122,7 +126,7 @@ setTimeout( () => {
         })
       })
 
-      describe('Add One Admin', () => {
+      describe('Add One Admin', async () => {
 
           it('Added as admin', async () => {
 
@@ -132,7 +136,7 @@ setTimeout( () => {
           })
       })
 
-    describe('Remove Admin', () => {
+    describe('Remove Admin', async () => {
       const adminToRemove = accountAddressList[3];
       
         it('returns admin is active', async () => {

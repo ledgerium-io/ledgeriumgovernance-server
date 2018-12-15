@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require ./test/testadminvalidatorset.js --timeout=100000 --recursive --delay"
   },
   "repository": {
     "type": "git",
@@ -14,6 +14,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "ajv-keywords": "^3.2.0",
+    "chai-bignumber": "^3.0.0",
     "ethereumjs-tx": "^1.3.4",
     "keythereum": "^1.0.4",
     "moment": "^2.22.2",
