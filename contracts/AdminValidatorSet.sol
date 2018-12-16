@@ -94,6 +94,7 @@ contract AdminValidatorSet is Voteable {
 		activeAdmins[_owner2].status = Status.ACTIVE;
 		admins.push(_owner2);
 		
+		totalCount = 3;
 		totalActiveCount = 3;
 		isInit = true;  //Important flag!
 	}

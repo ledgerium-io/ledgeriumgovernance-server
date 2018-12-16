@@ -235,10 +235,6 @@ async function initiateApp() {
     console.log("tranHash of initialisation", tranHash);
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
-   
-    var value = utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.abi");
-    var adminValidatorContract = new web3.eth.Contract(JSON.parse(value[0]),adminValidatorSetAddress);
-    global.adminValidatorContract = adminValidatorContract;
 }
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
