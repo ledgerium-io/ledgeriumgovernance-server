@@ -9,7 +9,6 @@ const ethUtil = require('ethereumjs-util');
 var provider;
 var protocol,host,port,web3;
 
-web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8550'));
 global.web3 = web3;
 
 var subscribePastEventsFlag = false;
@@ -26,10 +25,10 @@ var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
 
-adminValidator = new AdminValidator();
-global.adminValidator = adminValidator;
-simpleValidator = new SimpleValidator();
-global.simpleValidator = simpleValidator;
+// adminValidator = new AdminValidator();
+// global.adminValidator = adminValidator;
+// simpleValidator = new SimpleValidator();
+// global.simpleValidator = simpleValidator;
 
 var privateKey = {};
 var accountAddressList = [];
@@ -229,18 +228,17 @@ async function initiateApp() {
     }
     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    global.adminValidatorSetAddress = adminValidatorSetAddress;
+    global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+
     let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
-    global.adminValidatorSetAddress = adminValidatorSetAddress;
-    global.simpleValidatorSetAddress = simpleValidatorSetAddress;
-
-    //
+   
     var value = utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.abi");
     var adminValidatorContract = new web3.eth.Contract(JSON.parse(value[0]),adminValidatorSetAddress);
     global.adminValidatorContract = adminValidatorContract;
-
 }
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
@@ -327,9 +325,5 @@ async function writeContractsINConfig(){
     }
 }
 
-async function test() {
-    await readAccountsAndKeys();
-    await initiateApp();
-}
 
-test();
+
