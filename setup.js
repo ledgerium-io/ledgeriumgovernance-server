@@ -8,6 +8,7 @@ const AdminValidator = require('./adminvalidatorindex');
 var web3;
 global.web3 = web3;
 
+var protocol;
 var subscribePastEventsFlag = false;
 var webSocketProtocolFlag = false;
 global.webSocketProtocolFlag = webSocketProtocolFlag;
@@ -27,7 +28,7 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 async function initiateApp() {
 
     readContractsFromConfig();
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "") {
         if(accountAddressList.length < 3){
             console.log("Ethereum accounts are not available! Can not proceed further!!");
             return;
@@ -51,7 +52,7 @@ async function initiateApp() {
     // global.adminValidatorContract = adminValidatorContract;
 }
 
-async function readAccountsAndKeys(){
+async function readAccountsAndKeys() {
     var privateKeyFileName = __dirname + "/keystore/" + "privatekey.json";
     if(fs.existsSync(privateKeyFileName)){
         var keyData = fs.readFileSync(privateKeyFileName,"utf8");
@@ -68,7 +69,7 @@ async function readAccountsAndKeys(){
     }    
 }
 
-async function readContractsFromConfig(){
+async function readContractsFromConfig() {
     try{
         var contractFileName = __dirname + "/keystore/" + "contractsConfig.json";
         var keyData = {};
@@ -89,7 +90,39 @@ async function readContractsFromConfig(){
 test();
 
 async function test() {
-    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    const args = process.argv.slice(2);
+    for (let i=0; i<args.length ; i++) {
+        switch (args[0]) {
+            case "protocol":
+                switch (args[1]) {
+                    case "ws":
+                        protocol = "ws://";
+                        break;
+                    case "http":
+                    default:
+                        protocol = "http://";
+                        break;
+                }
+                break;
+            default:
+                //throw "command should be of form :\n node deploy.js host=<host> file=<file> contracts=<c1>,<c2> dir=<dir>";
+                break;
+        }
+        break; // We are processing only first flag, once read break out of the for loop!!
+    }
+    if (protocol=="ws://") {
+        web3 = new Web3(new Web3.providers.WebsocketProvider("ws://localhost:9000"));
+        webSocketProtocolFlag = true;
+        subscribePastEventsFlag = true;
+    }
+    else {
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        webSocketProtocolFlag = false;
+        subscribePastEventsFlag = false;
+    }
+
+    global.webSocketProtocolFlag = webSocketProtocolFlag;
+    global.subscribePastEventsFlag = subscribePastEventsFlag;
     global.web3 = web3;
     adminValidator = new AdminValidator();
     global.adminValidator = adminValidator;

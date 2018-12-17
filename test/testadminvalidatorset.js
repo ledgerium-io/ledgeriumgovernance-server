@@ -42,55 +42,53 @@ setTimeout(() => {
             })
 
             describe('Proposal to Add Admin', () => {
-                it('returns proposal not created before add admin proposal', async () => {
-                    var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
-                    whatProposal.should.be.equal('proposal not created');
-                })
+              it('returns proposal not created before add admin proposal', async () => {
+                  var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
+                  whatProposal.should.be.equal('proposal not created');
+              })
 
-                it('returns votes as [ 0, 0 ] before add admin proposal', async () => {
-                    var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
-                    expect(votes).to.deep.equal(['0', '0']);
-                })
+              it('returns votes as [ 0, 0 ] before add admin proposal', async () => {
+                  var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
+                  expect(votes).to.deep.equal(['0', '0']);
+              })
 
-                it('returns proposalToAddAdmin transaction as true', async () => {
-                    var encodedABI = this.contract.methods.proposalToAddAdmin(adminToAdd).encodeABI();
-                    var estimatedGas = 0;
-                    var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,privateKey[ethAccountToUse],this.web3,estimatedGas);
-                    expect(transactionObject.status).to.be.true;
-                })
+              it('returns proposalToAddAdmin transaction as true', async () => {
+                  var encodedABI = this.contract.methods.proposalToAddAdmin(adminToAdd).encodeABI();
+                  var estimatedGas = 0;
+                  var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.adminValidatorSetAddress,encodedABI,privateKey[ethAccountToUse],this.web3,estimatedGas);
+                  expect(transactionObject.status).to.be.true;
+              })
 
-                it('returns proposal as add after add admin proposal', async () => {
-                    var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
-                    whatProposal.should.be.equal('add');
-                })
-            
-                it('returns votes as [ 1, 0 ] after add admin proposal', async () => {
-                    var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
-                    expect(votes).to.deep.equal(['1', '0']);
-                })
-
+              it('returns proposal as add after add admin proposal', async () => {
+                  var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
+                  whatProposal.should.be.equal('add');
+              })
+          
+              it('returns votes as [ 1, 0 ] after add admin proposal', async () => {
+                  var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
+                  expect(votes).to.deep.equal(['1', '0']);
+              })
             })
 
             describe('Vote against Add Admin', () => {
                 it('returns voteAgainstAddingAdmin transaction status as true', async () => {
-                    var votingAgainst = accountAddressList[2];
-                    var estimatedGas = 0;
-                    var encodedABI = this.contract.methods.voteAgainstAddingAdmin(adminToAdd).encodeABI();
-                    var transactionObject = await this.utils.sendMethodTransaction(votingAgainst,this.adminValidatorSetAddress, encodedABI ,privateKey[votingAgainst],this.web3,estimatedGas);
-                    expect(transactionObject.status).to.be.true;
+                  var votingAgainst = accountAddressList[2];
+                  var estimatedGas = 0;
+                  var encodedABI = this.contract.methods.voteAgainstAddingAdmin(adminToAdd).encodeABI();
+                  var transactionObject = await this.utils.sendMethodTransaction(votingAgainst,this.adminValidatorSetAddress, encodedABI ,privateKey[votingAgainst],this.web3,estimatedGas);
+                  expect(transactionObject.status).to.be.true;
                 })
 
                 it('returns proposal as add after voting against add admin proposal', async () => {
-                    var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
-                    whatProposal.should.be.equal('add');
-                  })
+                  var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
+                  whatProposal.should.be.equal('add');
+                })
 
-                  it('returns votes as [ 1, 1 ] after voting against add admin proposal', async () => {
-                    var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
-                    console.log('Votes ' + votes);
-                    expect(votes).to.deep.equal(['1', '1']);
-                  })
-
+                it('returns votes as [ 1, 1 ] after voting against add admin proposal', async () => {
+                  var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
+                  console.log('Votes ' + votes);
+                  expect(votes).to.deep.equal(['1', '1']);
+                })
               })
 
             describe('Voting for Add admin', () => {
@@ -109,37 +107,37 @@ setTimeout(() => {
                     // console.log('AddAdmin event logs ' + JSON.stringify(logs))
                 })
 
-                  it('returns proposal not created after voting for add admin proposal', async () => {
-                    var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
-                    whatProposal.should.be.equal('proposal not created');
-                  })
+                it('returns proposal not created after voting for add admin proposal', async () => {
+                  var whatProposal = await this.contract.methods.checkProposal(adminToAdd).call({from : ethAccountToUse});
+                  whatProposal.should.be.equal('proposal not created');
+                })
 
-                  it('returns votes as [ 0, 0 ] after voting for add admin proposal', async () => {
-                    var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
-                    expect(votes).to.deep.equal(['0', '0']);
-                  })
+                it('returns votes as [ 0, 0 ] after voting for add admin proposal', async () => {
+                  var votes = await this.contract.methods.checkVotes(adminToAdd).call({from : ethAccountToUse});
+                  expect(votes).to.deep.equal(['0', '0']);
+                })
             })
 
-              describe('After admin is added', () => {
-                it('returns admin added', async () => {
-                    var flag = await this.contract.methods.isActiveAdmin(adminToAdd).call();
-                    expect(flag).to.be.true;
-                })
+            describe('After admin is added', () => {
+              it('returns admin added', async () => {
+                  var flag = await this.contract.methods.isActiveAdmin(adminToAdd).call();
+                  expect(flag).to.be.true;
+              })
 
-                it('returns admin count', async () => {
-                    var count = await this.contract.methods.getAdminsCount().call({from : ethAccountToUse});
-                    count.should.be.bignumber.equal(4);
-                })
+              it('returns admin count', async () => {
+                  var count = await this.contract.methods.getAdminsCount().call({from : ethAccountToUse});
+                  count.should.be.bignumber.equal(4);
+              })
 
-                it('returns active admin count', async () => {
-                    var count = await this.contract.methods.getActiveAdminsCount().call({from : ethAccountToUse});
-                    count.should.be.bignumber.equal(4);
-                })
+              it('returns active admin count', async () => {
+                  var count = await this.contract.methods.getActiveAdminsCount().call({from : ethAccountToUse});
+                  count.should.be.bignumber.equal(4);
+              })
             })
         })
 
         describe('Remove Admin', () => {
-          //const adminToRemove = accountAddressList[3];
+            //const adminToRemove = accountAddressList[3];
             it('returns admin is active before remove admin', async () => {
               var flag = await this.contract.methods.isActiveAdmin(adminToRemove).call();
               expect(flag).to.be.true;
@@ -233,20 +231,20 @@ setTimeout(() => {
             })
 
             describe('After admin is removed', () => {
-                it('returns admin removed', async () => {
-                  var flag = await this.contract.methods.isActiveAdmin(adminToRemove).call();
-                  expect(flag).to.be.false;
-                })
+              it('returns admin removed', async () => {
+                var flag = await this.contract.methods.isActiveAdmin(adminToRemove).call();
+                expect(flag).to.be.false;
+              })
 
-                it('returns admin count', async () => {
-                  var count = await this.contract.methods.getAdminsCount().call({from : ethAccountToUse});
-                  count.should.be.bignumber.equal(4);
-                })
+              it('returns admin count', async () => {
+                var count = await this.contract.methods.getAdminsCount().call({from : ethAccountToUse});
+                count.should.be.bignumber.equal(4);
+              })
 
-                it('returns admin count', async () => {
-                  var count = await this.contract.methods.getActiveAdminsCount().call({from : ethAccountToUse});
-                  count.should.be.bignumber.equal(3);
-                })
+              it('returns admin count', async () => {
+                var count = await this.contract.methods.getActiveAdminsCount().call({from : ethAccountToUse});
+                count.should.be.bignumber.equal(3);
+              })
             })
         })
 
