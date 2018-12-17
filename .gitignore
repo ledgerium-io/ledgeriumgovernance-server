@@ -80,7 +80,7 @@ typings/
 *.pub
 
 #vscode launch file
-.vscode/launch.json
+#.vscode/launch.json
 
 #vs code-workspace
 governanceapp.code-workspace

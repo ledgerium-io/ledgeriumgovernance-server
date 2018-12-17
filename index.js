@@ -9,6 +9,8 @@ const ethUtil = require('ethereumjs-util');
 var provider;
 var protocol,host,port,web3;
 
+global.web3 = web3;
+
 var subscribePastEventsFlag = false;
 var webSocketProtocolFlag = false;
 global.webSocketProtocolFlag = webSocketProtocolFlag;
@@ -22,6 +24,12 @@ global.utils = utils;
 var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
+
+// adminValidator = new AdminValidator();
+// global.adminValidator = adminValidator;
+// simpleValidator = new SimpleValidator();
+// global.simpleValidator = simpleValidator;
+
 var privateKey = {};
 var accountAddressList = [];
 var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
@@ -220,12 +228,13 @@ async function initiateApp() {
     }
     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    global.adminValidatorSetAddress = adminValidatorSetAddress;
+    global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+
     let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
-    global.adminValidatorSetAddress = adminValidatorSetAddress;
-    global.simpleValidatorSetAddress = simpleValidatorSetAddress;
 }
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
@@ -311,3 +320,6 @@ async function writeContractsINConfig(){
         console.log("Error in writeContractsINConfig: " + error);
     }
 }
+
+
+
