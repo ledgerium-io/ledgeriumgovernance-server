@@ -1,9 +1,7 @@
-
 var chai = require('chai')
 var expect = chai.expect;
-const BigNumber = web3.BigNumber;
 
-chai.use(require('chai-bignumber')(BigNumber))
+chai.use(require('chai-bignumber')())
 chai.should();
 
 setTimeout(() => {
