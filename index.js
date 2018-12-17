@@ -25,17 +25,11 @@ var contractsList = {};
 //Helper object for SimpleValidator Contract and AdminValdiator Contract! For now, globally declared
 var adminValidator,simpleValidator;
 
-// adminValidator = new AdminValidator();
-// global.adminValidator = adminValidator;
-// simpleValidator = new SimpleValidator();
-// global.simpleValidator = simpleValidator;
-
 var privateKey = {};
 var accountAddressList = [];
 var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 
 var main = async function () {
-
     const args = process.argv.slice(2);
     for (let i=0; i<args.length ; i++) {
         let temp = args[i].split("=");
@@ -238,7 +232,6 @@ async function initiateApp() {
 }
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
-    
     accountAddressList.length = 0;
     let pubkey;
     for(var index = 0; index < inputPrivateKeys.length; index++){

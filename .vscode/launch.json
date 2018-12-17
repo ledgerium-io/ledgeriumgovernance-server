@@ -10,6 +10,8 @@
             "name": "Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
+                "protocol",
+                "http",
                 "--timeout",
                 "999999",
                 "--require",
