@@ -9,7 +9,7 @@ class SimpleValidator{
     }
 
     async setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress){
-        let tranHash = await this.simpleValidatorSet.setOwnersParameters(accountAddressList[0],privateKey[accountAddressList[0]],simpleValidatorSetAddress,adminValidatorSetAddress);
+        let tranHash = await this.simpleValidatorSet.setOwnersParameters(accountAddressList[0],accountAddressList[1],accountAddressList[2],privateKey[accountAddressList[0]],simpleValidatorSetAddress,adminValidatorSetAddress);
         return tranHash;
     }
 

@@ -48,7 +48,7 @@ contract AdminValidatorSet is Voteable {
     */
 	modifier isAdmin() {
 		// make sure only activeAdmin can operate
-        require(activeAdmins[msg.sender].isActive);
+        require(activeAdmins[msg.sender].isActive, "msg.sender is not active admin!");
         _;
     }
 
@@ -72,11 +72,10 @@ contract AdminValidatorSet is Voteable {
     * @dev Function to initiate contract with adding first 3 valid admins. The pre-deployed contract will be the owner
     * @return A success flag
     */
-	function init() public ifNotInitalised {
-
-		address msg_sender = address(0x44643353444f4b42b46ED28e668C204db6Dbb7c3);
-		address _owner1 = address(0x43a69eDD54e07B95113FEd92e8c9ba004500Ce12);
-		address _owner2 = address(0xd44b2838207A46F1007B3F296a599fADfb20978c);
+	function init(address address1, address address2, address address3) public ifNotInitalised {
+		address msg_sender = address1;
+		address _owner1 = address2;
+		address _owner2 = address3;
 		
 		// make sure that there are minimum of 3 admins to vote for/against
 		exists[msg_sender] = true;
@@ -109,7 +108,6 @@ contract AdminValidatorSet is Voteable {
 	* @return A success flag
     */
 	function proposalToAddAdmin(address _address) public isAdmin isInitalised returns (bool) {
-
 		//Lets check if the _address is already active!
 		if(isActiveAdmin(_address)){
 			emit AlreadyActiveAdmin(_address);
@@ -127,7 +125,7 @@ contract AdminValidatorSet is Voteable {
 			}
 		}
 		votes[_address].proposal = Proposal.ADD;
-		require (voteFor(_address,msg.sender));
+		require(voteFor(_address,msg.sender), "voteFor function failed!");
 		votes[_address].proposer = msg.sender;
 		return true;
 	}
@@ -141,12 +139,11 @@ contract AdminValidatorSet is Voteable {
     * @return A success flag
     */
 	function voteForAddingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-
 		if(votes[_address].proposal != Proposal.ADD) {
 			emit NoProposalForAddingAdmin(_address);
 			return false;
 		}
-		require(voteFor(_address,msg.sender));
+		require(voteFor(_address,msg.sender), "voteFor function failed!");
 		if(votes[_address].countFor >= totalActiveCount / 2 + 1) {
 			if(!exists[_address]){
 				admins.push(_address);
@@ -157,7 +154,7 @@ contract AdminValidatorSet is Voteable {
     		activeAdmins[_address].status = Status.ACTIVE;
 			totalActiveCount = totalActiveCount.add(1);
 			emit AddAdmin(votes[_address].proposer, _address);
-			require(clearVotes(_address));
+			require(clearVotes(_address), "clearVotes function failed!");
 		}
 		return true;
 	}
@@ -170,12 +167,11 @@ contract AdminValidatorSet is Voteable {
 	* @return A success flag
     */
 	function voteAgainstAddingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-
 		if(votes[_address].proposal != Proposal.ADD) {
 			emit NoProposalForAddingAdmin(_address);
 			return false;
 		}
-		require(voteAgainst(_address,msg.sender));
+		require(voteAgainst(_address,msg.sender), "voteAgainst function failed!");
 		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1) {
 			assert(clearVotes(_address));
 		}
@@ -195,7 +191,6 @@ contract AdminValidatorSet is Voteable {
 	* @return Emits event minAdminNeeded in case the no of existing active admins are less than 3
     */
   	function proposalToRemoveAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		
 		//Lets check if the _address is already inActive!
 		if(!isActiveAdmin(_address)){
 			emit AlreadyInActiveAdmin(_address);
@@ -205,7 +200,6 @@ contract AdminValidatorSet is Voteable {
 			emit MinAdminNeeded(3);
 			return false;
 		}	
-		//require(votes[_address].proposal == Proposal.NOT_CREATED);
 		if(votes[_address].proposal != Proposal.NOT_CREATED) {
 			if(votes[_address].proposal == Proposal.ADD){
 				emit AlreadyProposalForAddingAdmin(_address);
@@ -217,7 +211,7 @@ contract AdminValidatorSet is Voteable {
 			}
 		}
 		votes[_address].proposal = Proposal.REMOVE;
-		require (voteFor(_address,msg.sender));
+		require (voteFor(_address,msg.sender), "voteFor function failed!");
 		votes[_address].proposer = msg.sender;
 		return true;
 	}
@@ -231,18 +225,17 @@ contract AdminValidatorSet is Voteable {
 	* @return A success flag
     */
 	function voteForRemovingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-
 		if(votes[_address].proposal != Proposal.REMOVE){
 			emit NoProposalForRemovingAdmin(_address);
 			return false;
 		}
-		require(voteFor(_address,msg.sender));
+		require(voteFor(_address,msg.sender), "voteFor function failed!");
 		if(votes[_address].countFor >= totalActiveCount / 2 + 1) {
 			activeAdmins[_address].isActive = false;
     		activeAdmins[_address].status = Status.INACTIVE;
 			totalActiveCount = totalActiveCount.sub(1);
 			emit RemoveAdmin(votes[_address].proposer, _address);
-			require(clearVotes(_address));
+			require(clearVotes(_address), "clearVotes function failed!");
 		}
 		return true;
 	}
@@ -255,12 +248,11 @@ contract AdminValidatorSet is Voteable {
 	* @return A success flag
     */
 	function voteAgainstRemovingAdmin(address _address) public isAdmin isInitalised returns (bool) {
-		
 		if(votes[_address].proposal != Proposal.REMOVE) {
 			emit NoProposalForRemovingAdmin(_address);
 			return false;
 		}
-		require(voteAgainst(_address,msg.sender));
+		require(voteAgainst(_address,msg.sender), "voteAgainst function failed!");
 		if(votes[_address].countAgainst >= totalActiveCount / 2 + 1) {
 			assert(clearVotes(_address));
 		}

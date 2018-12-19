@@ -35,8 +35,8 @@ contract Voteable {
     * @dev check whether msg.sender is the original proposer of the voting process
     */
 	modifier isProposer(address _address) {
-		require(_address != address(0));
-		require (votes[_address].proposer == msg.sender);
+		require(_address != address(0), "Input address is null!");
+		require(votes[_address].proposer == msg.sender, "msg.sender is not the proposer!");
 		_; 
 	}
 	
@@ -58,7 +58,7 @@ contract Voteable {
 	* @return A success flag
     */
 	function voteFor(address _address, address voter) internal returns (bool) {
-		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
+		require(votes[_address].vote[voter] == Decision.NOT_DECIDED, "Voter has already voted for the given address!");
 		uint32 count = votes[_address].countFor.add(1);
 		votes[_address].countFor = count;
 		votes[_address].vote[voter] = Decision.FOR;
@@ -81,7 +81,7 @@ contract Voteable {
 	* @return A success flag
     */
 	function voteAgainst(address _address, address voter) internal returns (bool) {
-		require (votes[_address].vote[voter] == Decision.NOT_DECIDED);
+		require(votes[_address].vote[voter] == Decision.NOT_DECIDED, "Voter has already voted for the given address!");
 		uint32 count = votes[_address].countAgainst.add(1);
 		votes[_address].countAgainst = count;
 		votes[_address].vote[voter] = Decision.AGAINST;
@@ -120,8 +120,8 @@ contract Voteable {
     * @return A success flag
     */
 	function internalChangeVote(address _address) internal returns (bool) {
-		require (votes[_address].vote[msg.sender] != Decision.NOT_DECIDED);
-		require (votes[_address].proposal != Proposal.NOT_CREATED);
+		require(votes[_address].vote[msg.sender] != Decision.NOT_DECIDED, "Voter has already voted for the given address!");
+		require(votes[_address].proposal != Proposal.NOT_CREATED, "Proposal is already ON for the given address!");
 		uint32 cfor = votes[_address].countFor;
 		uint32 cagainst = votes[_address].countAgainst;
 		if(votes[_address].vote[msg.sender] == Decision.FOR){

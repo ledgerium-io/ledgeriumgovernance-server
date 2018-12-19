@@ -38,6 +38,8 @@ sudo docker rm $(sudo docker ps -aq)
 ``` 
 - sudo npm install -g truffle
 - truffle compile 
+- solc --overwrite --gas --bin-runtime --abi --optimize-runs=200 -o ./build/contracts ./contracts/AdminValidatorSet.sol
+- solc --overwrite --gas --bin-runtime --abi --optimize-runs=200 -o ./build/contracts ./contracts/SimpleValidatorSet.sol
 - npm install
 ```
 

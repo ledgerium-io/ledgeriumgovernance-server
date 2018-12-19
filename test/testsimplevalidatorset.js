@@ -34,14 +34,11 @@ setTimeout(() => {
         })
 
         describe('Add Validator for Admin', () => {
-
             let validatorToAdd = accountAddressList[3];
-
             it('returns validator is inactive before adding as validator', async () => {
                 var flag = await this.contract.methods.isActiveValidator(validatorToAdd).call();
                 expect(flag).to.be.false;
             })
-
             describe('Proposal to Add Validator', () => {
               it('returns proposal not created before add validator proposal', async () => {
                   var whatProposal = await this.contract.methods.checkProposal(validatorToAdd).call({from : ethAccountToUse});

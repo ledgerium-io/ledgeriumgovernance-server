@@ -18,7 +18,7 @@ class AdminValidatorSet {
         }
     }
     
-    async setOwnersParameters(ethAccountToUse,_privateKey,adminValidatorSetAddress) {
+    async setOwnersParameters(ethAccountToUse,address1, address2,_privateKey,adminValidatorSetAddress) {
         try{
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
@@ -28,7 +28,7 @@ class AdminValidatorSet {
                     this.listenContractPastEvents();
                 this.listenContractAllEvents(this.contract);  
             }
-            let transactionHash = await this.init(ethAccountToUse,_privateKey);
+            let transactionHash = await this.init(ethAccountToUse,address1, address2,_privateKey);
             return transactionHash;
         }
         catch (error) {
@@ -49,9 +49,9 @@ class AdminValidatorSet {
         }
     }
 
-    async init(ethAccountToUse, privateKey) {
+    async init(ethAccountToUse,address1,address2,privateKey) {
         try{
-            var encodedABI = this.contract.methods.init().encodeABI();
+            var encodedABI = this.contract.methods.init(ethAccountToUse,address1,address2).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
