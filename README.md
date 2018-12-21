@@ -29,15 +29,17 @@ sudo docker rm $(sudo docker ps -aq)
 1. Create docker network by running this command
    ```
    docker network create -d bridge --subnet 172.16.239.0/24 --gateway 172.16.239.1 app_net
+   docker network create -d bridge --subnet 172.19.240.0/24 --gateway 172.19.240.1 test_net
    ```
-2. Ensure **genesis/led_genesis.json** file available at hostmachine **'~'** level
-3. Run the geth nodes by running
+2. Run the geth nodes by running
    **docker-compose up -d**
 
-### We also use truffle for compiling smart contract so truffle can be installed and run compile
+### We are not using truffle framework for any compilation.
+- ~~sudo npm install -g truffle~~
+- ~~truffle compile~~
+
 ``` 
-- sudo npm install -g truffle
-- truffle compile 
+We have used solc compiler to AdminValidatorSet and SimpleValidatorSet contract
 - solc --overwrite --gas --bin-runtime --abi --optimize-runs=200 -o ./build/contracts ./contracts/AdminValidatorSet.sol
 - solc --overwrite --gas --bin-runtime --abi --optimize-runs=200 -o ./build/contracts ./contracts/SimpleValidatorSet.sol
 - npm install
@@ -62,7 +64,7 @@ The governanceApp can be used with different switches
 - if keystore\privatekey.json needs to be used for accounts and respective their private keys
 
 or **privateKeys**
-- provide comma-seperated valid private keys like "897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb" to be used
+- provide comma-seperated valid private keys like "897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb"
 
 **runadminvalidator** - for AdminValidatorSet tests 
 - runAdminTestCases 
@@ -94,6 +96,9 @@ node index.js protocol=ws hostname=localhost port=9000 readkeyconfig=true runsim
 ```
 node index.js protocol=http hostname=localhost port=8545 readkeyconfig=true runadminvalidator=addOneAdmin,0x3a91fd8517b58470c85fd570913b358c4db916bc,runClearProposalsAdminTestCases,0xc2cb28fad9b82036c9f32cbd6c84343612ee0323,getAllActiveAdmins
 ```
+### Running the smart contracts testcases
+- npm test
+This will run testcases of the AdminValidatorSet and SimpleValidatorSet contracts on local setup
 
 This will bring up 
 - 7 geth node docker instances
