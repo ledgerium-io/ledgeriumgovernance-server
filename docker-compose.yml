@@ -1,752 +1,1151 @@
 version: '3'
 services:
   eth-stats:
-    image: quay.io/amis/ethstats:latest
+    image: 'quay.io/amis/ethstats:latest'
     ports:
       - '3000:3000'
     environment:
-      - WS_SECRET=bb98a0b6442386d0cdf8a31b267892c1
+      - WS_SECRET=bb98a0b6442334d0cdf8a31b267892c1
     restart: always
     networks:
-      app_net:
-        ipv4_address: 172.16.239.9
+      test_net:
+        ipv4_address: 172.19.240.9
   validator-0:
     hostname: validator-0
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30303:30303'
       - '8545:8545'
       - '9000:9000'
     volumes:
-      - 0:/constellation:z
-      - _val0eth:/eth:z
-      - ../genesis:/genesis:ro
+      - 'validator-0:/eth'
+      - 'constellation-0:/constellation:z'
+      - './tmp:/tmp'
+      - 'logs:/logs'
     depends_on:
       - constellation-0
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0",
-        "enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0",
-        "enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0",
-        "enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0",
-        "enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0",
-        "enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0",
-        "enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-0" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-0:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >+
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm0.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '' > ./password
+
+        echo '5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-0"
+        --nodekeyhex
+        "5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49"
+        --etherbase "494c6cd1eeacf473ce9ae13eba61e0e13dbbb68d" --port "30303"
+        --ethstats
+        "validator-0:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000 2>/logs/gethLogs/validator-0.txt
+
     networks:
-      app_net:
-        ipv4_address: 172.16.239.10
+      test_net:
+        ipv4_address: 172.19.240.10
     restart: always
   constellation-0:
     hostname: constellation-0
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10000:10000'
     volumes:
-      - 0:/constellation:z
-      - .:/tmp/
+      - 'constellation-0:/constellation:z'
+      - 'logs:/logs'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm0.pub
-        constellation-node \
-          --url=http://172.16.239.100:10000/ \
-          --port=10000 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.101:10001/,http://172.16.239.102:10002/,http://172.16.239.103:10003/,http://172.16.239.104:10004/,http://172.16.239.105:10005/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.101:10001/,http://172.19.240.102:10002/,http://172.19.240.103:10003/
+        --url=http://172.19.240.100:10000/ --port=10000
+        2>/logs/constellationLogs/validator-0_constellation.txt
     networks:
-      app_net:
-        ipv4_address: 172.16.239.100
+      test_net:
+        ipv4_address: 172.19.240.100
     restart: always
   governance_ui-0:
-    hostname: governance_ui-0
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-0
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3545:3003'
     volumes:
-      - _val0eth:/eth:z
+      - 'validator-0:/eth'
+      - 'constellation-0:/constellation:z'
     depends_on:
       - validator-0
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
         cd /ledgerium/governanceapp/governanceApp
-        node index.js protocol=ws hostname=localhost port=9000 privateKeys=7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3
+
+        node index.js protocol=http hostname=localhost port=8545
+        privateKeys=5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49,08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2,c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b
+
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.10 8545
+
+        node governanceUI.js 172.19.240.10 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.110
+      test_net:
+        ipv4_address: 172.19.240.150
   validator-1:
     hostname: validator-1
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30304:30303'
       - '8546:8545'
       - '9001:9000'
     volumes:
-      - 1:/constellation:z
-      - _val1eth:/eth:z
-      - ../genesis:/genesis:ro
+      - 'validator-1:/eth'
+      - 'constellation-1:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-1
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-1" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "567521641fd972a53a9d5ac80c442f5ffc867a5242f660a6e4dfdcda33465fef" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-1:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm1.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '31212' > ./password
+
+        echo '08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-1"
+        --nodekeyhex
+        "08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2"
+        --etherbase "c4b14f905aea26bec03c4a1ad8b1de44fe573f56" --port "30303"
+        --ethstats
+        "validator-1:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.11
+      test_net:
+        ipv4_address: 172.19.240.11
     restart: always
   constellation-1:
     hostname: constellation-1
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10001:10001'
     volumes:
-      - 1:/constellation:z
-      - .:/tmp/
+      - 'constellation-1:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm1.pub
-        constellation-node \
-          --url=http://172.16.239.101:10001/ \
-          --port=10001 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.102:10002/,http://172.16.239.103:10003/,http://172.16.239.104:10004/,http://172.16.239.105:10005/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.102:10002/,http://172.19.240.103:10003/
+        --url=http://172.19.240.101:10001/ --port=10001
     networks:
-      app_net:
-        ipv4_address: 172.16.239.101
+      test_net:
+        ipv4_address: 172.19.240.101
     restart: always
   governance_ui-1:
-    hostname: governance_ui-1
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-1
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3546:3003'
     volumes:
-      - _val1eth:/eth:z
+      - 'validator-1:/eth'
+      - 'constellation-1:/constellation:z'
     depends_on:
       - validator-1
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.11 8545
+        node governanceUI.js 172.19.240.11 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.111
+      test_net:
+        ipv4_address: 172.19.240.151
   validator-2:
     hostname: validator-2
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30305:30303'
       - '8547:8545'
       - '9002:9000'
     volumes:
-      - 2:/constellation:z
-      - _val2eth:/eth:z
-      - ../genesis:/genesis:ro
+      - 'validator-2:/eth'
+      - 'constellation-2:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-2
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-2" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "12d2bc8fc2419e9086cd38285a6a5e9c029fd5cd0a0b0c49e44d284f94ee84ae" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-2:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm2.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '312312321' > ./password
+
+        echo 'c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-2"
+        --nodekeyhex
+        "c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b"
+        --etherbase "10e1edc260cb0b75f2f6854d833420d1008c63b0" --port "30303"
+        --ethstats
+        "validator-2:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.12
+      test_net:
+        ipv4_address: 172.19.240.12
     restart: always
   constellation-2:
     hostname: constellation-2
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10002:10002'
     volumes:
-      - 2:/constellation:z
-      - .:/tmp/
+      - 'constellation-2:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm2.pub
-        constellation-node \
-          --url=http://172.16.239.102:10002/ \
-          --port=10002 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.101:10001/,http://172.16.239.103:10003/,http://172.16.239.104:10004/,http://172.16.239.105:10005/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.101:10001/,http://172.19.240.103:10003/
+        --url=http://172.19.240.102:10002/ --port=10002
     networks:
-      app_net:
-        ipv4_address: 172.16.239.102
+      test_net:
+        ipv4_address: 172.19.240.102
     restart: always
   governance_ui-2:
-    hostname: governance_ui-2
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-2
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3547:3003'
     volumes:
-      - _val2eth:/eth:z
+      - 'validator-2:/eth'
+      - 'constellation-2:/constellation:z'
     depends_on:
       - validator-2
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.12 8545
+        node governanceUI.js 172.19.240.12 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.112
-    restart: always
+      test_net:
+        ipv4_address: 172.19.240.152
   validator-3:
     hostname: validator-3
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30306:30303'
       - '8548:8545'
       - '9003:9000'
     volumes:
-      - 3:/constellation:z
-      - _val3eth:/eth:z
-      - ../genesis:/genesis:ro
+      - 'validator-3:/eth'
+      - 'constellation-3:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-3
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-3" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-3:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm3.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '3123213213' > ./password
+
+        echo 'b6979e309323884f1ef2329d8487b994bb2f96d865d235e7cab11bc8efa41aaf'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-3"
+        --nodekeyhex
+        "b6979e309323884f1ef2329d8487b994bb2f96d865d235e7cab11bc8efa41aaf"
+        --etherbase "02747c68e9d85d898a0affea969772106f1dc268" --port "30303"
+        --ethstats
+        "validator-3:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.13
+      test_net:
+        ipv4_address: 172.19.240.13
     restart: always
   constellation-3:
     hostname: constellation-3
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10003:10003'
     volumes:
-      - 3:/constellation:z
-      - .:/tmp/
+      - 'constellation-3:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm3.pub
-        constellation-node \
-          --url=http://172.16.239.103:10003/ \
-          --port=10003 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.101:10001/,http://172.16.239.102:10002/,http://172.16.239.104:10004/,http://172.16.239.105:10005/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.101:10001/,http://172.19.240.102:10002/
+        --url=http://172.19.240.103:10003/ --port=10003
     networks:
-      app_net:
-        ipv4_address: 172.16.239.103
+      test_net:
+        ipv4_address: 172.19.240.103
     restart: always
   governance_ui-3:
-    hostname: governance_ui-3
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-3
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3548:3003'
     volumes:
-      - _val3eth:/eth:z
+      - 'validator-3:/eth'
+      - 'constellation-3:/constellation:z'
     depends_on:
       - validator-3
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.13 8545
+        node governanceUI.js 172.19.240.13 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.113
-    restart: always
+      test_net:
+        ipv4_address: 172.19.240.153
   validator-4:
     hostname: validator-4
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30307:30303'
       - '8549:8545'
       - '9004:9000'
     volumes:
-      - 4:/constellation:z
-      - ../genesis:/genesis:ro
+      - 'validator-4:/eth'
+      - 'constellation-4:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-4
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-4" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "f3b734412dd78acb34a4304c6f2a1df7bf48c42f819a86ef3306409c2c51129e" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-4:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm4.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '5353453' > ./password
+
+        echo '05bdd52d1c11b79ef9e303e4cf5b863d9b9afdfb45db586b2e6591370695fe0f'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-4"
+        --nodekeyhex
+        "05bdd52d1c11b79ef9e303e4cf5b863d9b9afdfb45db586b2e6591370695fe0f"
+        --etherbase "e1002cb96e4bbaa00719f0746b4e51452999f31b" --port "30303"
+        --ethstats
+        "validator-4:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.14
+      test_net:
+        ipv4_address: 172.19.240.14
     restart: always
   constellation-4:
     hostname: constellation-4
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10004:10004'
     volumes:
-      - 4:/constellation:z
-      - .:/tmp/
+      - 'constellation-4:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm4.pub
-        constellation-node \
-          --url=http://172.16.239.104:10004/ \
-          --port=10004 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.101:10001/,http://172.16.239.102:10002/,http://172.16.239.103:10003/,http://172.16.239.105:10005/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.101:10001/,http://172.19.240.102:10002/
+        --url=http://172.19.240.104:10004/ --port=10004
     networks:
-      app_net:
-        ipv4_address: 172.16.239.104
+      test_net:
+        ipv4_address: 172.19.240.104
     restart: always
   governance_ui-4:
-    hostname: governance_ui-4
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-4
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3549:3003'
     volumes:
-      - _val4eth:/eth:z
+      - 'validator-4:/eth'
+      - 'constellation-4:/constellation:z'
     depends_on:
       - validator-4
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.14 8545
+        node governanceUI.js 172.19.240.14 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.114
-    restart: always
+      test_net:
+        ipv4_address: 172.19.240.154
   validator-5:
     hostname: validator-5
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30308:30303'
       - '8550:8545'
       - '9005:9000'
     volumes:
-      - 5:/constellation:z
-      - ../genesis:/genesis:ro
+      - 'validator-5:/eth'
+      - 'constellation-5:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-5
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-5" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "41d74f2f60da7c09beabd9e11ed6df79339a1586130d0e4275eb2c77e5450146" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-5:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm5.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '423432' > ./password
+
+        echo 'bd2a868ebe1989ef3a166fea43b0b4ffb3922295206797649ce6125032204105'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-5"
+        --nodekeyhex
+        "bd2a868ebe1989ef3a166fea43b0b4ffb3922295206797649ce6125032204105"
+        --etherbase "0b8be4750ffca22ee4aa6a28c8c71160a9439ff1" --port "30303"
+        --ethstats
+        "validator-5:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.15
+      test_net:
+        ipv4_address: 172.19.240.15
     restart: always
   constellation-5:
     hostname: constellation-5
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10005:10005'
     volumes:
-      - 5:/constellation:z
-      - .:/tmp/
+      - 'constellation-5:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm5.pub
-        constellation-node \
-          --url=http://172.16.239.105:10005/ \
-          --port=10005 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.101:10001/,http://172.16.239.102:10002/,http://172.16.239.103:10003/,http://172.16.239.104:10004/,http://172.16.239.106:10006/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.101:10001/,http://172.19.240.102:10002/
+        --url=http://172.19.240.105:10005/ --port=10005
     networks:
-      app_net:
-        ipv4_address: 172.16.239.105
+      test_net:
+        ipv4_address: 172.19.240.105
     restart: always
   governance_ui-5:
-    hostname: governance_ui-5
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-5
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3550:3003'
     volumes:
-      - _val5eth:/eth:z
+      - 'validator-5:/eth'
+      - 'constellation-5:/constellation:z'
     depends_on:
       - validator-5
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.15 8545
+        node governanceUI.js 172.19.240.15 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.115
-    restart: always
+      test_net:
+        ipv4_address: 172.19.240.155
   validator-6:
     hostname: validator-6
-    image: ledgeriumengineering/quorum:latest
+    image: 'ledgeriumengineering/quorum:latest'
     ports:
       - '30309:30303'
       - '8551:8545'
       - '9006:9000'
     volumes:
-      - 6:/constellation:z
-      - ../genesis:/genesis:ro
+      - 'validator-6:/eth'
+      - 'constellation-6:/constellation:z'
+      - './tmp:/tmp'
     depends_on:
       - constellation-6
     environment:
       - PRIVATE_CONFIG=/constellation/tm.conf
     entrypoint:
       - /bin/sh
-      - -c
-      - |
-        mkdir -p /eth/geth
-        echo '["enode://214c4999274bc516d6bd6a364219357be27d4c39a3f00568d5cfed7f3db818834f687a57858e5ee6084185e96181a845514535889fcaa9d2448d61e973e959d9@172.16.239.10:30303?discport=0","enode://ed4fe5be16a65ddedbf27f8eb85be93f7c04ca0cdb5cb28a35655d2b8aa3725110a69d682876157c26789ab00c622baf264f4de43260fb5c17d479dd4bf2de8b@172.16.239.11:30303?discport=0","enode://bf4e42ef636d7062ef2dfa86b03b265cb770c0b16521f5db04b5fdcf114235b9debf4835feb7f1d2512909691776535eab7e2549292cfababd1148760dba5e9b@172.16.239.12:30303?discport=0","enode://ed9fcc64577afd6c9abae48eda5c5cb8e9d45e11659c21688265570aecf2cf2fdcfd02355c2c80cc775bb3640a387b4ca60a338b5aa6d3a5a19acf7953b60e67@172.16.239.13:30303?discport=0","enode://bad4aa21b80ec53aa7826d12ac16fc2295b101149be941366a5ff5f6f7d12ddb94474ceb0e39cf86c8826f2da3b32085c7f82363316ebb636083616c811006e1@172.16.239.14:30303?discport=0","enode://ff84f073c473242750068a565658bbb20332ebed421cf8510420ba9fed234f62d911c16dd1d290de7e62490886f5fd9487da57dad884daccc9f24bc7ca804f4a@172.16.239.15:30303?discport=0","enode://0c84cb8d04b5521199bc70b7893ff513beaebf00441e5baebaf1f326eeb83b1d961b02eb5ba45c913980b60a2d832d748891134325ce38dc53eb9e5265c4fd02@172.16.239.16:30303?discport=0"]' > /eth/geth/static-nodes.json
-        cp /genesis/led_genesis.json /eth/genesis.json
-        geth --datadir "/eth" init "/eth/genesis.json"
-        geth \
-        --identity "validator-6" \
-        --rpc \
-        --rpcaddr "0.0.0.0" \
-        --rpcport "8545" \
-        --rpccorsdomain "*" \
-        --datadir "/eth" \
-        --port "30303" \
-        --rpcapi "db,eth,net,web3,istanbul,personal,admin,debug,txpool" \
-        --ws \
-        --wsorigins "*" \
-        --wsport "9000" \
-        --wsapi "db,eth,net,web3,personal,admin,debug,txpool" \
-        --wsaddr "0.0.0.0" \
-        --networkid "2018" \
-        --nat "any" \
-        --targetgaslimit 9007199254740000 \
-        --nodekeyhex "790afdeb16ae5c22453f8eeee25038c314f09d64fc51b8e21a5a82225e54fde6" \
-        --mine \
-        --debug \
-        --metrics \
-        --syncmode "full" \
-        --ethstats "validator-6:bb98a0b6442386d0cdf8a31b267892c1@172.16.239.9:3000" \
-        --gasprice 0
+      - '-c'
+      - >
+        while [ ! -e /constellation/tm.ipc ];do
+
+        sleep 1
+
+        echo "waiting for priv impl..."
+
+        done
+
+        rm -f /eth/geth.ipc
+
+        if [ ! -e /eth/genesis.json ];then
+
+        mkdir -p /eth
+
+        mkdir -p /logs/gethLogs
+
+        cp /tmp/genesis.json /eth/genesis.json
+
+        cp /tmp/static-nodes.json /eth/static-nodes.json
+
+        cp /tmp/permissioned-nodes.json /eth/permissioned-nodes.json
+
+        cp /constellation/tm.pub /tmp/tm6.pub
+
+        geth init /eth/genesis.json --datadir /eth
+
+        echo '2343242' > ./password
+
+        echo 'c8f84bc73e366934e897c706303b1d723b20f4cf9e761aa8cf56ea5f148e1be5'
+        > ./file
+
+        geth account import file --datadir /eth --password password
+
+        rm -f ./file && rm -f ./password
+
+        fi
+
+        geth --rpc --rpcaddr '0.0.0.0' --rpccorsdomain '*' --datadir '/eth'
+        --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
+        --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
+        --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
+        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
+        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
+        --mine --minerthreads 1 --syncmode full --identity "validator-6"
+        --nodekeyhex
+        "c8f84bc73e366934e897c706303b1d723b20f4cf9e761aa8cf56ea5f148e1be5"
+        --etherbase "6d9e1560e0a95b8fdbcc970dcac159d260304ada" --port "30303"
+        --ethstats
+        "validator-6:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
+        --rpcport 8545 --wsport 9000
     networks:
-      app_net:
-        ipv4_address: 172.16.239.16
+      test_net:
+        ipv4_address: 172.19.240.16
     restart: always
   constellation-6:
     hostname: constellation-6
-    image: quorumengineering/constellation:latest
+    image: 'quorumengineering/constellation:latest'
     ports:
       - '10006:10006'
     volumes:
-      - 6:/constellation:z
-      - .:/tmp/
+      - 'constellation-6:/constellation:z'
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
+        rm -f /constellation/tm.ipc
+
+        if [ ! -e "/constellation/tm.pub" ];then
+
         mkdir -p /constellation
-        echo "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n" > /constellation/tm.conf
+
+        mkdir -p /logs/constellationLogs
+
+        echo
+        "socket=\"/constellation/tm.ipc\"\npublickeys=[\"/constellation/tm.pub\"]\n"
+        > /constellation/tm.conf
+
         constellation-node --generatekeys=/constellation/tm
+
         cp /constellation/tm.pub /tmp/tm6.pub
-        constellation-node \
-          --url=http://172.16.239.106:10006/ \
-          --port=10006 \
-          --socket=/constellation/tm.ipc \
-          --othernodes=http://172.16.239.100:10000/,http://172.16.239.101:10001/,http://172.16.239.102:10002/,http://172.16.239.103:10003/,http://172.16.239.104:10004/,http://172.16.239.105:10005/ \
-          --publickeys=/constellation/tm.pub \
-          --privatekeys=/constellation/tm.key \
-          --storage=/constellation \
-          --verbosity=4 \
-          --tls="off"
+
+        fi
+
+        constellation-node --socket=/constellation/tm.ipc
+        --publickeys=/constellation/tm.pub --privatekeys=/constellation/tm.key
+        --storage=/constellation --verbosity=4
+        --othernodes=http://172.19.240.100:10000/,http://172.19.240.101:10001/,http://172.19.240.102:10002/
+        --url=http://172.19.240.106:10006/ --port=10006
     networks:
-      app_net:
-        ipv4_address: 172.16.239.106
+      test_net:
+        ipv4_address: 172.19.240.106
     restart: always
   governance_ui-6:
-    hostname: governance_ui-6
-    image: ledgeriumengineering/governance_app_ui_img:latest
+    hostname: governance-ui-6
+    image: 'ledgeriumengineering/governance_app_ui_img:latest'
     ports:
       - '3551:3003'
     volumes:
-      - _val6eth:/eth:z
+      - 'validator-6:/eth'
+      - 'constellation-6:/constellation:z'
     depends_on:
       - validator-6
     entrypoint:
       - /bin/sh
-      - -c
+      - '-c'
       - |
         cd /ledgerium/governanceapp/governanceApp/app
-        node governanceUI.js 172.16.239.16 8545
+        node governanceUI.js 172.19.240.16 8545
     networks:
-      app_net:
-        ipv4_address: 172.16.239.116
-    restart: always
+      test_net:
+        ipv4_address: 172.19.240.156
   quorum-maker:
     hostname: quorum-maker
-    image: syneblock/quorum-maker:2.1.0_2.5
+    image: 'mythrihegde/quorumumaker:2.1.1_2.5.1'
     ports:
       - '9999:9999'
+    volumes:
+      - 'logs:/logs'
+      - './tmp:/tmp'
+      - 'validator-0:/eth'
+      - 'constellation-0:/constellation:z'
     depends_on:
       - validator-0
     entrypoint:
       - /bin/sh
-      - -c
-      - |
+      - '-c'
+      - >
         set -u
+
         set -e
+
+        while : ;do
+
+        sleep 1
+
+        if [ -e /eth/geth.ipc ];then
+
+        break;
+
+        fi
+
+        done
+
         cd /root/quorum-maker/
-        ./start_nodemanager.sh 8545 9999 172.16.239.10
+
+        if [ ! -e /root/quorum-maker/setup.conf ];then
+
+        RESPONSE=`curl https://ipinfo.io/ip` || "--"
+
+        echo "EXTERNAL_IP=$${RESPONSE}" > ./setup.conf
+
+        echo "CONTRACT_ADD=" >> setup.conf
+
+        echo "RPC_PORT=8545" >> ./setup.conf
+
+        echo "WS_PORT=9000" >> ./setup.conf
+
+        echo "WHISPER_PORT=30303" >> ./setup.conf
+
+        echo "CONSTELLATION_PORT=10000" >> ./setup.conf
+
+        echo "TOTAL_NODES=7" >> ./setup.conf
+
+        echo "MODE=ACTIVE" >> ./setup.conf
+
+        echo "STATE=I" >> ./setup.conf
+
+        if [ -e /tmp/tm0.pub ];then
+
+        PUB=$$(cat /tmp/tm0.pub)
+
+        fi
+
+        echo "PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "ROLE=Unassigned" >> ./setup.conf
+
+        echo "CURRENT_IP=172.19.240.10" >> ./setup.conf
+
+        echo "REGISTERED=" >> ./setup.conf
+
+        echo "NODENAME=validator-"0 >> ./setup.conf
+
+        echo
+        "1_ENODE=027714b70b532a672710be37291cb781a3f24ce5dd043296a4f7cb502f3ab8fdc12acff7e177b19be07b4fad1ba16503dd72fcfed3e3fb9e3ad4b55360fccb16"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm1.pub ];then
+
+        PUB=$$(cat /tmp/tm1.pub)
+
+        fi
+
+        echo "1_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "1_ROLE=Unassigned" >> ./setup.conf
+
+        echo "1_CURRENT_IP=172.19.240.11" >> ./setup.conf
+
+        echo "1_REGISTERED=" >> ./setup.conf
+
+        echo "1_NODENAME=validator-"1 >> ./setup.conf
+
+        echo
+        "2_ENODE=343f65f8bd021a9d573e7a8d750df0517716d73dedfd557bee59acf1baca4336414ef5583ab658a95ed47ab0c3f005b3504a865f96986aa065bd04775d0c2180"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm2.pub ];then
+
+        PUB=$$(cat /tmp/tm2.pub)
+
+        fi
+
+        echo "2_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "2_ROLE=Unassigned" >> ./setup.conf
+
+        echo "2_CURRENT_IP=172.19.240.12" >> ./setup.conf
+
+        echo "2_REGISTERED=" >> ./setup.conf
+
+        echo "2_NODENAME=validator-"2 >> ./setup.conf
+
+        echo
+        "3_ENODE=66bb0f4a27bed2776c1611e7808be5452c50d11936c741f7d22e5554566a5d83f7670a207b4a2d018b2ba1f98a9f69e5cad1a2ba889101e3df010a58aadc8ad9"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm3.pub ];then
+
+        PUB=$$(cat /tmp/tm3.pub)
+
+        fi
+
+        echo "3_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "3_ROLE=Unassigned" >> ./setup.conf
+
+        echo "3_CURRENT_IP=172.19.240.13" >> ./setup.conf
+
+        echo "3_REGISTERED=" >> ./setup.conf
+
+        echo "3_NODENAME=validator-"3 >> ./setup.conf
+
+        echo
+        "4_ENODE=27e63100a297c0248a1eeadd21fc43df919fbd0eff054cb68b3e7140e3a8d40c366a1562293fbba2ce09651c5b63629d3d8593410ab6adff0345aef65aaa59a0"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm4.pub ];then
+
+        PUB=$$(cat /tmp/tm4.pub)
+
+        fi
+
+        echo "4_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "4_ROLE=Unassigned" >> ./setup.conf
+
+        echo "4_CURRENT_IP=172.19.240.14" >> ./setup.conf
+
+        echo "4_REGISTERED=" >> ./setup.conf
+
+        echo "4_NODENAME=validator-"4 >> ./setup.conf
+
+        echo
+        "5_ENODE=ce7b7c004deda2b6afa338864acec34682381182bf89c62b9924cd0ec4a53ab9ae4afd82b9e86225af26071b59ac5b5c942803112fc1ac9fa362932b22895bd8"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm5.pub ];then
+
+        PUB=$$(cat /tmp/tm5.pub)
+
+        fi
+
+        echo "5_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "5_ROLE=Unassigned" >> ./setup.conf
+
+        echo "5_CURRENT_IP=172.19.240.15" >> ./setup.conf
+
+        echo "5_REGISTERED=" >> ./setup.conf
+
+        echo "5_NODENAME=validator-"5 >> ./setup.conf
+
+        echo
+        "6_ENODE=ae2b4916de143bda7a6f0fb292e1b94f07c7fd08f024e4c6ea82b6e6705159e6a979e10e790ae134e190c9610e4f592eec987814d0dce90b0b866be08c55acff"
+        >> ./setup.conf
+
+        if [ -e /tmp/tm6.pub ];then
+
+        PUB=$$(cat /tmp/tm6.pub)
+
+        fi
+
+        echo "6_PUBKEY="$${PUB} >> ./setup.conf
+
+        echo "6_ROLE=Unassigned" >> ./setup.conf
+
+        echo "6_CURRENT_IP=172.19.240.16" >> ./setup.conf
+
+        echo "6_REGISTERED=" >> ./setup.conf
+
+        echo "6_NODENAME=validator-"6 >> ./setup.conf
+
+        fi
+
+        ./NodeManager http://172.19.240.10:8545 9999 /logs/gethLogs/
+        /logs/constellationLogs
     networks:
-      app_net:
-        ipv4_address: 172.16.239.196
+      test_net:
+        ipv4_address: 172.19.240.196
     restart: always
-networks:
- app_net:
-   external: true
 volumes:
- "0":
- "1":
- "2":
- "3":
- "4":
- "5":
- "6":
- "_val0eth":
- "_val1eth":
- "_val2eth":
- "_val3eth":
- "_val4eth":
- "_val5eth":
- "_val6eth":
+  logs:
+  constellation-0:
+  validator-0:
+  constellation-1:
+  validator-1:
+  constellation-2:
+  validator-2:
+  constellation-3:
+  validator-3:
+  constellation-4:
+  validator-4:
+  constellation-5:
+  validator-5:
+  constellation-6:
+  validator-6:
+networks:
+  test_net:
+    external: true
