@@ -112,7 +112,7 @@ async function test() {
         subscribePastEventsFlag = true;
     }
     else {
-        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        web3 = new Web3(new Web3.providers.HttpProvider("http://testnet.ledgerium.net:8545"));
         webSocketProtocolFlag = false;
         subscribePastEventsFlag = false;
     }
