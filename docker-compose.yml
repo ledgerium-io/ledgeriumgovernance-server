@@ -12,7 +12,7 @@ services:
         ipv4_address: 172.19.240.9
   validator-0:
     hostname: validator-0
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30303:30303'
       - '8545:8545'
@@ -58,7 +58,7 @@ services:
 
         echo '' > ./password
 
-        echo '5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49'
+        echo '13ac043daa6ca261ca26570c815f8ee26a2357e1ced796ddc8a5879f12681fd1'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -71,12 +71,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-0"
-        --nodekeyhex
-        "5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49"
-        --etherbase "494c6cd1eeacf473ce9ae13eba61e0e13dbbb68d" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-0" --nodekeyhex
+        "13ac043daa6ca261ca26570c815f8ee26a2357e1ced796ddc8a5879f12681fd1"
+        --etherbase "0d48f403571cfeedc50f58248cc7230411e77f76" --port "30303"
         --ethstats
         "validator-0:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000 2>/logs/gethLogs/validator-0.txt
@@ -142,7 +141,7 @@ services:
         cd /ledgerium/governanceapp/governanceApp
 
         node index.js protocol=http hostname=localhost port=8545
-        privateKeys=5bb196400bcbc9d4a8499492f2a1d47c38a646b675a7829c0a1976b3f46f6f49,08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2,c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b
+        privateKeys=13ac043daa6ca261ca26570c815f8ee26a2357e1ced796ddc8a5879f12681fd1,7e7ddca439d2f524d25f3f55fdfeda5e5e41526685e52b1494cf5162505e80ee,e46dc1e9ebb2c0c0ceeeb76d57e99fd0a2f9327f1d0d3dc3d7446d9aef90ca71
 
         cd /ledgerium/governanceapp/governanceApp/app
 
@@ -152,7 +151,7 @@ services:
         ipv4_address: 172.19.240.150
   validator-1:
     hostname: validator-1
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30304:30303'
       - '8546:8545'
@@ -195,9 +194,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '31212' > ./password
+        echo 'eqwe' > ./password
 
-        echo '08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2'
+        echo '7e7ddca439d2f524d25f3f55fdfeda5e5e41526685e52b1494cf5162505e80ee'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -210,12 +209,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-1"
-        --nodekeyhex
-        "08df7192f097cfae8b9fafc7df3bf783bfb36af17bcd272e5dd29a70056f39a2"
-        --etherbase "c4b14f905aea26bec03c4a1ad8b1de44fe573f56" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-1" --nodekeyhex
+        "7e7ddca439d2f524d25f3f55fdfeda5e5e41526685e52b1494cf5162505e80ee"
+        --etherbase "1e244067bfdcf40e2494f2a66efd8fc315a89efd" --port "30303"
         --ethstats
         "validator-1:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -282,7 +280,7 @@ services:
         ipv4_address: 172.19.240.151
   validator-2:
     hostname: validator-2
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30305:30303'
       - '8547:8545'
@@ -325,9 +323,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '312312321' > ./password
+        echo 'ldas' > ./password
 
-        echo 'c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b'
+        echo 'e46dc1e9ebb2c0c0ceeeb76d57e99fd0a2f9327f1d0d3dc3d7446d9aef90ca71'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -340,12 +338,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-2"
-        --nodekeyhex
-        "c8a973cef10bcede5cddb38cc91071d86c507122f649f5a1a5c99a8088c6e14b"
-        --etherbase "10e1edc260cb0b75f2f6854d833420d1008c63b0" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-2" --nodekeyhex
+        "e46dc1e9ebb2c0c0ceeeb76d57e99fd0a2f9327f1d0d3dc3d7446d9aef90ca71"
+        --etherbase "8ec82b5891b800a3a7c0d6cbf76773f00ab4f974" --port "30303"
         --ethstats
         "validator-2:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -412,7 +409,7 @@ services:
         ipv4_address: 172.19.240.152
   validator-3:
     hostname: validator-3
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30306:30303'
       - '8548:8545'
@@ -455,9 +452,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '3123213213' > ./password
+        echo '13123jl' > ./password
 
-        echo 'b6979e309323884f1ef2329d8487b994bb2f96d865d235e7cab11bc8efa41aaf'
+        echo 'f1e7251d4da41dc0c00b3066c1db59e3c874d621347119e168352f1d00a53523'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -470,12 +467,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-3"
-        --nodekeyhex
-        "b6979e309323884f1ef2329d8487b994bb2f96d865d235e7cab11bc8efa41aaf"
-        --etherbase "02747c68e9d85d898a0affea969772106f1dc268" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-3" --nodekeyhex
+        "f1e7251d4da41dc0c00b3066c1db59e3c874d621347119e168352f1d00a53523"
+        --etherbase "02420610ab7a8053772af6ca1e2d28ea2f18cc21" --port "30303"
         --ethstats
         "validator-3:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -542,7 +538,7 @@ services:
         ipv4_address: 172.19.240.153
   validator-4:
     hostname: validator-4
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30307:30303'
       - '8549:8545'
@@ -585,9 +581,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '5353453' > ./password
+        echo 'daslkdlsak' > ./password
 
-        echo '05bdd52d1c11b79ef9e303e4cf5b863d9b9afdfb45db586b2e6591370695fe0f'
+        echo 'b7c1b2ee28a430a0c414c7b8b2e0890561e2c8526c7dbc3bcb126cf489698575'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -600,12 +596,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-4"
-        --nodekeyhex
-        "05bdd52d1c11b79ef9e303e4cf5b863d9b9afdfb45db586b2e6591370695fe0f"
-        --etherbase "e1002cb96e4bbaa00719f0746b4e51452999f31b" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-4" --nodekeyhex
+        "b7c1b2ee28a430a0c414c7b8b2e0890561e2c8526c7dbc3bcb126cf489698575"
+        --etherbase "f3cce47d62c4ab109ac0e8f4d0ece6cc3f9703e7" --port "30303"
         --ethstats
         "validator-4:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -672,7 +667,7 @@ services:
         ipv4_address: 172.19.240.154
   validator-5:
     hostname: validator-5
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30308:30303'
       - '8550:8545'
@@ -715,9 +710,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '423432' > ./password
+        echo 'eqwewq' > ./password
 
-        echo 'bd2a868ebe1989ef3a166fea43b0b4ffb3922295206797649ce6125032204105'
+        echo '60d8f49cd78dff917a669b04ec83a15f53255ff391c651c1b4fa093019ee4846'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -730,12 +725,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-5"
-        --nodekeyhex
-        "bd2a868ebe1989ef3a166fea43b0b4ffb3922295206797649ce6125032204105"
-        --etherbase "0b8be4750ffca22ee4aa6a28c8c71160a9439ff1" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-5" --nodekeyhex
+        "60d8f49cd78dff917a669b04ec83a15f53255ff391c651c1b4fa093019ee4846"
+        --etherbase "98670230d346e4369563051ba80858f38c93168f" --port "30303"
         --ethstats
         "validator-5:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -802,7 +796,7 @@ services:
         ipv4_address: 172.19.240.155
   validator-6:
     hostname: validator-6
-    image: 'ledgeriumengineering/quorum:latest'
+    image: 'ledgeriumengineering/quorum:fdlimit-bump'
     ports:
       - '30309:30303'
       - '8551:8545'
@@ -845,9 +839,9 @@ services:
 
         geth init /eth/genesis.json --datadir /eth
 
-        echo '2343242' > ./password
+        echo 'dkak;sa' > ./password
 
-        echo 'c8f84bc73e366934e897c706303b1d723b20f4cf9e761aa8cf56ea5f148e1be5'
+        echo '85591d71da3cf601b15a8213122e35ded343dd0fa95341440ebcbd05031df9e8'
         > ./file
 
         geth account import file --datadir /eth --password password
@@ -860,12 +854,11 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --permissioned --debug --metrics --syncmode 'full' --gasprice 0 --mine
-        --verbosity 3 --nodiscover --emitcheckpoints --istanbul.blockperiod 1
-        --mine --minerthreads 1 --syncmode full --identity "validator-6"
-        --nodekeyhex
-        "c8f84bc73e366934e897c706303b1d723b20f4cf9e761aa8cf56ea5f148e1be5"
-        --etherbase "6d9e1560e0a95b8fdbcc970dcac159d260304ada" --port "30303"
+        --debug --metrics --syncmode 'full' --gasprice 0 --mine --verbosity 3
+        --emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1
+        --syncmode full --identity "validator-6" --nodekeyhex
+        "85591d71da3cf601b15a8213122e35ded343dd0fa95341440ebcbd05031df9e8"
+        --etherbase "177b60c932034fc62dd9950bce9274558503b292" --port "30303"
         --ethstats
         "validator-6:bb98a0b6442334d0cdf8a31b267892c1@172.19.240.9:3000"
         --rpcport 8545 --wsport 9000
@@ -932,7 +925,7 @@ services:
         ipv4_address: 172.19.240.156
   quorum-maker:
     hostname: quorum-maker
-    image: 'mythrihegde/quorumumaker:2.1.1_2.5.1'
+    image: 'ledgeriumengineering/quorum-maker:v0.1'
     ports:
       - '9999:9999'
     volumes:
@@ -982,6 +975,8 @@ services:
 
         echo "TOTAL_NODES=7" >> ./setup.conf
 
+        echo "RAFT_ID=0" >> ./setup.conf
+
         echo "MODE=ACTIVE" >> ./setup.conf
 
         echo "STATE=I" >> ./setup.conf
@@ -1002,8 +997,12 @@ services:
 
         echo "NODENAME=validator-"0 >> ./setup.conf
 
+        echo "1_RAFT_ID=1"  >> ./setup.conf
+
+        echo "1_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "1_ENODE=027714b70b532a672710be37291cb781a3f24ce5dd043296a4f7cb502f3ab8fdc12acff7e177b19be07b4fad1ba16503dd72fcfed3e3fb9e3ad4b55360fccb16"
+        "1_ENODE=ae3d0728d27d0a465490cf28a1f78b4eb8391b976ee3129ffa82a302d31efcbff75480747d420f580086d252e4f13575ed3ec90ff86b3b595dc6c951ac5a5e85"
         >> ./setup.conf
 
         if [ -e /tmp/tm1.pub ];then
@@ -1022,8 +1021,12 @@ services:
 
         echo "1_NODENAME=validator-"1 >> ./setup.conf
 
+        echo "2_RAFT_ID=2"  >> ./setup.conf
+
+        echo "2_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "2_ENODE=343f65f8bd021a9d573e7a8d750df0517716d73dedfd557bee59acf1baca4336414ef5583ab658a95ed47ab0c3f005b3504a865f96986aa065bd04775d0c2180"
+        "2_ENODE=bd9eac1a0846dfcd6db365b3a30f8ccca2c8e913aae7cdde8ff9436760eabba90b1fec95ea15f20ec58cbbcf404eab71ea8e4052803564868094a204b13082cd"
         >> ./setup.conf
 
         if [ -e /tmp/tm2.pub ];then
@@ -1042,8 +1045,12 @@ services:
 
         echo "2_NODENAME=validator-"2 >> ./setup.conf
 
+        echo "3_RAFT_ID=3"  >> ./setup.conf
+
+        echo "3_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "3_ENODE=66bb0f4a27bed2776c1611e7808be5452c50d11936c741f7d22e5554566a5d83f7670a207b4a2d018b2ba1f98a9f69e5cad1a2ba889101e3df010a58aadc8ad9"
+        "3_ENODE=c94d5d721ad333559f8d741d2b94de96df2076cf175de5ee5166332b60dcd2f7cdd2f181dde7e3d571c316730f2be1445ff43c25e3c6dc4b8350129f084b8e50"
         >> ./setup.conf
 
         if [ -e /tmp/tm3.pub ];then
@@ -1062,8 +1069,12 @@ services:
 
         echo "3_NODENAME=validator-"3 >> ./setup.conf
 
+        echo "4_RAFT_ID=4"  >> ./setup.conf
+
+        echo "4_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "4_ENODE=27e63100a297c0248a1eeadd21fc43df919fbd0eff054cb68b3e7140e3a8d40c366a1562293fbba2ce09651c5b63629d3d8593410ab6adff0345aef65aaa59a0"
+        "4_ENODE=16cb4f17cbc78329cb767c0080e496c31e245c2aa4f70dfb7d0726089f2764420ce458d09a1529fb0db76374f68d72ba1cd6a62085b511fdb4d8953365839068"
         >> ./setup.conf
 
         if [ -e /tmp/tm4.pub ];then
@@ -1082,8 +1093,12 @@ services:
 
         echo "4_NODENAME=validator-"4 >> ./setup.conf
 
+        echo "5_RAFT_ID=5"  >> ./setup.conf
+
+        echo "5_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "5_ENODE=ce7b7c004deda2b6afa338864acec34682381182bf89c62b9924cd0ec4a53ab9ae4afd82b9e86225af26071b59ac5b5c942803112fc1ac9fa362932b22895bd8"
+        "5_ENODE=cc73014048ab8f06a1245fde29770069a6c4976bb4a9e715304ce50377f5b89dcd1a94b808db8d638702296eed97f27617bddd12cdc02619d23767b76061b577"
         >> ./setup.conf
 
         if [ -e /tmp/tm5.pub ];then
@@ -1102,8 +1117,12 @@ services:
 
         echo "5_NODENAME=validator-"5 >> ./setup.conf
 
+        echo "6_RAFT_ID=6"  >> ./setup.conf
+
+        echo "6_ROLE=Unassigned" >> ./setup.conf
+
         echo
-        "6_ENODE=ae2b4916de143bda7a6f0fb292e1b94f07c7fd08f024e4c6ea82b6e6705159e6a979e10e790ae134e190c9610e4f592eec987814d0dce90b0b866be08c55acff"
+        "6_ENODE=475cfee286261de7273e78270e7f73138acc37d991c9bfeccbe841d5114cac4da6df02f8addbae358f3632b4463f9e7b2f4b3ec0f085bcb0a65670aa280db6c6"
         >> ./setup.conf
 
         if [ -e /tmp/tm6.pub ];then
