@@ -1,4 +1,4 @@
-pragma solidity 0.5.1;
+pragma solidity ^0.5.1;
 
 /**
  * @title The Ownable contract maintains the list of all the owner of the derived class

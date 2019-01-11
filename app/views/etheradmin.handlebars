@@ -106,16 +106,20 @@
   <script src="SimpleValidatorSet.js" type="text/javascript"></script>
   <script type="text/javascript" async defer>
     var isLoaded = false;
-    var localWeb3 = new Web3(web3.currentProvider);
+    var localWeb3;
     //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8546"));
     //var web3provider = new Web3.providers.HttpProvider("http://localhost:8546");
+   
+
     var contractAbi = '{{{json this.contractAbi}}}';
     var nodeInfo = {{{json this.nodes}}};
     var adminAddress = {{{json this.nodes.adminContractAddress}}};
     var simpleAddress = {{{json this.nodes.simpleContractAddress}}};
+    var adminContractAbi = {{{json this.nodes.adminContractAbi}}};
+    var simpleContractAbi = {{{json this.nodes.simpleContractAbi}}};
     var utils = new Utils();
-    var helper = new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, {{{json this.nodes.adminContractAbi}}}, Web3)
-    var simpleHelper = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, {{{json this.nodes.simpleContractAbi}}}, Web3)
+    var helper; //= new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, {{{json this.nodes.adminContractAbi}}}, Web3)
+    var simpleHelper; // = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, {{{json this.nodes.simpleContractAbi}}}, Web3)
     var validatorCapacity = 0;
     var userIsAdmin = false;
     var consortiumValidatorAddresses = [];
@@ -125,6 +129,23 @@
     window.addEventListener('load', () => onload(), false);
     
     async function onload () {
+
+       if (window.ethereum) {
+          localWeb3 = new Web3(ethereum);
+          try {
+              // Request account access if needed
+              await ethereum.enable();
+          } catch (error) {
+              // User denied account access...
+          }
+      }
+      // Legacy dapp browsers...
+      else if (window.web3) {
+          localWeb3 = new Web3(web3.currentProvider);
+      }
+
+      var helper = new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, adminContractAbi, Web3)
+      var simpleHelper = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, simpleContractAbi, Web3)
       // Checking if Web3 has been injected by the browser (Mist/MetaMask)
       if (typeof web3 !== 'undefined') {
         // Use the browser's ethereum provider
