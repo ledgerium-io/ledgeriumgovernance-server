@@ -255,8 +255,8 @@ function getLeasedBlobList(listBlobs) {
 
 function getAbiDatafromBlob() {
   var abiPromise = new Promise((resolve, reject) => {
-    var contract = require("../build/contracts/AdminValidatorSet.json");
-    var simpleContract = require("../build/contracts/SimpleValidatorSet.json");
+    var contract = require("../build/contracts/AdminValidatorSet.abi.json");
+    var simpleContract = require("../build/contracts/SimpleValidatorSet.abi.json");
     var addresses = require("../keystore/contractsConfig.json");
     resolve(JSON.stringify({contract, simpleContract, 
       adminValidatorSetAddress: addresses.adminValidatorSetAddress,
@@ -264,8 +264,8 @@ function getAbiDatafromBlob() {
   });
   abiPromise.then(function (contents) {
     contents = JSON.parse(contents);
-    abiContent = contents.contract.abi;
-    simpleContent = contents.simpleContract.abi;
+    abiContent = contents.contract;
+    simpleContent = contents.simpleContract;
     adminValidatorSetAddress = contents.adminValidatorSetAddress;
     simpleValidatorSetAddress = contents.simpleValidatorSetAddress;
   });
@@ -283,8 +283,8 @@ function getActiveNodeDetails(leasedList) {
       var result = filecontent.enodeUrl.match(nodeRegexExp);
 
       var promise = new Promise(function (resolve, reject) {
-        resolve(getNodeInfo(filecontent, result[1]));
-        // resolve(getNodeInfo(filecontent, "localhost"));
+        //resolve(getNodeInfo(filecontent, result[1]));
+        resolve(getNodeInfo(filecontent, "localhost"));
       });
 
       nodePromiseArray.push(promise);
