@@ -84,3 +84,5 @@ typings/
 
 #vs code-workspace
 governanceapp.code-workspace
+
+build/contracts/*.bin-runtime
