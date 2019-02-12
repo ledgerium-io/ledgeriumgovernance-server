@@ -1,14 +1,14 @@
 {
   "name": "governanceapp",
-  "version": "0.0.0",
-  "description": "",
+  "version": "1.0",
+  "description": "Goveranance App contains smart contracts to manage admin and individual validators to come on platform.",
   "main": "index.js",
   "scripts": {
     "test": "mocha protocol http --require ./setup.js --timeout=100000 --recursive --delay ./test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ledgerium/governanceApp"
+    "url": "https://github.com/ledgerium/governanceapp"
   },
   "author": "Ledgerium",
   "license": "BSD-2-Clause",
