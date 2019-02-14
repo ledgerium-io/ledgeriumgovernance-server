@@ -1,6 +1,6 @@
 {
   "name": "governanceapp",
-  "version": "1.0",
+  "version": "0.2.0",
   "description": "Goveranance App contains smart contracts to manage admin and individual validators to come on platform.",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "promise": "7.1.1",
     "scrypt": "^6.0.3",
     "truffle-hdwallet-provider": "0.0.6",
-    "web3": "^1.0.0-beta.36",
+    "web3": "1.0.0-beta.36",
     "websocket": "^1.0.26"
   },
   "devDependencies": {

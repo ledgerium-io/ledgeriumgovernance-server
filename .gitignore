@@ -85,4 +85,8 @@ typings/
 #vs code-workspace
 governanceapp.code-workspace
 
+#solidity run bin
 build/contracts/*.bin-runtime
+
+#MAC
+.DS_Store
