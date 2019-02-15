@@ -90,3 +90,6 @@ build/contracts/*.bin-runtime
 
 #MAC
 .DS_Store
+
+#datastore
+output/validator-*
