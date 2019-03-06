@@ -1,7 +1,7 @@
 version: '3'
 services:
   eth-stats:
-    image: 'quay.io/amis/ethstats:latest'
+    image: 'ledgeriumengineering/ledgeriumstats:v1.0'
     ports:
       - '3000:3000'
     environment:
@@ -12,7 +12,7 @@ services:
         ipv4_address: 172.19.240.9
   validator-0:
     hostname: validator-0
-    image: 'ledgeriumengineering/quorum:blockperiod_gasprice'
+    image: 'ledgeriumengineering/ledgeriumcore:v1.1'
     ports:
       - '30303:30303'
       - '8545:8545'
@@ -71,7 +71,7 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --debug --metrics --syncmode 'full' --gasprice 10000 --mine --verbosity 6
+        --debug --metrics --syncmode 'full' --verbosity 6
         --emitcheckpoints --mine --minerthreads 1 --syncmode full
         --rpcvhosts=localhost --identity "validator-0" --nodekeyhex
         "83a5803e698a3642d5309f119643f6a729c7c51fac00fdffac31983cb5275bb5"
@@ -162,7 +162,7 @@ services:
     restart: always
   validator-1:
     hostname: validator-1
-    image: 'ledgeriumengineering/quorum:blockperiod_gasprice'
+    image: 'ledgeriumengineering/ledgeriumcore:v1.1'
     ports:
       - '30304:30303'
       - '8546:8545'
@@ -221,7 +221,7 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --debug --metrics --syncmode 'full' --gasprice 10000 --mine --verbosity 6
+        --debug --metrics --syncmode 'full' --verbosity 6
         --emitcheckpoints --mine --minerthreads 1 --syncmode full
         --rpcvhosts=localhost --identity "validator-1" --nodekeyhex
         "9d698949e6ddb9086c34409b16f81c854ef2d7f73e020db7f896ed615efa25b1"
@@ -304,7 +304,7 @@ services:
     restart: always
   validator-2:
     hostname: validator-2
-    image: 'ledgeriumengineering/quorum:blockperiod_gasprice'
+    image: 'ledgeriumengineering/ledgeriumcore:v1.1'
     ports:
       - '30305:30303'
       - '8547:8545'
@@ -363,7 +363,7 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --debug --metrics --syncmode 'full' --gasprice 10000 --mine --verbosity 6
+        --debug --metrics --syncmode 'full' --verbosity 6
         --emitcheckpoints --mine --minerthreads 1 --syncmode full
         --rpcvhosts=localhost --identity "validator-2" --nodekeyhex
         "02a121dc9a44f48c3630210f6643eeb148f6c418908788457f6b72892f9f3516"
@@ -446,7 +446,7 @@ services:
     restart: always
   validator-3:
     hostname: validator-3
-    image: 'ledgeriumengineering/quorum:blockperiod_gasprice'
+    image: 'ledgeriumengineering/ledgeriumcore:v1.1'
     ports:
       - '30306:30303'
       - '8548:8545'
@@ -505,7 +505,7 @@ services:
         --rpcapi 'db,eth,net,web3,istanbul,personal,admin,debug,txpool' --ws
         --wsorigins '*' --wsapi 'db,eth,net,web3,personal,admin,debug,txpool'
         --wsaddr '0.0.0.0' --networkid 2018 --targetgaslimit 9007199254740000
-        --debug --metrics --syncmode 'full' --gasprice 10000 --mine --verbosity 6
+        --debug --metrics --syncmode 'full' --verbosity 6
         --emitcheckpoints --mine --minerthreads 1 --syncmode full
         --rpcvhosts=localhost --identity "validator-3" --nodekeyhex
         "bf96d1aabb87c249ef8c85f98476b11e114e0bc6e62a11582d376ece941ecf09"
