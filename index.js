@@ -84,22 +84,14 @@ var main = async function () {
             case "readkeyconfig":
                 readAccountsAndKeys();
                 await initiateApp();
-                // readkeyconfig = temp[1];
-                // switch(readkeyconfig){
-                //     case "true":
-                //     default: 
-                //         readAccountsAndKeys();
-                //         break;
-                //     case "false":
-                //         console.log("Given readkeyconfig option not supported! Provide correct details");
-                //         break;     
-                // }
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
-                //writeAccountsAndKeys();
-                await initiateApp();
+                break;
+            case "initiateApp":
+                let peerNodesFileName = temp[1];
+                await initiateApp(peerNodesFileName);
                 break;
             case "runadminvalidator":{
                 //Initiate App before any function gets executed
@@ -208,7 +200,7 @@ var main = async function () {
 
 main();
 
-async function initiateApp() {
+async function initiateApp(peerNodesFileName) {
 
     readContractsFromConfig();
     if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" || networkManagerAddress == "") {
@@ -233,10 +225,56 @@ async function initiateApp() {
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
 
-    setupNetworkManagerContract();
+    setupNetworkManagerContract(peerNodesFileName);
 }
 
-async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
+async function setupNetworkManagerContract(peerNodesfileName) {
+
+    var ethAccountToUse = global.accountAddressList[0];
+
+    // Todo: Read ABI from dynamic source.
+    var abiFilename = __dirname + "/build/contracts/NetworkManagerContract.abi";
+    var json = JSON.parse(fs.readFileSync(abiFilename, 'utf8'));
+    if(json == "") {    
+        return;
+    }
+
+    var networkManagerAddress = "0x0000000000000000000000000000000000002023";
+    var nmContract = new web3.eth.Contract(json,networkManagerAddress);
+    var encodedABI = nmContract.methods.init().encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+    console.log("TransactionLog for Network Manager init() method -", transactionObject.transactionHash);
+  
+    var peerNodejson = JSON.parse(fs.readFileSync(peerNodesfileName, 'utf8'));
+    if(peerNodejson == "") {    
+        return;
+    }
+
+    var peerNodes = peerNodejson["nodes"];
+    for(var index = 0; index < peerNodes.length; index++){
+        encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
+                                                    peerNodes[index].hostname,
+                                                    peerNodes[index].role,
+                                                    peerNodes[index].ipaddress,
+                                                    peerNodes[index].port.toString(),
+                                                    peerNodes[index].publickey,
+                                                    peerNodes[index].enodeUrl
+        ).encodeABI();
+        transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+        console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+    }
+
+    var noOfNodes = await nmContract.methods.getNodesCounter().call();
+    for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+        console.log("****** Details of peer index -", nodeIndex, "**********");
+        console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
+    }
+    return;
+  }
+
+
+async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys) {
     accountAddressList.length = 0;
     let pubkey;
     for(var index = 0; index < inputPrivateKeys.length; index++){
@@ -321,60 +359,5 @@ async function writeContractsINConfig(){
         console.log("Error in writeContractsINConfig: " + error);
     }
 }
-
-async function setupNetworkManagerContract() {
-
-    var ethAccountToUse = global.accountAddressList[0];
-  
-    // Todo: Read ABI from dynamic source.
-    var filename = __dirname + "/build/contracts/NetworkManagerContract.abi";
-    var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
-    if(json == "") {    
-        return;
-    }
-  
-    var nmContract = new web3.eth.Contract(json,networkManagerAddress);
-    var index = 0;
-    let encodedABI = nmContract.methods.registerNode("validator-"+index,
-                                                    "mothernode",
-                                                    global.accountAddressList[index],
-                                                    "ae0f4add91eccaa384f8dcd00ae20e9e1cc460d66bdbb3236866b5c9e864830084aed077718351a968c9d87766ef3bc26301bdec836d295a6ffbedb9dab5503c",
-                                                    "172.19.240.10","ID"+index++).encodeABI();
-    let transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-    console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
-
-    encodedABI = nmContract.methods.registerNode("validator-"+index,
-                                                    "mothernode",
-                                                    global.accountAddressList[index],
-                                                    "db5371dfe7fd0822a73355b907648f35ba1039c0f111ba3591c6e6d9ecf61c1f29bed29a36231138ab5c6c15ed928a0ee19bd7aa2ea03e35744c839b28376977",
-                                                    "172.19.240.11","ID"+index++).encodeABI();
-    transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-    console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
-
-    encodedABI = nmContract.methods.registerNode("validator-"+index,
-                                                    "mothernode",
-                                                    global.accountAddressList[index],
-                                                    "a25a2ebaf83fb0e687187ea8735753934f1f87e8c4259d2da909ec9e89dc59215c2ab6e05b8c97b496a651a5373c1c6a49a4920b722a180af4a1be8184b56f3b",
-                                                    "172.19.240.12","ID"+index++).encodeABI();
-    transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-    console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
-
-    encodedABI = nmContract.methods.registerNode("validator-"+index,
-                                                    "mothernode",
-                                                    global.accountAddressList[index],
-                                                    "66c4b0731768a92297e1c93126ed3a8abba0b6d20ce6c3ad1b05ca44fce8a73bda61a75076753433846796bbcf66de998ba2e56f9a3cadc361c4628b381e057e",
-                                                    "172.19.240.13","ID"+index++).encodeABI();
-    transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-    console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
-  
-    var noOfNodes = await nmContract.methods.getNodesCounter().call();
-    for(var nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
-        console.log("details of", nodeIndex);
-        console.log("ID ", result.i,"\nNode Name ", result.n, "\npublic key ", result.p, "\nrole ", result.r, "\nIP ", result.ip, "\nEnode ", result.e);
-    }
-    return;
-  }
-
 
 

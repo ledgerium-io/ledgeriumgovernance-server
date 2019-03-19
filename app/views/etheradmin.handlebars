@@ -75,8 +75,10 @@
       <table class="u-full-width" id="nodesTable">
         <thead>
           <tr>
-            <th>Node Name</th>
             <th>Host Name</th>
+            <th>Role</th>
+            <th>IP Address</th>
+            <th>Port</th>
             <th>Public Key</th>
             <th>Enode ID</th>
           </tr>
@@ -84,10 +86,12 @@
         <tbody>
           {{#each nodeRows}}
           <tr>
-            <td>{{this.nodename}}</td>
             <td>{{this.hostname}}</td>
+            <td>{{this.role}}</td>
+            <td>{{this.ipaddress}}</td>
+            <td>{{this.port}}</td>
             <td>{{this.publickey}}</td>
-            <td>{{this.enodeUrl}}</td>
+            <td>{{this.enode}}</td>
           </tr>
           {{/each}}
         </tbody>
