@@ -13,6 +13,7 @@ RUN mkdir -p /ledgerium/governanceapp \
 
 # to be removed in the future
 WORKDIR /ledgerium/governanceapp/governanceApp/
+RUN git checkout feat/LB-101
 RUN npm install
 
 WORKDIR /ledgerium/governanceapp/governanceApp/app

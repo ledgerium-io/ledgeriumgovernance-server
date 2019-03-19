@@ -90,6 +90,7 @@ var main = async function () {
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
                 break;
             case "initiateApp":
+                readAccountsAndKeys();
                 let peerNodesFileName = temp[1];
                 await initiateApp(peerNodesFileName);
                 break;

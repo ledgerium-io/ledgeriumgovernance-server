@@ -70,15 +70,15 @@ process.on('unhandledRejection', err => {
 });
 
 // Set logging
-var log_file = fs.createWriteStream(logFilePath, {
-  flags: 'a'
-});
-var log_stdout = process.stdout;
+// var log_file = fs.createWriteStream(logFilePath, {
+//   flags: 'a'
+// });
+// var log_stdout = process.stdout;
 
-console.log = function (d) {
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
-};
+// console.log = function (d) {
+//   log_file.write(util.format(d) + '\n');
+//   log_stdout.write(util.format(d) + '\n');
+// };
 
 /*
  * Output Parameters to log file
