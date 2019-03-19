@@ -83,7 +83,7 @@ var main = async function () {
             //     break;
             case "readkeyconfig":
                 readAccountsAndKeys();
-                await initiateApp();
+                //await initiateApp();
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
