@@ -103,7 +103,6 @@ function readNetworkManagerContract() {
 
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
-    console.log(web3RPC);
     var latestBlockNumber;
     web3RPC.eth.getBlockNumber(function(err, latest) {
       latestBlockNumber = latest;
@@ -136,7 +135,7 @@ function readNodesFromNetworkManager(nodeIndex) {
     reject('NetworkManagerContract not initialised!');
     networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
       if (!error) {
-        console.log(`No of nodes: ${noOfNodes}`)
+        //console.log(`No of nodes: ${noOfNodes}`)
         if (nodeIndex < noOfNodes) {
           networkmanagerContract.methods.getNodeDetails(nodeIndex).call(function (error, result) {
             if (!error) {
@@ -171,6 +170,7 @@ function getNoOfNodes() {
     if(networkmanagerContract) {
       networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
         if(!error) {
+          console.log(`No of nodes: ${noOfNodes}`);
           resolve(noOfNodes);
         }
         else {
