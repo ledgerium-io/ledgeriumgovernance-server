@@ -17,15 +17,8 @@ var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
 
 var listenPort = "3003";
-var consortiumId = "111";
-var containerName = "dontcare";
-var identityBlobPrefix = "passphrase-";
+var consortiumId = "2018";
 var ethRpcPort = gethIpRpcPort;
-var validatorListBlobName = "AddressList.json";
-var paritySpecBlobName = "spec.json";
-var valSetContractBlobName = "../contracts/SimpleValidatorSet.sol";
-var adminContractBlobName = "../contracts/AdminValidatorSet.sol";
-var adminContractABIBlobName = "../contracts/AdminValidatorSet.sol.abi";
 var logFilePath = "log1.txt";
 
 /*
@@ -34,11 +27,18 @@ var logFilePath = "log1.txt";
 const refreshInterval = 60000;
 const nodeRegexExp = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
 
-const recentBlockDecrement = 10; // To find a recent block for "/networkInfo", take the "currentBlock - recentBlockDecrement"
+//const recentBlockDecrement = 10; // To find a recent block for "/networkInfo", take the "currentBlock - recentBlockDecrement"
 var activeNodes = [];
 var abiContent = '';
+var adminContractABI = '';
+var simpleContractABI = '';
+var networkManagerContractABI = '';
+var adminValidatorSetAddress, simpleValidatorSetAddress, networkManagerAddress;
+
 var timeStamp;
-var addressList = undefined;
+//var addressList = undefined;
+var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
+var networkmanagerContract;
 
 var app = express();
 app.engine('handlebars', exphbs({
@@ -86,29 +86,28 @@ console.log = function (d) {
 console.log("etheradmin.js starting parameters")
 console.log(`listenPort: ${listenPort}`)
 console.log(`consortiumId: ${consortiumId}`)
-console.log(`containerName: ${containerName}`)
-console.log(`identityBlobPrefix: ${identityBlobPrefix}`)
 console.log(`ethRpcPort: ${ethRpcPort}`)
-console.log(`validatorListBlobName: ${validatorListBlobName}`)
-console.log(`paritySpecBlobName: ${paritySpecBlobName}`)
-console.log(`valSetContractBlobName: ${valSetContractBlobName}`)
-console.log(`adminContractBlobName: ${adminContractBlobName}`)
-console.log(`adminContractABIBlobName: ${adminContractABIBlobName}`)
+console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
 console.log(`Started EtherAdmin website - Ver.${appjson.version}`);
 
+console.log('Start EtherAdmin Site');
+//setInterval(getNodesfromBlob, refreshInterval);
+getAbiData();
+readNetworkManagerContract();
+getNodesfromBlockchain();
+
+function readNetworkManagerContract() {
+  var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
+  networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
+}
 
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
-    try {
-      var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
-    } catch (err) {
-      console.log(err);
-    }
+    console.log(web3RPC);
     var latestBlockNumber;
     web3RPC.eth.getBlockNumber(function(err, latest) {
       latestBlockNumber = latest;
-      var recentBlockNumber = Math.max(latestBlockNumber - recentBlockDecrement, 1);
-      web3RPC.eth.getBlock(recentBlockNumber, function (error, result) {
+      web3RPC.eth.getBlock(latestBlockNumber, function (error, result) {
         if (!error) {
           resolve(result);
         } else {
@@ -118,177 +117,111 @@ function getRecentBlock() {
     })
   });
 }
-
 /* 
  * Given a node hostinfo object, collect node information (Consortium Id, PeerCount, Latest Block #) 
  */
-function getNodeInfo(hostinfo, ipAddress) {
+function getNodeInfo(indexNode) {
   return new Promise(function (resolve, reject) {
-    try {
-      var web3RPC = new Web3(new Web3.providers.HttpProvider('http://' + ipAddress + ':' + ethRpcPort));
-    } catch (err) {
-      console.log(err);
-    }
-    var web3PromiseArray = [];
-    web3PromiseArray.push(new Promise(function (resolve, reject) {
-      web3RPC.eth.net.getPeerCount(function (error, result) {
-        if (!error) {
-          resolve(result);
-        } else {
-          resolve('Not running');
-        }
-      })
-    }));
-    web3PromiseArray.push(new Promise(function (resolve, reject) {
-      web3RPC.eth.getBlockNumber(function (error, result) {
-        if (!error) {
-          resolve(result);
-        } else {
-          resolve('Not running');
-        }
-      })
-    }));
-    Promise.all(web3PromiseArray).then(function (values) {
-      var peerCount = values[0];
-      var blockNumber = values[1];
-      var nodeInfo = {
-        hostname: hostinfo.hostname,
-        peercount: peerCount,
-        blocknumber: blockNumber,
-        consortiumid: consortiumId,
-        enodeUrl: hostinfo.enodeUrl
-      }
-      resolve(nodeInfo);
-    });
-  });
-} 
-
-function getAddressListExists() {
-  return new Promise((resolve, reject) => {
-    blobService.doesBlobExist(containerName, validatorListBlobName, function (err, result) {
-      if (err) {
-        console.log(`Error trying to determine if ${validatorListBlobName} exists in ${containerName}`);
-        console.error(err);
-        reject(err);
-      } else {
-        resolve(result.exists);
-      }
-    })
-  })
+      readNodesFromNetworkManager(indexNode)
+      .then(function(nodeInfo){
+            resolve(nodeInfo);
+        });//end of then
+      });
+  // });
 }
 
-function getAddressListContents() {
-  return new Promise((resolve, reject) => {
-    getAddressListExists()
-      .then(function (exists) {
-        if (exists) {
-          console.log(`${validatorListBlobName} file exists.`);
-
-          var addressListPromise = new Promise((resolve, reject) => {
-            blobService.getBlobToText(
-              containerName,
-              validatorListBlobName,
-              function (err, blobText, blockBlob) {
-                if (err) {
-                  reject(err);
-                } else {
-                  console.log(`${validatorListBlobName} contents: ${blobText}`)
-                  var addressListObject = JSON.parse(blobText);
-                  resolve(addressListObject)
-                }
+function readNodesFromNetworkManager(nodeIndex) {
+  return new Promise(function (resolve, reject) {
+    if(networkmanagerContract == undefined)
+    reject('NetworkManagerContract not initialised!');
+    networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
+      if (!error) {
+        console.log(`No of nodes: ${noOfNodes}`)
+        if (nodeIndex < noOfNodes) {
+          networkmanagerContract.methods.getNodeDetails(nodeIndex).call(function (error, result) {
+            if (!error) {
+              console.log(`details of: ${nodeIndex}`)
+              console.log(`HostName : ${result.hostName} \nRole : ${result.role} \nIPAddress : ${result.ipAddress}  \nPort : ${result.port} \nPublic key : ${result.publicKey} \nEnode : ${result.enode}`);
+              var nodeInfo = {
+                hostname: result.hostName,
+                role: result.role,
+                ipaddress:result.ipAddress,
+                port:result.port,
+                publickey:result.publicKey,
+                enode: result.enode
               }
-            )
+              resolve(nodeInfo);
+            }
+            else {
+              console.log("NetworkManager.getNodeDetails failed!");
+              reject('NetworkManager.getNodeDetails failed!');
+            }
           });
-          addressListPromise.then((result) => {
-            resolve(result);
-          });
-        } else {
-          resolve(null);
+        }
+      } else {
+        console.log("web3.eth.getNodesCounter failed!");
+        reject('NetworkManager.getNodesCounter failed!');
+      }
+    });
+  });//end of promise 
+}
+
+function getNoOfNodes() {
+  var promise = new Promise((resolve, reject) => {
+    if(networkmanagerContract) {
+      networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
+        if(!error) {
+          resolve(noOfNodes);
+        }
+        else {
+          reject('networkmanagerContract.getNodesCounter failed')
         }
       });
-  });
-}
-
-function getBlobs(continuationToken = null) {
-  var promise = new Promise((resolve, reject) => {
-    resolve(["passphrase-0.json","passphrase-1.json", "passphrase-2.json", "passphrase-3.json"]);
+    }
   });
   return promise;
 }
 
-function getLeasedBlobList(listBlobs) {
-  var promise = new Promise((resolve, reject) => {
-    var x = 100;
-    resolve([
-      {
-        name: 'passphrase-0.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-1.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-2.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-3.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-4.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-5.json',
-        state: 'leased'
-      },
-      {
-        name: 'passphrase-6.json',
-        state: 'leased'
-      }
-    ]);
-  });
-  return promise;
+function getAbiData() {
+
+  adminContractABI = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
+  simpleContractABI = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
+  networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
+
+  var addresses = require("../keystore/contractsConfig.json");
+  adminValidatorSetAddress = addresses.adminValidatorSetAddress;
+  simpleValidatorSetAddress = addresses.simpleValidatorSetAddress;
+  networkManagerAddress = addresses.networkManagerAddress;
+
+  // var abiPromise = new Promise((resolve, reject) => {
+  //   var adminContractABI = require("../build/contracts/AdminValidatorSet.abi.json");
+  //   var simpleContractABI = require("../build/contracts/SimpleValidatorSet.abi.json");
+  //   var networkManagerContractABI = require("../build/contracts/NetworkManagerContract.abi.json");
+  //   var addresses = require("../keystore/contractsConfig.json");
+  //   resolve(JSON.stringify({ }));
+  // });
+  // abiPromise.then(function (contents) {
+  //   contents = JSON.parse(contents);
+  //   abiContent = contents.adminContractABI;
+  //   simpleContent = contents.simpleContractABI;
+  //   adminValidatorSetAddress = contents.adminValidatorSetAddress;
+  //   simpleValidatorSetAddress = contents.simpleValidatorSetAddress;
+  //   networkManagerAddress = contents.networkManagerAddress;
+  // });
 }
 
-function getAbiDatafromBlob() {
-  var abiPromise = new Promise((resolve, reject) => {
-    var contract = require("../build/contracts/AdminValidatorSet.abi.json");
-    var simpleContract = require("../build/contracts/SimpleValidatorSet.abi.json");
-    var addresses = require("../keystore/contractsConfig.json");
-    resolve(JSON.stringify({contract, simpleContract, 
-      adminValidatorSetAddress: addresses.adminValidatorSetAddress,
-      simpleValidatorSetAddress: addresses.simpleValidatorSetAddress }));
-  });
-  abiPromise.then(function (contents) {
-    contents = JSON.parse(contents);
-    abiContent = contents.contract;
-    simpleContent = contents.simpleContract;
-    adminValidatorSetAddress = contents.adminValidatorSetAddress;
-    simpleValidatorSetAddress = contents.simpleValidatorSetAddress;
-  });
-}
-
-function getActiveNodeDetails(leasedList) {
+function getActiveNodeDetails(noOfNodes) {
   var nodePromiseArray = [];
   var promise = new Promise((resolve, reject) => {
-    if (leasedList.length == 0) {
+    if (noOfNodes.length == 0) {
       resolve([]);
     }
-
-    leasedList.forEach((value) => {
-      var filecontent = require("./config/"+value.name);
-      var result = filecontent.enodeUrl.match(nodeRegexExp);
-
+    for(var index = 0; index < noOfNodes; index++) {
       var promise = new Promise(function (resolve, reject) {
-        //resolve(getNodeInfo(filecontent, result[1]));
-        resolve(getNodeInfo(filecontent, "localhost"));
+        resolve(getNodeInfo(index));
       });
-
       nodePromiseArray.push(promise);
-    });
+    }
 
     Promise.all(nodePromiseArray).then(function (values) {
       if (values.length == 0) {
@@ -299,14 +232,12 @@ function getActiveNodeDetails(leasedList) {
       resolve(resultSet);
     });
   });
-
   return promise;
-  }
+}
 
-function getNodesfromBlob() {
+function getNodesfromBlockchain() {
   // Get Node info
-  getBlobs()
-    .then(getLeasedBlobList)
+  getNoOfNodes()
     .then(getActiveNodeDetails).catch(function (error) {
       console.log(`Error occurs while getting node details : ${error}`);
     })
@@ -314,10 +245,6 @@ function getNodesfromBlob() {
       activeNodes = activeNodesList;
     });
 }
-
-console.log('Start EtherAdmin Site');
-setInterval(getNodesfromBlob, refreshInterval);
-getAbiDatafromBlob();
 
 app.get('/', function (req, res) {
   var hasNodeRows = activeNodes.length >= 0;
@@ -328,16 +255,16 @@ app.get('/', function (req, res) {
       nodeRows: activeNodes,
       timestamp: timeStamp,
       refreshinterval: (refreshInterval / 1000),
-      contractAbi: abiContent,
+      contractAbi: adminContractABI,
       nodes: {
-        adminContractAbi: JSON.stringify(abiContent),
+        adminContractAbi: adminContractABI,//JSON.stringify(abiContent),
         adminContractAddress: adminValidatorSetAddress,
-        simpleContractAbi: JSON.stringify(simpleContent),
+        simpleContractAbi: simpleContractABI,//JSON.stringify(simpleContent),
         simpleContractAddress: simpleValidatorSetAddress
       }
     };
     res.render('etheradmin', data);
-  } else {
+  } else {ssh
     res.render('etherstartup');
   }
 });
@@ -346,11 +273,10 @@ app.get('/', function (req, res) {
 app.get('/networkinfo', function (req, res) {
   var networkInfo = new NetworkInfo();
   networkInfo.adminContractABI = abiContent;
-  if (addressList)
-    networkInfo.addressList = addressList;
+  // if (addressList)
+  //   networkInfo.addressList = addressList;
   // Get Node info
-  getBlobs()
-    .then(getLeasedBlobList)
+  getNoOfNodes()
     .then(getActiveNodeDetails).catch(function (error) {
       console.log(`Error occurs while getting node details : ${error}`);
       networkInfo.errorMessage += error + "\n";
@@ -367,10 +293,8 @@ app.get('/networkinfo', function (req, res) {
     })
     .then(getRecentBlock)
     .then(function (recentBlock) {
-      // Get paritySpecBlobName
       networkInfo.recentBlock = recentBlock;
       networkInfo.paritySpec = '{ "params": {"networkID":"2018"} }';
-
       networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
       networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
       res.send(JSON.stringify(networkInfo));
@@ -456,3 +380,5 @@ app.post('/istanbul_propose', function(req, res) {
     }
   });
 });
+
+

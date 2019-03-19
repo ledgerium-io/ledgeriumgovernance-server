@@ -70,23 +70,28 @@
   <div id="nodeStatusContent" style="display: none">
     <br/>
     <br/>
-    <b>Consortium Member ID: {{this.consortiumid}}</b>
+    <b>Consortium: {{this.consortiumid}}</b>
       {{#if hasNodeRows}}
       <table class="u-full-width" id="nodesTable">
         <thead>
           <tr>
-            <th>Node Hostname</th>
-            <th>Peer Count</th>
-            <th>Latest Block Number</th>
-            <th>Remote Address</th>
+            <th>Host Name</th>
+            <th>Role</th>
+            <th>IP Address</th>
+            <th>Port</th>
+            <th>Public Key</th>
+            <th>Enode ID</th>
           </tr>
         </thead>
         <tbody>
           {{#each nodeRows}}
           <tr>
             <td>{{this.hostname}}</td>
-            <td>{{this.peercount}}</td>
-            <td>{{this.blocknumber}}</td>
+            <td>{{this.role}}</td>
+            <td>{{this.ipaddress}}</td>
+            <td>{{this.port}}</td>
+            <td>{{this.publickey}}</td>
+            <td>{{this.enode}}</td>
           </tr>
           {{/each}}
         </tbody>
@@ -110,7 +115,6 @@
     //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8546"));
     //var web3provider = new Web3.providers.HttpProvider("http://localhost:8546");
    
-
     var contractAbi = '{{{json this.contractAbi}}}';
     var nodeInfo = {{{json this.nodes}}};
     var adminAddress = {{{json this.nodes.adminContractAddress}}};
@@ -156,12 +160,12 @@
           var baseNetworkInfo = JSON.parse(networkInfoRequest.response);
           var paritySpec = JSON.parse(baseNetworkInfo.paritySpec);
 
-          localWeb3.eth.getAccounts((error, accounts) => {
+          {{!-- localWeb3.eth.getAccounts((error, accounts) => {
             console.log(accounts[0]);
             currentAccount = accounts[0];//.toLowerCase();
             // refresh the page in the case that web3 account changes
             var accountInterval = setInterval(async function () {
-              let f = helper.isActiveAdmin(currentAccount, currentAccount);
+              let f = await helper.isActiveAdmin(currentAccount, currentAccount);
               if(!f) {
                 location.reload();
               }    
@@ -175,7 +179,26 @@
             else {
               document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${accounts[0]}`;
             }
-          })
+          }) --}}
+
+          accounts = await localWeb3.eth.getAccounts();
+          currentAccount = accounts[0];//.toLowerCase();
+          let f = await helper.isActiveAdmin(currentAccount, currentAccount);
+          var accountInterval = setInterval(async function () {
+            let f = await helper.isActiveAdmin(currentAccount, currentAccount);
+            if(!f) {
+              location.reload();
+            }    
+            if (web3.eth.accounts[0] !== currentAccount) {
+              location.reload();
+            }
+          }, 60000);
+          if (`${accounts[0]}` == "undefined") {
+            showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a>");
+          }
+          else {
+            document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${accounts[0]}`;
+          }
 
           // Print the Metamask providers network Id
           localWeb3.eth.net.getId((error, networkId) => {
@@ -198,8 +221,9 @@
 
           //var validatorCapacityHtml = `Each administrator is allowed ${inWords(2)} nodes`;
           document.getElementById('validatorsHeader').innerHTML = "List of validators on network";
-
-          let result = await helper.getAllAdmins();
+          //currentAccount = "0xf232a4bf183cf17d09bea23e19ceff58ad9dbfed";
+          //console.log("currentAccount - ", currentAccount)
+          let result = await helper.getAllAdmins(currentAccount);
           {
             // Add rows to the adminTable
             var table = document.getElementById("adminTable");

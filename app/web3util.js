@@ -128,22 +128,17 @@ class Utils {
         return receipt;
     }
     
-    // readSolidityContractJSON (filename) {
-    //     var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
-    //     let abi = JSON.stringify(json.abi);
-    //     return [abi, json.bytecode];
-    // },
+    /** to read .abi and .bin file and return the values
+    */ 
+    readSolidityContractJSON (filename) {
+        var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
+        let abi = JSON.stringify(json.abi);
+        return abi;
+    }
 
     getABIBytecodeAdmin(filename,contractName) {
-        // let source = fs.readFileSync(filename, 'utf8');
-        // let compiledContract = solc.compile(source, 1);
-        // let abi = compiledContract.contracts[":"+contractName].interface;
-        // let bytecode = compiledContract.contracts[":"+contractName].bytecode;
-
         let abi = [{"inputs":[{"name":"owner1","type":"address"},{"name":"owner2","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"by","type":"address"},{"indexed":false,"name":"vfor","type":"address"}],"name":"votedfor","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"by","type":"address"},{"indexed":false,"name":"vfor","type":"address"}],"name":"votedagainst","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_address","type":"address"}],"name":"ownerAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_address","type":"address"}],"name":"ownerRemoved","type":"event"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"proposalToRemoveAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"proposalToAddAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"voteForAddingAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"voteForRemovingAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"voteAgainstAddingAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"voteAgainstRemovingAdmin","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_address","type":"address"}],"name":"changeVote","outputs":[{"name":"res","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"checkAdmin","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getAllAdmins","outputs":[{"name":"res","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"checkVotes","outputs":[{"name":"res","type":"uint32[2]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"checkProposal","outputs":[{"name":"res","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"getVoted","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getTotalCount","outputs":[{"name":"","type":"uint32"}],"payable":false,"stateMutability":"view","type":"function"}];
         let bytecode = "0x60806029";
-        
-
         return [abi, bytecode];
     }
 

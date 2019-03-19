@@ -27,7 +27,7 @@ var adminValidator,simpleValidator;
 
 var privateKey = {};
 var accountAddressList = [];
-var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
+var adminValidatorSetAddress = "", simpleValidatorSetAddress = "", networkManagerAddress = "";
 
 var main = async function () {
     const args = process.argv.slice(2);
@@ -83,23 +83,15 @@ var main = async function () {
             //     break;
             case "readkeyconfig":
                 readAccountsAndKeys();
-                await initiateApp();
-                // readkeyconfig = temp[1];
-                // switch(readkeyconfig){
-                //     case "true":
-                //     default: 
-                //         readAccountsAndKeys();
-                //         break;
-                //     case "false":
-                //         console.log("Given readkeyconfig option not supported! Provide correct details");
-                //         break;     
-                // }
+                //await initiateApp();
                 break;
             case "privateKeys":
                 let prvKeys = temp[1].split(",");
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
-                //writeAccountsAndKeys();
-                await initiateApp();
+                break;
+            case "initiateApp":
+                let peerNodesFileName = temp[1];
+                await initiateApp(peerNodesFileName);
                 break;
             case "runadminvalidator":{
                 //Initiate App before any function gets executed
@@ -208,11 +200,11 @@ var main = async function () {
 
 main();
 
-async function initiateApp() {
+async function initiateApp(peerNodesFileName) {
 
     readContractsFromConfig();
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == ""){
-        if(accountAddressList.length < 3){
+    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "" || networkManagerAddress == "") {
+        if(accountAddressList.length < 3) {
             console.log("Ethereum accounts are not available! Can not proceed further!!");
             return;
         }    
@@ -220,18 +212,69 @@ async function initiateApp() {
         simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
         writeContractsINConfig();
     }
-    console.log("adminValidatorSetAddress",adminValidatorSetAddress);
-    console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
+    console.log("adminValidatorSetAddress", adminValidatorSetAddress);
+    console.log("simpleValidatorSetAddress", simpleValidatorSetAddress);
+    console.log("networkManagerAddress", networkManagerAddress);
+
     global.adminValidatorSetAddress = adminValidatorSetAddress;
     global.simpleValidatorSetAddress = simpleValidatorSetAddress;
+    global.networkManagerAddress = networkManagerAddress;
 
     let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
+
+    setupNetworkManagerContract(peerNodesFileName);
 }
 
-async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys){
+async function setupNetworkManagerContract(peerNodesfileName) {
+
+    var ethAccountToUse = global.accountAddressList[0];
+
+    // Todo: Read ABI from dynamic source.
+    var abiFilename = __dirname + "/build/contracts/NetworkManagerContract.abi";
+    var json = JSON.parse(fs.readFileSync(abiFilename, 'utf8'));
+    if(json == "") {    
+        return;
+    }
+
+    var networkManagerAddress = "0x0000000000000000000000000000000000002023";
+    var nmContract = new web3.eth.Contract(json,networkManagerAddress);
+    var encodedABI = nmContract.methods.init().encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+    console.log("TransactionLog for Network Manager init() method -", transactionObject.transactionHash);
+  
+    var peerNodejson = JSON.parse(fs.readFileSync(peerNodesfileName, 'utf8'));
+    if(peerNodejson == "") {    
+        return;
+    }
+
+    var peerNodes = peerNodejson["nodes"];
+    for(var index = 0; index < peerNodes.length; index++){
+        encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
+                                                    peerNodes[index].hostname,
+                                                    peerNodes[index].role,
+                                                    peerNodes[index].ipaddress,
+                                                    peerNodes[index].port.toString(),
+                                                    peerNodes[index].publickey,
+                                                    peerNodes[index].enodeUrl
+        ).encodeABI();
+        transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+        console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+    }
+
+    var noOfNodes = await nmContract.methods.getNodesCounter().call();
+    for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+        console.log("****** Details of peer index -", nodeIndex, "**********");
+        console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
+    }
+    return;
+  }
+
+
+async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys) {
     accountAddressList.length = 0;
     let pubkey;
     for(var index = 0; index < inputPrivateKeys.length; index++){
@@ -293,6 +336,8 @@ async function readContractsFromConfig(){
                 adminValidatorSetAddress = contractsList["adminValidatorSetAddress"];
             if(contractsList["simpleValidatorSetAddress"] != undefined)    
                 simpleValidatorSetAddress= contractsList["simpleValidatorSetAddress"];
+            if(contractsList["networkManagerAddress"] != undefined)    
+                networkManagerAddress= contractsList["networkManagerAddress"];    
         }
     }
     catch (error) {
@@ -305,6 +350,7 @@ async function writeContractsINConfig(){
         var contractFileName = __dirname + "/keystore/" + "contractsConfig.json";
         contractsList["adminValidatorSetAddress"] = adminValidatorSetAddress;
         contractsList["simpleValidatorSetAddress"] = simpleValidatorSetAddress;
+        contractsList["networkManagerAddress"] = networkManagerAddress;
     
         var data = JSON.stringify(contractsList,null, 2);
         fs.writeFileSync(contractFileName,data);
@@ -313,6 +359,5 @@ async function writeContractsINConfig(){
         console.log("Error in writeContractsINConfig: " + error);
     }
 }
-
 
 

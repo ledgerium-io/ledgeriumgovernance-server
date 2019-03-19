@@ -30,9 +30,11 @@
             "program": "${workspaceFolder}/index.js",
             //"args":["protocol=http", "hostname=localhost", "port=9000", "privateKeys=897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb,567521641fd972a53a9d5ac80c442f5ffc867a5242f660a6e4dfdcda33465fef,12d2bc8fc2419e9086cd38285a6a5e9c029fd5cd0a0b0c49e44d284f94ee84ae,7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3"]
             //"args":["protocol=ws", "hostname=localhost", "port=9000", "privateKeys=897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb,567521641fd972a53a9d5ac80c442f5ffc867a5242f660a6e4dfdcda33465fef,12d2bc8fc2419e9086cd38285a6a5e9c029fd5cd0a0b0c49e44d284f94ee84ae,7e0d243242af3a907f7b0675925bf1694d1e586265b4fc9dc4f20e2a1157f4e3,f3b734412dd78acb34a4304c6f2a1df7bf48c42f819a86ef3306409c2c51129e,41d74f2f60da7c09beabd9e11ed6df79339a1586130d0e4275eb2c77e5450146,790afdeb16ae5c22453f8eeee25038c314f09d64fc51b8e21a5a82225e54fde6", "usecontractconfig=true", "runadminvalidator=runAdminTestCases,runRemoveAdminTestCases,getAllAdmins", "runsimplevalidator=validatorSetup,runValidatorTestCases,runRemoveValidatorTestCases,getListOfActiveValidators"]
-            //"args":["protocol=http", "hostname=testnet.ledgerium.net", "port=8545", "readkeyconfig=true", "usecontractconfig=true", "runadminvalidator=getAllActiveAdmins"]
-            "args":["protocol=http", "hostname=localhost", "port=8545", "readkeyconfig=true", "runadminvalidator=getAllActiveAdmins,runAdminTestCases,getAllActiveAdmins"]
-            //"args":["protocol=ws", "hostname=localhost", "port=9000", "privateKeys=897c0cee04cadac8df147671bc0868c208c95c750d46be09f2d7b18b4efabdbb", "runsimplevalidator=getListOfActiveValidators"]
+            //"args":["protocol=http", "hostname=localhost", "port=8545", "readkeyconfig=true", "runadminvalidator=getAllActiveAdmins,runAdminTestCases,getAllActiveAdmins"]
+            //"args":["protocol=http", "hostname=localhost", "port=8545", "privateKeys=83a5803e698a3642d5309f119643f6a729c7c51fac00fdffac31983cb5275bb5,9d698949e6ddb9086c34409b16f81c854ef2d7f73e020db7f896ed615efa25b1,02a121dc9a44f48c3630210f6643eeb148f6c418908788457f6b72892f9f3516"]
+            //"args":["protocol=http", "hostname=testnet.ledgerium.net", "port=8545", "readkeyconfig=true", , "initiateApp=../ledgeriumtools/output/tmp/nodesdetails.json", "runadminvalidator=getAllActiveAdmins"]
+            "args":["protocol=http", "hostname=localhost", "port=8545", "privateKeys=83a5803e698a3642d5309f119643f6a729c7c51fac00fdffac31983cb5275bb5,9d698949e6ddb9086c34409b16f81c854ef2d7f73e020db7f896ed615efa25b1,02a121dc9a44f48c3630210f6643eeb148f6c418908788457f6b72892f9f3516,bf96d1aabb87c249ef8c85f98476b11e114e0bc6e62a11582d376ece941ecf09", "initiateApp=../ledgeriumtools/output/tmp/nodesdetails.json"]
+            //"args":["protocol=http", "hostname=localhost", "port=8545", "initiateApp=nodesdetails.json"]
             //"args":["protocol=ws", "hostname=localhost", "port=9000", "readkeyconfig=true", "runadminvalidator=runClearProposalsAdminTestCases,0x3a91fd8517b58470c85fd570913b358c4db916bc,getAllActiveAdmins"]
         },
         {
@@ -41,6 +43,9 @@
             "name": "Launch governanceUI",
             "program": "${workspaceFolder}/app/governanceUI.js",
             "cwd": "${workspaceFolder}/app",
+            "serverReadyAction": {
+                "action": "openExternally"
+            },
             "args": [
                 "127.0.0.1",
                 "8545"
