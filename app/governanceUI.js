@@ -83,12 +83,12 @@ process.on('unhandledRejection', err => {
 /*
  * Output Parameters to log file
  */
-console.log("etheradmin.js starting parameters")
-console.log(`listenPort: ${listenPort}`)
+console.log("governanceapp starting parameters")
 console.log(`consortiumId: ${consortiumId}`)
+console.log(`listenPort: ${listenPort}`)
 console.log(`ethRpcPort: ${ethRpcPort}`)
 console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
-console.log(`Started EtherAdmin website - Ver.${appjson.version}`);
+console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 console.log('Start EtherAdmin Site');
 //setInterval(getNodesfromBlob, refreshInterval);
@@ -247,26 +247,28 @@ function getNodesfromBlockchain() {
 }
 
 app.get('/', function (req, res) {
-  var hasNodeRows = activeNodes.length >= 0;
-  if (hasNodeRows) {
-    var data = {
-      hasNodeRows: hasNodeRows,
-      consortiumid: consortiumId,
-      nodeRows: activeNodes,
-      timestamp: timeStamp,
-      refreshinterval: (refreshInterval / 1000),
-      contractAbi: adminContractABI,
-      nodes: {
-        adminContractAbi: adminContractABI,//JSON.stringify(abiContent),
-        adminContractAddress: adminValidatorSetAddress,
-        simpleContractAbi: simpleContractABI,//JSON.stringify(simpleContent),
-        simpleContractAddress: simpleValidatorSetAddress
-      }
-    };
-    res.render('etheradmin', data);
-  } else {ssh
-    res.render('etherstartup');
+  var data = {
+    consortiumid: consortiumId,
+    refreshinterval: (refreshInterval / 1000),
+    contractAbi: adminContractABI,
+    nodes: {
+      adminContractAbi: adminContractABI,
+      adminContractAddress: adminValidatorSetAddress,
+      simpleContractAbi: simpleContractABI,
+      simpleContractAddress: simpleValidatorSetAddress
+    }
   }
+  if(!activeNodes || activeNodes.length <= 0) {
+    data.hasNodeRows = activeNodes.length;
+    data.timestamp = "timeStamp";
+    data.nodeRows = []; 
+  }
+  else {
+    data.hasNodeRows = activeNodes.length;
+    data.timestamp = timeStamp;
+    data.nodeRows = activeNodes; 
+  }
+  res.render('etheradmin', data);
 });
 
 // Get:networkinfo
