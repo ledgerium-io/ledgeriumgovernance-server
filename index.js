@@ -32,6 +32,7 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "", networkManage
 var main = async function () {
     const args = process.argv.slice(2);
     for (let i=0; i<args.length ; i++) {
+        console.log("args-",args);
         let temp = args[i].split("=");
         switch (temp[0]) {
             case "protocol":

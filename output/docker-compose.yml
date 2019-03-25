@@ -449,14 +449,14 @@ services:
 
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
 
-        cd /ledgerium/governanceapp/governanceApp
+        cd /ledgerium/governanceapp/governanceapp
 
         node index.js protocol=http hostname=172.19.240.10 port=8545
         initialiseApp=${PRIVATEKEY0},${PRIVATEKEY1},${PRIVATEKEY2},${PRIVATEKEY3},${PRIVATEKEY4},${PRIVATEKEY5},${PRIVATEKEY6},/eth/nodedetails.json
         runadminvalidator=addOneAdmin,cd ,0xa1895fb3461b115872c46d7298b84f15c43d4db1,0xb2b0e3404e3be494d68ecc6312866cc256890542,0x5656605a47f3e451b507af519312709a70628167
         runsimplevalidator=addSimpleSetContractValidatorForAdmin,0x2296365c074db8bece7d8443d1ece22384ae1ee7,0xa1895fb3461b115872c46d7298b84f15c43d4db1,0xb2b0e3404e3be494d68ecc6312866cc256890542,0x5656605a47f3e451b507af519312709a70628167
 
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
 
         node governanceUI.js 172.19.240.10 8545
          2>/logs/governanceappLogs/$${DATE}_validator-0_Log.txt
@@ -597,7 +597,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.11 8546
          2>/logs/governanceappLogs/$${DATE}_validator-1_Log.txt
     networks:
@@ -737,7 +737,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.12 8547
          2>/logs/governanceappLogs/$${DATE}_validator-2_Log.txt
     networks:
@@ -877,7 +877,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.13 8548
          2>/logs/governanceappLogs/$${DATE}_validator-3_Log.txt
     networks:
@@ -1017,7 +1017,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.14 8549
          2>/logs/governanceappLogs/$${DATE}_validator-4_Log.txt
     networks:
@@ -1157,7 +1157,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.15 8550
          2>/logs/governanceappLogs/$${DATE}_validator-5_Log.txt
     networks:
@@ -1297,7 +1297,7 @@ services:
         mkdir -p /logs/governanceappLogs
         DATE=`date '+%Y-%m-%d_%H-%M-%S'`
         cp /tmp/nodesdetails.json /eth/nodesdetails.json
-        cd /ledgerium/governanceapp/governanceApp/app
+        cd /ledgerium/governanceapp/governanceapp/app
         node governanceUI.js 172.19.240.16 8551
          2>/logs/governanceappLogs/$${DATE}_validator-6_Log.txt
     networks:
