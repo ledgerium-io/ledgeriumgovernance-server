@@ -3,6 +3,7 @@ FROM mhart/alpine-node:8
 RUN apk add --no-cache --virtual .build-deps \
         git \
         bash \
+        curl \
         python \
         make \
         g++

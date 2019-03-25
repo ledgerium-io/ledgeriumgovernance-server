@@ -1,7 +1,6 @@
 async function onload() {
     var isLoaded = false;
     var localWeb3 = new Web3(web3.currentProvider);
-    //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     var contractAbi = '{{{json this.contractAbi}}}';
     var nodeInfo = {{{json this.nodes}}};
     var adminAddress = {{{json this.nodes.adminContractAddress}}};
@@ -25,7 +24,7 @@ async function onload() {
         networkInfoRequest.onload = function () {
           console.log(`NetworkInfo returned: ${networkInfoRequest.response}`);
           var baseNetworkInfo = JSON.parse(networkInfoRequest.response);
-          var paritySpec = JSON.parse(baseNetworkInfo.paritySpec);
+          var networkID = JSON.parse(baseNetworkInfo.networkID);
 
           localWeb3.eth.getAccounts((error, accounts) => {
             console.log(accounts[0]);
@@ -50,12 +49,12 @@ async function onload() {
           })
 
           // Print the Metamask providers network Id
-          localWeb3.eth.net.getId((error, networkId) => {
-            var webServerNetworkId = parseInt(paritySpec.params.networkID);
+          localWeb3.eth.net.getId((error, _networkID) => {
+            var webServerNetworkId = parseInt(networkID);
             console.log(`Web server ethererum networkId: ${webServerNetworkId}`);
             console.log(`Local Web3 NetworkId: ${networkId}`);
-            if (webServerNetworkId != networkId) {              
-              errorMessage(`The web server is connected to a network with an ID of: ${webServerNetworkId}, and Metamask is connected to a network with an ID of: ${networkId}`);
+            if (webServerNetworkId != _networkID) {              
+              errorMessage(`The web server is connected to a network with an ID of: ${webServerNetworkId}, and Metamask is connected to a network with an ID of: ${_networkID}`);
             }            
           })
 

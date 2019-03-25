@@ -116,6 +116,7 @@ function getRecentBlock() {
     })
   });
 }
+
 /* 
  * Given a node hostinfo object, collect node information (Consortium Id, PeerCount, Latest Block #) 
  */
@@ -192,22 +193,6 @@ function getAbiData() {
   adminValidatorSetAddress = addresses.adminValidatorSetAddress;
   simpleValidatorSetAddress = addresses.simpleValidatorSetAddress;
   networkManagerAddress = addresses.networkManagerAddress;
-
-  // var abiPromise = new Promise((resolve, reject) => {
-  //   var adminContractABI = require("../build/contracts/AdminValidatorSet.abi.json");
-  //   var simpleContractABI = require("../build/contracts/SimpleValidatorSet.abi.json");
-  //   var networkManagerContractABI = require("../build/contracts/NetworkManagerContract.abi.json");
-  //   var addresses = require("../keystore/contractsConfig.json");
-  //   resolve(JSON.stringify({ }));
-  // });
-  // abiPromise.then(function (contents) {
-  //   contents = JSON.parse(contents);
-  //   abiContent = contents.adminContractABI;
-  //   simpleContent = contents.simpleContractABI;
-  //   adminValidatorSetAddress = contents.adminValidatorSetAddress;
-  //   simpleValidatorSetAddress = contents.simpleValidatorSetAddress;
-  //   networkManagerAddress = contents.networkManagerAddress;
-  // });
 }
 
 function getActiveNodeDetails(noOfNodes) {
@@ -276,9 +261,16 @@ app.get('/', function (req, res) {
 app.get('/networkinfo', function (req, res) {
   var networkInfo = new NetworkInfo();
   networkInfo.adminContractABI = abiContent;
-  // if (addressList)
-  //   networkInfo.addressList = addressList;
-  // Get Node info
+
+  getRecentBlock()
+  .then(function (recentBlock) {
+    networkInfo.recentBlock = recentBlock;
+    networkInfo.networkID = "2018";
+    //networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
+    //networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
+    res.send(JSON.stringify(networkInfo));
+  });
+  
   getNoOfNodes()
     .then(getActiveNodeDetails).catch(function (error) {
       console.log(`Error occurs while getting node details : ${error}`);
@@ -286,35 +278,27 @@ app.get('/networkinfo', function (req, res) {
     })
     .then(function (activeNodesList) {
       if (activeNodesList.length > 0) {
-        activeNodesList.forEach((nodeInfo) => {
-          networkInfo.bootnodes.push(nodeInfo.enodeUrl);
-        });
-
+        activeNodes = activeNodesList;
+        for(var index = 0; index < activeNodesList.length; index++) {
+          var nodeInfo = activeNodesList[index];
+          networkInfo.addressList.push(nodeInfo.publickey);
+        }
       } else {
         networkInfo.errorMessage += "Couldn't find any active nodes\n";
       } 
-    })
-    .then(getRecentBlock)
-    .then(function (recentBlock) {
-      networkInfo.recentBlock = recentBlock;
-      networkInfo.paritySpec = '{ "params": {"networkID":"2018"} }';
-      networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
-      networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
-      res.send(JSON.stringify(networkInfo));
     })
 })
 
 // Used for sharing information about the network to joining members
 function NetworkInfo() {
   // Indicates break in compatibility
-  this.majorVersion = 0;
+  //this.majorVersion = 0;
   // Indicates backward compatible change
-  this.minorVersion = 0;
-  this.bootnodes = [];
-  this.valSetContract = "";
-  this.adminContract = "";
+  //this.minorVersion = 0;
+  //this.valSetContract = "";
+  //this.adminContract = "";
   this.adminContractABI = "";
-  this.paritySpec = "";
+  this.networkID = "";
   this.errorMessage = "";
   this.recentBlock = "";
 }

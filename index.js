@@ -245,7 +245,7 @@ async function initiateApp(peerNodesFileName) {
     }
 
     var peerNodes = peerNodejson["nodes"];
-    console.log("peerNodes ", peerNodes);
+    //console.log("peerNodes ", peerNodejson);
     global.peerNodes = peerNodes;
     await setupNetworkManagerContract();
 }
@@ -266,29 +266,45 @@ async function setupNetworkManagerContract() {
     var encodedABI = nmContract.methods.init().encodeABI();
     var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
     console.log("TransactionLog for Network Manager init() method -", transactionObject.transactionHash);
-  
-    for(var index = 0; index < peerNodes.length; index++){
-        encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
-                                                    peerNodes[index].hostname,
-                                                    peerNodes[index].role,
-                                                    peerNodes[index].ipaddress,
-                                                    peerNodes[index].port.toString(),
-                                                    peerNodes[index].publickey,
-                                                    peerNodes[index].enodeUrl
-        ).encodeABI();
-        transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-        console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+    
+    for(var index = 0; index < peerNodes.length; index++) {
+        var noOfNodes = await nmContract.methods.getNodesCounter().call();
+        let flag = false;
+        for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+            let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+            if(result.enode == peerNodes[index].enodeUrl) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+        {
+            encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
+                peerNodes[index].hostname,
+                peerNodes[index].role,
+                peerNodes[index].ipaddress,
+                peerNodes[index].port.toString(),
+                peerNodes[index].publickey,
+                peerNodes[index].enodeUrl
+            ).encodeABI();
+            transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+            console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+        }
     }
+    // var noOfNodes = await nmContract.methods.getNodesCounter().call();
+    // for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+    //     let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+    //     for(let peerIndex = 0; peerIndex < peerNodes.length; peerIndex++) {
+    //         if(result.enode == peerNodes[nodeIndex].enodeUrl)
+    //             continue;
+    //         else
 
-    var noOfNodes = await nmContract.methods.getNodesCounter().call();
-    for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
-        console.log("****** Details of peer index -", nodeIndex, "**********");
-        console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
-    }
+    //     }
+    //     //console.log("****** Details of peer index -", nodeIndex, "**********");
+    //     //console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
+    // }
     return;
 }
-
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys) {
     accountAddressList.length = 0;
