@@ -6,7 +6,7 @@ class SimpleValidatorSet {
         var value;
         if(!abi) {
             //Read ABI and Bytecode from dynamic source.
-            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet.abi");
+            var value = this.utils.readSolidityContractJSON("./build/contracts/SimpleValidatorSet",false);
         }else{
             value = [abi, ""];
         }
@@ -18,7 +18,7 @@ class SimpleValidatorSet {
         }
     }
     
-    async setOwnersParameters(ethAccountToUse,address1, address2,_privateKey,simpleValidatorSetAddress,adminValidatorSetAddress) {
+    async setOwnersParameters(ethAccountToUse,_privateKey, validtorsList, simpleValidatorSetAddress,adminValidatorSetAddress) {
         try{
             this.simpleValidatorSetAddress = simpleValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.simpleValidatorSetAbi),this.simpleValidatorSetAddress);
@@ -28,7 +28,7 @@ class SimpleValidatorSet {
                     this.listenContractPastEvents();
                 this.listenContractAllEvents(this.contract);  
             }
-            let transactionHash = await this.init(ethAccountToUse,address1, address2,_privateKey);
+            let transactionHash = await this.init(ethAccountToUse,_privateKey,validtorsList);
             return transactionHash;
         }
         catch (error) {
@@ -37,13 +37,10 @@ class SimpleValidatorSet {
         }  
     }
     
-    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,adminValidatorSetAddress,otherValidatorList) {
+    async deployNewSimpleSetValidatorContractWithPrivateKey(ethAccountToUse,privateKey,otherValidatorList) {
         try {
-            var constructorParameters = [];
-            //constructorParameters.push(adminValidatorAddress);
-            constructorParameters = constructorParameters.concat(otherValidatorList);
             var estimatedGas = 0;
-            var encodedABI = await this.utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,constructorParameters);
+            var encodedABI = await this.utils.getContractEncodeABI(this.simpleValidatorSetAbi, this.simpleValidatorSetByteCode,this.web3,otherValidatorList);
             var deployedAddress = await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,privateKey,this.web3,estimatedGas);
             return deployedAddress.contractAddress;
         } catch (error) {
@@ -52,17 +49,27 @@ class SimpleValidatorSet {
         }
     }
     
-    async init(ethAccountToUse,address1,address2,privateKey) {
+    async init(ethAccountToUse,_privateKey,validtorsList) {
         try{
-            var encodedABI = this.contract.methods.init(ethAccountToUse,address1,address2).encodeABI();
+            if (validtorsList.length < 3)
+                return "";
+            //Solidity does not take dynakic list of input parameters. So had give it seperate parameters. We have deided to give 4 validators as admin for Ledgerium Blockchain
+            var encodedABI = this.contract.methods.init(validtorsList[0],validtorsList[1],validtorsList[2]).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,_privateKey,this.web3,estimatedGas);
+            
+            var logs = await this.contract.getPastEvents('InitValidatorAdded',{fromBlock: 0, toBlock: 'latest'});
+            console.log('InitValidatorAdded event logs ' + JSON.stringify(logs));
+
+            logs = await this.contract.getPastEvents('TotalNoOfValidator',{fromBlock: 0, toBlock: 'latest'});
+            console.log('TotalNoOfValidator event logs ' + JSON.stringify(logs))
+            
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet:init(): " + error);
+            console.log("Error in SimpleValidatorSet:init(): " + error);
             return "";
         }
     }

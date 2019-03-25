@@ -17,7 +17,7 @@ class Utils  {
     async getContractEncodeABI(abi,bytecode,web3,arg) {
         try{
             let contract = new web3.eth.Contract(JSON.parse(abi));
-            return await contract.deploy({ data : bytecode, arguments : arg, privateFor: ["0x43a69edd54e07b95113fed92e8c9ba004500ce12"]}).encodeABI();
+            return await contract.deploy({ data : bytecode, arguments : arg}).encodeABI();
             //return await contract.deploy({ data : bytecode, arguments : arg, "privateFor" : privateFor }).encodeABI();
         } catch (error) {
             console.log("Exception in utils.getContractEncodeABI(): " + error);
@@ -110,10 +110,13 @@ class Utils  {
     
     /** to get receipt of the event raised from the blockchain
     */ 
-    readSolidityContractJSON (filename) {
-        var json = JSON.parse(fs.readFileSync(filename, 'utf8'));
-        let abi = JSON.stringify(json);
-        return [abi, ""];
+    readSolidityContractJSON (filename, binFlag) {
+        var jsonABi = JSON.parse(fs.readFileSync(filename+".abi", 'utf8'));
+        var jsonBytecode = "0x";
+        let abi = JSON.stringify(jsonABi);
+        if(binFlag)
+            jsonBytecode += fs.readFileSync(filename+".bin", 'utf8');
+        return [abi, jsonBytecode];
     }
 
     keccak (web3,text) {
@@ -184,6 +187,21 @@ class Utils  {
             return true;
         else (inputString == "0x0000000000000000000000000000000000000000000000000000000000000000")
             return false;
+    }
+
+    writeContractsINConfig(){
+        try{
+            var contractFileName = __dirname + "/keystore/" + "contractsConfig.json";
+            contractsList["adminValidatorSetAddress"] = adminValidatorSetAddress;
+            contractsList["simpleValidatorSetAddress"] = simpleValidatorSetAddress;
+            contractsList["networkManagerAddress"] = networkManagerAddress;
+        
+            var data = JSON.stringify(contractsList,null, 2);
+            fs.writeFileSync(contractFileName,data);
+        }
+        catch (error) {
+            console.log("Error in writeContractsINConfig: " + error);
+        }
     }
 }
 module.exports = Utils;

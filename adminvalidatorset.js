@@ -5,7 +5,7 @@ class AdminValidatorSet {
         this.utils = utils;
         if(!abi) {
             //Read ABI and Bytecode from dynamic source.
-            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet.abi");
+            value = this.utils.readSolidityContractJSON("./build/contracts/AdminValidatorSet",false);
         }else{
             value = [abi, ""];
         }
@@ -18,7 +18,19 @@ class AdminValidatorSet {
         }
     }
     
-    async setOwnersParameters(ethAccountToUse,address1, address2,_privateKey,adminValidatorSetAddress) {
+    async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,adminsList) {
+        try {
+            var estimatedGas = 0;
+            var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,adminsList);
+            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
+            return deployedAddress.contractAddress;
+        } catch (error) {
+            console.log("Error in AdminValidatorSet:deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
+            return "";
+        }
+    }
+    
+    async setOwnersParameters(ethAccountToUse,_privateKey,adminsList,adminValidatorSetAddress) {
         try{
             this.adminValidatorSetAddress = adminValidatorSetAddress;
             this.contract = new this.web3.eth.Contract(JSON.parse(this.adminValidatorSetAbi),this.adminValidatorSetAddress);
@@ -28,7 +40,7 @@ class AdminValidatorSet {
                     this.listenContractPastEvents();
                 this.listenContractAllEvents(this.contract);  
             }
-            let transactionHash = await this.init(ethAccountToUse,address1, address2,_privateKey);
+            let transactionHash = await this.init(ethAccountToUse,_privateKey,adminsList);
             return transactionHash;
         }
         catch (error) {
@@ -36,30 +48,28 @@ class AdminValidatorSet {
             return "";
         }    
     }
-    
-    async deployNewAdminSetValidatorContractWithPrivateKey(ethAccountToUse,_privateKey,otherAdminsList) {
-        try {
-            var estimatedGas = 0;
-            var encodedABI = await this.utils.getContractEncodeABI(this.adminValidatorSetAbi,this.adminValidatorSetByteCode,this.web3,otherAdminsList);
-            var deployedAddress =  await this.utils.sendMethodTransaction(ethAccountToUse,undefined,encodedABI,_privateKey,this.web3,estimatedGas);
-            return deployedAddress.contractAddress;
-        } catch (error) {
-            console.log("Error in AdminValidatorSet:deployNewAdminSetValidatorContractWithPrivateKey(): " + error);
-            return "";
-        }
-    }
 
-    async init(ethAccountToUse,address1,address2,privateKey) {
+    async init(ethAccountToUse,_privateKey,adminsList) {
         try{
-            var encodedABI = this.contract.methods.init(ethAccountToUse,address1,address2).encodeABI();
+            if (adminsList.length < 3)
+                return "";
+            //Solidity does not take dynakic list of input parameters. So had give it seperate parameters. We have deided to give 4 validators as admin for Ledgerium Blockchain
+            var encodedABI = this.contract.methods.init(adminsList[0],adminsList[1],adminsList[2]).encodeABI();
             // var estimatedGas = await this.utils.estimateGasTransaction(ethAccountToUse,this.contract._address, encodedABI,this.web3);
             // console.log("estimatedGas",estimatedGas);
             var estimatedGas = 0;
-            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,privateKey,this.web3,estimatedGas);
+            var transactionObject = await this.utils.sendMethodTransaction(ethAccountToUse,this.contract._address,encodedABI,_privateKey,this.web3,estimatedGas);
+
+            var logs = await this.contract.getPastEvents('InitAdminAdded',{fromBlock: 0, toBlock: 'latest'});
+            console.log('InitAdminAdded event logs ' + JSON.stringify(logs));
+
+            logs = await this.contract.getPastEvents('TotalNoOfAdmin',{fromBlock: 0, toBlock: 'latest'});
+            console.log('TotalNoOfAdmin event logs ' + JSON.stringify(logs))
+            
             return transactionObject.transactionHash;
         }
         catch (error) {
-            console.log("Error in AdminValidatorSet:proposalToAddAdmin(): " + error);
+            console.log("Error in AdminValidatorSet:init(): " + error);
             return false;
         }
     }
