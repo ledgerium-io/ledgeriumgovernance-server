@@ -9,14 +9,14 @@ RUN apk add --no-cache --virtual .build-deps \
 
 RUN mkdir -p /ledgerium/governanceapp \
     && cd /ledgerium/governanceapp \
-    && git clone -b feat/LB-101 https://github.com/ledgerium/governanceApp.git
+    && git clone -b feat/LB-101 https://github.com/ledgerium/governanceapp.git
 
 # to be removed in the future
-WORKDIR /ledgerium/governanceapp/governanceApp/
+WORKDIR /ledgerium/governanceapp/governanceapp/
 #RUN git checkout feat/LB-101
 RUN npm install
 
-WORKDIR /ledgerium/governanceapp/governanceApp/app
+WORKDIR /ledgerium/governanceapp/governanceapp/app
 
 RUN npm install
 RUN npm install web3@1.0.0-beta.36
