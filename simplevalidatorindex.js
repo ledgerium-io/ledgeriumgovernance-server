@@ -220,6 +220,7 @@ class SimpleValidator{
     async addSimpleSetContractValidatorForAdmin(newValidator){
         console.log("****************** Running addSimpleSetContractValidatorForAdmin ******************");
         try{
+            console.log("list of accounts ", accountAddressList);
             var from = accountAddressList[0];
             var ethAccountToPropose = accountAddressList[0];
 

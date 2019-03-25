@@ -32,7 +32,6 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "", networkManage
 var main = async function () {
     const args = process.argv.slice(2);
     for (let i=0; i<args.length ; i++) {
-        console.log("args-",args);
         let temp = args[i].split("=");
         switch (temp[0]) {
             case "protocol":
@@ -93,10 +92,8 @@ var main = async function () {
             case "initiateApp":
                 //readAccountsAndKeys();
                 let inputvals = temp[1].split(",");
-                //let privKeys = [inputvals[0],inputvals[1]]
                 let peerNodesFileName = inputvals.pop();
                 createAccountsAndManageKeysFromPrivateKeys(inputvals);
-                //let peerNodesFileName = temp[1];
                 await initiateApp(peerNodesFileName);
                 break;
             case "runadminvalidator":{
@@ -124,6 +121,7 @@ var main = async function () {
                             break;
                         case "addOneAdmin":
                             var adminList = list.slice(2,list.length);
+                            console.log("adminList ", adminList);
                             console.log("no of admin to add ", adminList.length);
                             for(var index = 0; index < adminList.length; index++) {
                                 var result = await adminValidator.addOneAdmin(adminList[index]);
@@ -179,16 +177,12 @@ var main = async function () {
                         case "addSimpleSetContractValidatorForAdmin":
                             var validatorList = list.slice(2,list.length);
                             console.log("no of validator to add ", validatorList.length);
+                            console.log("validatorList ", validatorList);
                             for(var index = 0; index < validatorList.length; index++) {
                                 var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validatorList[index]);
                                 result = await simpleValidator.getListOfActiveValidators();
                                 console.log("No of validators",result.length);
                             }  
-                            // var validator = list[++j];
-                            // console.log("validator ", validator);
-                            // var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validator);
-                            // result = await simpleValidator.getListOfActiveValidators();
-                            // console.log("No of validators",result.length);
                             break;
                         case "removeSimpleSetContractValidatorForAdmin":
                             var validator = list[++j];
@@ -251,6 +245,7 @@ async function initiateApp(peerNodesFileName) {
     }
 
     var peerNodes = peerNodejson["nodes"];
+    console.log("peerNodes ", peerNodes);
     global.peerNodes = peerNodes;
     await setupNetworkManagerContract();
 }

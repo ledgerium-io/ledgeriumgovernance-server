@@ -242,6 +242,7 @@ function getNodesfromBlockchain() {
       console.log(`Error occurs while getting node details : ${error}`);
     })
     .then(function (activeNodesList) {
+      console.log("getActiveNodeDetails output", activeNodesList);
       activeNodes = activeNodesList;
     });
 }
