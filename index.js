@@ -120,7 +120,8 @@ var main = async function () {
                             console.log("No of admins",result.length);
                             break;
                         case "addOneAdmin":
-                            var adminList = list.slice(2,list.length);
+                            console.log("addOneAdmin list ", list);
+                            var adminList = list.slice(1,list.length);
                             console.log("adminList ", adminList);
                             console.log("no of admin to add ", adminList.length);
                             for(var index = 0; index < adminList.length; index++) {
@@ -175,7 +176,8 @@ var main = async function () {
                             console.log("No of validators",result.length);
                             break;
                         case "addSimpleSetContractValidatorForAdmin":
-                            var validatorList = list.slice(2,list.length);
+                            console.log("addSimpleSetContractValidatorForAdmin list ", list);
+                            var validatorList = list.slice(1,list.length);
                             console.log("no of validator to add ", validatorList.length);
                             console.log("validatorList ", validatorList);
                             for(var index = 0; index < validatorList.length; index++) {
