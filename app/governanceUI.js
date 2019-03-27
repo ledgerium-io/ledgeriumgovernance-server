@@ -91,7 +91,9 @@ console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
 //console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 console.log('Start EtherAdmin Site');
-setInterval(getNodesfromBlockchain, 120000);
+//setInterval(getNodesfromBlockchain, 120000);
+
+getNodesfromBlockchain();
 
 function readNetworkManagerContract() {
   console.log("networkManagerAddress",networkManagerAddress);
