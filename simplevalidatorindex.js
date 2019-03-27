@@ -9,7 +9,7 @@ class SimpleValidator{
     }
 
     async setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress){
-        let tranHash = await this.simpleValidatorSet.setOwnersParameters(accountAddressList[0],accountAddressList[1],accountAddressList[2],privateKey[accountAddressList[0]],simpleValidatorSetAddress,adminValidatorSetAddress);
+        let tranHash = await this.simpleValidatorSet.setOwnersParameters(accountAddressList[0],privateKey[accountAddressList[0]],accountAddressList,simpleValidatorSetAddress,adminValidatorSetAddress);
         return tranHash;
     }
 
@@ -151,8 +151,8 @@ class SimpleValidator{
         }
     }
 
-    async addSimpleSetContractValidatorForAdmin(newValidator){
-        console.log("****************** Running addSimpleSetContractValidatorForAdmin ******************");
+    async addSimpleSetContractValidatorForAdminTestCase(newValidator){
+        console.log("****************** Running addSimpleSetContractValidatorForAdminTestCase ******************");
         try{
             var from = accountAddressList[0];
             var ethAccountToPropose = accountAddressList[0];
@@ -199,6 +199,73 @@ class SimpleValidator{
                 /* Lets see how voting looks at the moment! It should return 1,1*/
                 votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
                 console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+                
+                whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose, newValidator);
+                console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+                //Check if no of required votes (N/2+1) is already achieved, if so, the running proposal will be cleared off
+                //if so, dont need to run the loop and break it now, to run further voting!
+                if(whatProposal == "proposal not created")
+                    break; 
+            }
+            this.istanbulAddValidator(newValidator);
+            console.log("****************** Ending addSimpleSetContractValidatorForAdminTestCase ******************");
+            return true;
+        }
+        catch (error) {
+            console.log("Error in SimpleValidator:addSimpleSetContractValidatorForAdminTestCase(): " + error);
+            return false;
+        }
+    }
+
+    async addSimpleSetContractValidatorForAdmin(newValidator){
+        console.log("****************** Running addSimpleSetContractValidatorForAdmin ******************");
+        try{
+            console.log("list of accounts ", accountAddressList);
+            var from = accountAddressList[0];
+            var ethAccountToPropose = accountAddressList[0];
+
+            var whatProposal = await this.simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
+            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+            var votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+            var transactionhash = await this.simpleValidatorSet.proposalToAddValidator(from, privateKey[from], newValidator);
+            console.log("submitted transactionhash ",transactionhash, "for proposal to add ", newValidator, "by admin", from);
+
+            whatProposal = await this.simpleValidatorSet.checkProposal(accountAddressList[0],newValidator);
+            console.log(newValidator, "checked proposal for the validator ?", whatProposal);
+
+            votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+            /* Lets see who proposed this validator for add*/
+            var proposer = await this.simpleValidatorSet.getProposer(ethAccountToPropose, newValidator);
+            console.log(newValidator, "checked proposer for the validator ?", proposer);
+
+            var activeValidatorList = await this.getListOfActiveValidators();
+            for(var indexAV = 0; indexAV < activeValidatorList.length;indexAV++){
+                if(ethAccountToPropose == activeValidatorList[indexAV])
+                    continue;
+                let votingFor = activeValidatorList[indexAV];
+                transactionhash = await this.simpleValidatorSet.voteForAddingValidator(votingFor, privateKey[votingFor], newValidator);
+                console.log("submitted transactionhash ",transactionhash, "for voting to add ", newValidator, "by validator", votingFor);
+
+                /* Lets see how voting looks at the moment! It should return 1,1*/
+                let votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+                console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
+
+                // indexAV++;
+                // let votingAgainst = activeValidatorList[indexAV];
+                // if(votingAgainst == undefined)
+                //     break;
+                // /* Lets see how voting looks at the moment! It should return 1,1*/
+                // transactionhash = await this.simpleValidatorSet.voteAgainstAddingValidator(votingAgainst, privateKey[votingAgainst], newValidator);
+                // console.log("submitted transactionhash ",transactionhash, "against voting to add ", newValidator, "by validator", votingAgainst);
+                
+                // /* Lets see how voting looks at the moment! It should return 1,1*/
+                // votes = await this.simpleValidatorSet.checkVotes(ethAccountToPropose, newValidator);
+                // console.log(newValidator, "checked votes for adding as validator ?", votes[0], votes[1]);
                 
                 whatProposal = await this.simpleValidatorSet.checkProposal(ethAccountToPropose, newValidator);
                 console.log(newValidator, "checked proposal for the validator ?", whatProposal);
@@ -328,38 +395,46 @@ class SimpleValidator{
 
     async istanbulAddValidator(validatorAddress)
     {
-        //await this.listIstanbulValidator();
-        
-        await this.addIstanbulValidator(8545,validatorAddress);
-        await this.addIstanbulValidator(8546,validatorAddress);
-        await this.addIstanbulValidator(8547,validatorAddress);
-        await this.addIstanbulValidator(8548,validatorAddress);
-        await this.addIstanbulValidator(8549,validatorAddress);
-        await this.addIstanbulValidator(8550,validatorAddress);
+        await this.listIstanbulValidator();
+        for(var index = 0; index < peerNodes.length; index++){
+            var peerNode = peerNodes[index];
+            await this.addIstanbulValidator(peerNode,validatorAddress);
+        }
+        // await this.addIstanbulValidator(8545,validatorAddress);
+        // await this.addIstanbulValidator(8546,validatorAddress);
+        // await this.addIstanbulValidator(8547,validatorAddress);
+        // await this.addIstanbulValidator(8548,validatorAddress);
+        // await this.addIstanbulValidator(8549,validatorAddress);
+        // await this.addIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        //await this.listIstanbulValidator();
+        await this.listIstanbulValidator();
         return;
     }
 
     async istanbulRemoveValidator(validatorAddress){
-        //await this.listIstanbulValidator();
-
-        await this.removeIstanbulValidator(8545,validatorAddress);
-        await this.removeIstanbulValidator(8546,validatorAddress);
-        await this.removeIstanbulValidator(8547,validatorAddress);
-        await this.removeIstanbulValidator(8548,validatorAddress);
-        await this.removeIstanbulValidator(8549,validatorAddress);
-        await this.removeIstanbulValidator(8550,validatorAddress);
+        
+        await this.listIstanbulValidator();
+        for(var index = 0; index < peerNodes.length; index++){
+            var peerNode = peerNodes[index];
+            await this.removeIstanbulValidator(peerNode,validatorAddress);
+        }
+        // await this.removeIstanbulValidator(8545,validatorAddress);
+        // await this.removeIstanbulValidator(8546,validatorAddress);
+        // await this.removeIstanbulValidator(8547,validatorAddress);
+        // await this.removeIstanbulValidator(8548,validatorAddress);
+        // await this.removeIstanbulValidator(8549,validatorAddress);
+        // await this.removeIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        //await this.listIstanbulValidator();
+        await this.listIstanbulValidator();
         return;
     }
 
-    async addIstanbulValidator(_port,validator)
+    async addIstanbulValidator(peerNode,validator)
     {
-        let URL = "http://" + host + ":" + _port;
+        //let URL = "http://" + host + ":" + _port;
+        let URL = "http://" + peerNode.ipaddress + ":" + peerNode.port.toString();
         console.log("addIstanbulValidator pointing to", URL);
         var web3 = new Web3(new Web3.providers.HttpProvider(URL));
         var coinbase = await web3.eth.getCoinbase();
@@ -385,9 +460,10 @@ class SimpleValidator{
         return;
     }
 
-    async removeIstanbulValidator(_port,validator)
+    async removeIstanbulValidator(peerNode,validator)
     {
-        let URL = "http://" + host + ":" + _port;
+        //let URL = "http://" + host + ":" + _port;
+        let URL = "http://" + peerNode.ipaddress + ":" + peerNode.port.toString();
         console.log("removeIstanbulValidator pointing to", URL);
         var web3 = new Web3(new Web3.providers.HttpProvider(URL));
         var coinbase = await web3.eth.getCoinbase();
@@ -415,7 +491,7 @@ class SimpleValidator{
 
     async listIstanbulValidator()
     {
-        let URL = "http://" + host + ":" + port;
+        let URL = "http://" + peerNodes[0].ipaddress + ":" + peerNodes[0].port.toString();
         console.log("listIstanbulValidator pointing to", URL);
         var web3 = new Web3(new Web3.providers.HttpProvider(URL));
         var message = {

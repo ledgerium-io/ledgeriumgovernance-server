@@ -43,6 +43,8 @@ contract SimpleValidatorSet is Voteable {
 	event AlreadyInActiveValidator(address indexed _address);
 
 	event MinValidatorNeeded(uint8 minNoOfValidator);
+	event TotalNoOfValidator(uint32 noOfValidator);
+	event InitValidatorAdded(address adminAddress);
 
 	/**
     * @dev check whether msg.sender is one of the active admin
@@ -77,30 +79,24 @@ contract SimpleValidatorSet is Voteable {
     }
 
 	/**
-    * @dev Function to initiate contract with adding first 3 valid valdiators and the contract's owner. The pre-deployed contract will be the owner
+    * @dev Function to initiate contract with adding valdiators and the contract's owner. The pre-deployed contract will be the owner
     * @return A success flag
     */
 	function init(address address1, address address2, address address3) public ifNotInitalised {
 		address adminContractAddress = address(0x0000000000000000000000000000000000002018);
-		address msg_sender = address1;
-		address _validator1 = address2;
-		address _validator2 = address3;
+		address _validator1 = address1;
+		address _validator2 = address2;
+		address _validator3 = address3;
 		
 		adminSet = AdminValidatorSet(adminContractAddress);
 
-		//Adding msg.sender as first validator
-		exists[msg_sender] = true;
-		adminValidatorsMap[msg_sender].push(msg_sender);
-		activeValidators[msg_sender].isValidator = true;
-		activeValidators[msg_sender].status = Status.ACTIVE;
-		validators.push(msg_sender);
-
-		//To add _validator1 as validator
+		//Adding _validator1 as first validator
 		exists[_validator1] = true;
 		adminValidatorsMap[_validator1].push(_validator1);
 		activeValidators[_validator1].isValidator = true;
 		activeValidators[_validator1].status = Status.ACTIVE;
 		validators.push(_validator1);
+		emit InitValidatorAdded(_validator1);
 
 		//To add _validator2 as validator
 		exists[_validator2] = true;
@@ -108,9 +104,19 @@ contract SimpleValidatorSet is Voteable {
 		activeValidators[_validator2].isValidator = true;
 		activeValidators[_validator2].status = Status.ACTIVE;
 		validators.push(_validator2);
+		emit InitValidatorAdded(_validator2);
+
+		//To add _validator3 as validator
+		exists[_validator3] = true;
+		adminValidatorsMap[_validator3].push(_validator3);
+		activeValidators[_validator3].isValidator = true;
+		activeValidators[_validator3].status = Status.ACTIVE;
+		validators.push(_validator3);
+		emit InitValidatorAdded(_validator3);
 
 		totalCount = 3;
 		totalActiveCount = 3;
+		emit TotalNoOfValidator(totalCount);
 		isInit = true;	//Important flag!
 	}
 	

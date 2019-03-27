@@ -42,6 +42,8 @@ contract AdminValidatorSet is Voteable {
 	event AlreadyInActiveAdmin(address indexed _address);
 
 	event MinAdminNeeded(uint8 minNoOfAdmin);
+	event TotalNoOfAdmin(uint32 noOfAdmin);
+	event InitAdminAdded(address adminAddress);
 
 	/**
     * @dev check whether msg.sender is one of the active admin
@@ -69,35 +71,40 @@ contract AdminValidatorSet is Voteable {
     }
 
 	/**
-    * @dev Function to initiate contract with adding first 3 valid admins. The pre-deployed contract will be the owner
+    * @dev Function to initiate contract with adding first admins. The pre-deployed contract will be the owner
     * @return A success flag
     */
 	function init(address address1, address address2, address address3) public ifNotInitalised {
-		address msg_sender = address1;
-		address _owner1 = address2;
-		address _owner2 = address3;
+
+		address _owner1 = address1;
+		address _owner2 = address2;
+		address _owner3 = address3;
 		
 		// make sure that there are minimum of 3 admins to vote for/against
-		exists[msg_sender] = true;
-		activeAdmins[msg_sender].isActive = true;
-		activeAdmins[msg_sender].status = Status.ACTIVE;
-		admins.push(msg_sender);
-
 		exists[_owner1] = true;
 		activeAdmins[_owner1].isActive = true;
 		activeAdmins[_owner1].status = Status.ACTIVE;
 		admins.push(_owner1);
+		emit InitAdminAdded(_owner1);
 
 		exists[_owner2] = true;
 		activeAdmins[_owner2].isActive = true;
 		activeAdmins[_owner2].status = Status.ACTIVE;
 		admins.push(_owner2);
-		
+		emit InitAdminAdded(_owner2);
+
+		exists[_owner3] = true;
+		activeAdmins[_owner3].isActive = true;
+		activeAdmins[_owner3].status = Status.ACTIVE;
+		admins.push(_owner3);
+		emit InitAdminAdded(_owner3);
+
 		totalCount = 3;
 		totalActiveCount = 3;
+		emit TotalNoOfAdmin(totalCount);
 		isInit = true;  //Important flag!
 	}
-
+	
 	/**
     * @dev Function to propose adding new admin. It checks validity of msg.sender with isAdmin modifier
     * msg.sender address should be one of the active admin

@@ -99,7 +99,7 @@
       <hr />
       <i>As of {{this.timestamp}} (Refresh interval: ~{{this.refreshinterval}} seconds)</i>
       <hr /> {{else}}
-      <h4>Waiting on all Ledgerium nodes to boot up...</h4>
+      <h6>Waiting on all Ledgerium nodes to boot up...</h6>
       {{/if}}
   </div>
 
@@ -158,7 +158,7 @@
         networkInfoRequest.onload = async function () {
           console.log(`NetworkInfo returned: ${networkInfoRequest.response}`);
           var baseNetworkInfo = JSON.parse(networkInfoRequest.response);
-          var paritySpec = JSON.parse(baseNetworkInfo.paritySpec);
+          var networkID = JSON.parse(baseNetworkInfo.networkID);
 
           {{!-- localWeb3.eth.getAccounts((error, accounts) => {
             console.log(accounts[0]);
@@ -202,7 +202,7 @@
 
           // Print the Metamask providers network Id
           localWeb3.eth.net.getId((error, networkId) => {
-            var webServerNetworkId = parseInt(paritySpec.params.networkID);
+            var webServerNetworkId = parseInt(networkID);
             console.log(`Web server ethererum networkId: ${webServerNetworkId}`);
             console.log(`Local Web3 NetworkId: ${networkId}`);
             if (webServerNetworkId != networkId) {              

@@ -1,0 +1,67 @@
+{
+  "nodes": [
+    {
+      "nodename": "validator-0",
+      "hostname": "validator-0",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8545,
+      "publickey": "0xc7a89e9c2d5acd30cf78f8a9ef4777c10bb69a07",
+      "enodeUrl": "c06795a0a58c39d5af6938f8ae8aa964312d0eb291f4d4f9d9cc22fedaeedeb51d572472dfca9b9c1f7ab757cccd4648cd42254816445213d48e10cccb721190"
+    },
+    {
+      "nodename": "validator-1",
+      "hostname": "validator-1",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8546,
+      "publickey": "0xd25df157d2a64e5eba4bc1363f5a386ec36154f3",
+      "enodeUrl": "d997eb0179a4134b0212c966652c592ed9bc0edd5c9e49592f3ba3dc3aed474e8fa5966785e50dc15ab1a95a788e53b2ab1a76db0bc669daf1a86678e8da696f"
+    },
+    {
+      "nodename": "validator-2",
+      "hostname": "validator-2",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8547,
+      "publickey": "0xbefa0195759586a328502339f9420b8a6603bc82",
+      "enodeUrl": "de08f5c6a22b8596668fa8e6092fc62ac34e7a1f9fe7e9edf85e36fb59f0174fd8cdaacaad7e08ee08f6096af28e4cc320b3acf8ceefb5b26b7e17e0f229759f"
+    },
+    {
+      "nodename": "validator-3",
+      "hostname": "validator-3",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8548,
+      "publickey": "0x2296365c074db8bece7d8443d1ece22384ae1ee7",
+      "enodeUrl": "4704c3c4ae1030a8ad5292a56fa714c90e8218b9e05207431aa50ff9f6ccdfb1e1199e2712330298952b7039b398f1463eb21bf399faaebd2191f6a2e9ad0463"
+    },
+    {
+      "nodename": "validator-4",
+      "hostname": "validator-4",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8549,
+      "publickey": "0xa1895fb3461b115872c46d7298b84f15c43d4db1",
+      "enodeUrl": "0a72fae84a3c999abb0f1967a9d143e5395d58aefdff76f378ec87f9f6782e9f62190362be678510dc13cca1ee1daaeaf0f834f8e80a84c708908b8383dd6689"
+    },
+    {
+      "nodename": "validator-5",
+      "hostname": "validator-5",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8550,
+      "publickey": "0xb2b0e3404e3be494d68ecc6312866cc256890542",
+      "enodeUrl": "a0e2129a1c20e70978273e70f437caf28abe7c86747f523d3a477147c5e937f83816e616fb3ea35225cfc1dfdcb147a937669163f9399fcbccbf9396c1117b3e"
+    },
+    {
+      "nodename": "validator-6",
+      "hostname": "validator-6",
+      "role": "full node",
+      "ipaddress": "localhost",
+      "port": 8551,
+      "publickey": "0x5656605a47f3e451b507af519312709a70628167",
+      "enodeUrl": "34dcb2d8b7a0656c875b97bdc5e57d00dd90a7fa55b654034d10dd7f6bde66cf5dd760fee202ec0f715965e5310f0441c23e1bfa9cbb883ca5142cf633abc41d"
+    }
+  ]
+}

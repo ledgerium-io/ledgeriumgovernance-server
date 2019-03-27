@@ -90,13 +90,18 @@ var main = async function () {
                 createAccountsAndManageKeysFromPrivateKeys(prvKeys);
                 break;
             case "initiateApp":
-                let peerNodesFileName = temp[1];
+                //readAccountsAndKeys();
+                let inputvals = temp[1].split(",");
+                let peerNodesFileName = inputvals.pop();
+                createAccountsAndManageKeysFromPrivateKeys(inputvals);
                 await initiateApp(peerNodesFileName);
                 break;
             case "runadminvalidator":{
                 //Initiate App before any function gets executed
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
+                    if(list[j].indexOf("0x") > -1)
+                        continue;
                     switch (list[j]) {
                         case "runAdminTestCases":
                             var result = await adminValidator.runAdminTestCases();
@@ -115,11 +120,15 @@ var main = async function () {
                             console.log("No of admins",result.length);
                             break;
                         case "addOneAdmin":
-                            var adminToAdd = list[++j];
-                            console.log("adminToAdd ", adminToAdd);
-                            var result = await adminValidator.addOneAdmin(adminToAdd);
-                            result = await adminValidator.getAllActiveAdmins();
-                            console.log("No of admins",result.length);
+                            //console.log("%%%%%%%%%%%%%%%%%%%%%% addOneAdmin list %%%%%%%%%%%%%%%%%%%%%%", list);
+                            var adminList = list.slice(1,list.length);
+                            console.log("adminList ", adminList);
+                            console.log("no of admin to add ", adminList.length);
+                            for(var index = 0; index < adminList.length; index++) {
+                                var result = await adminValidator.addOneAdmin(adminList[index]);
+                                result = await adminValidator.getAllActiveAdmins();
+                                console.log("No of admins",result.length);
+                            }    
                             break;
                         case "removeOneAdmin":
                             var adminToRemove = list[++j];
@@ -147,6 +156,8 @@ var main = async function () {
                 //Initiate App before any function gets executed
                 let list = temp[1].split(",");
                 for (let j=0; j<list.length ; j++) {
+                    if(list[j].indexOf("0x") > -1)
+                        continue;
                     switch (list[j]) {
                         case "validatorSetup":
                             var result = await simpleValidator.validatorSetup();
@@ -165,11 +176,15 @@ var main = async function () {
                             console.log("No of validators",result.length);
                             break;
                         case "addSimpleSetContractValidatorForAdmin":
-                            var validator = list[++j];
-                            console.log("validator ", validator);
-                            var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validator);
-                            result = await simpleValidator.getListOfActiveValidators();
-                            console.log("No of validators",result.length);
+                            //console.log("%%%%%%%%%%%%%%%%%%%%%% addSimpleSetContractValidatorForAdmin list %%%%%%%%%%%%%%%%%%%%%%", list);
+                            var validatorList = list.slice(1,list.length);
+                            console.log("no of validator to add ", validatorList.length);
+                            console.log("validatorList ", validatorList);
+                            for(var index = 0; index < validatorList.length; index++) {
+                                var result = await simpleValidator.addSimpleSetContractValidatorForAdmin(validatorList[index]);
+                                result = await simpleValidator.getListOfActiveValidators();
+                                console.log("No of validators",result.length);
+                            }  
                             break;
                         case "removeSimpleSetContractValidatorForAdmin":
                             var validator = list[++j];
@@ -222,15 +237,24 @@ async function initiateApp(peerNodesFileName) {
 
     let tranHash = await adminValidator.setHelperParameters(adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
+
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
 
-    setupNetworkManagerContract(peerNodesFileName);
+    var peerNodejson = JSON.parse(fs.readFileSync(peerNodesFileName, 'utf8'));
+    if(peerNodejson == "") {    
+        return;
+    }
+
+    var peerNodes = peerNodejson["nodes"];
+    //console.log("peerNodes ", peerNodejson);
+    global.peerNodes = peerNodes;
+    await setupNetworkManagerContract();
 }
 
-async function setupNetworkManagerContract(peerNodesfileName) {
+async function setupNetworkManagerContract() {
 
-    var ethAccountToUse = global.accountAddressList[0];
+    var ethAccountToUse = accountAddressList[0];
 
     // Todo: Read ABI from dynamic source.
     var abiFilename = __dirname + "/build/contracts/NetworkManagerContract.abi";
@@ -244,35 +268,45 @@ async function setupNetworkManagerContract(peerNodesfileName) {
     var encodedABI = nmContract.methods.init().encodeABI();
     var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
     console.log("TransactionLog for Network Manager init() method -", transactionObject.transactionHash);
-  
-    var peerNodejson = JSON.parse(fs.readFileSync(peerNodesfileName, 'utf8'));
-    if(peerNodejson == "") {    
-        return;
+    
+    for(var index = 0; index < peerNodes.length; index++) {
+        var noOfNodes = await nmContract.methods.getNodesCounter().call();
+        let flag = false;
+        for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+            let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+            if(result.enode == peerNodes[index].enodeUrl) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+        {
+            encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
+                peerNodes[index].hostname,
+                peerNodes[index].role,
+                peerNodes[index].ipaddress,
+                peerNodes[index].port.toString(),
+                peerNodes[index].publickey,
+                peerNodes[index].enodeUrl
+            ).encodeABI();
+            transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+            console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+        }
     }
+    // var noOfNodes = await nmContract.methods.getNodesCounter().call();
+    // for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+    //     let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+    //     for(let peerIndex = 0; peerIndex < peerNodes.length; peerIndex++) {
+    //         if(result.enode == peerNodes[nodeIndex].enodeUrl)
+    //             continue;
+    //         else
 
-    var peerNodes = peerNodejson["nodes"];
-    for(var index = 0; index < peerNodes.length; index++){
-        encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
-                                                    peerNodes[index].hostname,
-                                                    peerNodes[index].role,
-                                                    peerNodes[index].ipaddress,
-                                                    peerNodes[index].port.toString(),
-                                                    peerNodes[index].publickey,
-                                                    peerNodes[index].enodeUrl
-        ).encodeABI();
-        transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
-        console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
-    }
-
-    var noOfNodes = await nmContract.methods.getNodesCounter().call();
-    for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
-        console.log("****** Details of peer index -", nodeIndex, "**********");
-        console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
-    }
+    //     }
+    //     //console.log("****** Details of peer index -", nodeIndex, "**********");
+    //     //console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
+    // }
     return;
-  }
-
+}
 
 async function createAccountsAndManageKeysFromPrivateKeys(inputPrivateKeys) {
     accountAddressList.length = 0;

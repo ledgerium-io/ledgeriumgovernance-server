@@ -28,14 +28,14 @@ var adminValidatorSetAddress = "", simpleValidatorSetAddress = "";
 async function initiateApp() {
 
     readContractsFromConfig();
-    if(simpleValidatorSetAddress == "" || adminValidatorSetAddress == "") {
+    if((!simpleValidatorSetAddress || (simpleValidatorSetAddress == "")) && (!adminValidatorSetAddress || adminValidatorSetAddress == "")) {
         if(accountAddressList.length < 3){
             console.log("Ethereum accounts are not available! Can not proceed further!!");
             return;
         }    
         adminValidatorSetAddress = await adminValidator.deployNewAdminSetValidatorContractWithPrivateKey();
         simpleValidatorSetAddress = await simpleValidator.deployNewSimpleSetValidatorContractWithPrivateKey(adminValidatorSetAddress);
-        writeContractsINConfig();
+        utils.writeContractsINConfig();
     }
     console.log("adminValidatorSetAddress",adminValidatorSetAddress);
     console.log("simpleValidatorSetAddress",simpleValidatorSetAddress);
@@ -46,6 +46,9 @@ async function initiateApp() {
     console.log("tranHash of initialisation", tranHash);
     tranHash = await simpleValidator.setHelperParameters(simpleValidatorSetAddress,adminValidatorSetAddress);
     console.log("tranHash of initialisation", tranHash);
+
+    var peerNodesFileName = "../ledgeriumtools/output/tmp/nodesdetails.json";
+    setupNetworkManagerContract(peerNodesFileName);
 }
 
 async function readAccountsAndKeys() {
@@ -81,7 +84,53 @@ async function readContractsFromConfig() {
     catch (error) {
         console.log("Error in readContractsFromConfig: " + error);
     }
-}    
+}
+
+async function setupNetworkManagerContract(peerNodesfileName) {
+
+    var ethAccountToUse = global.accountAddressList[0];
+
+    // Todo: Read ABI from dynamic source.
+    var abiFilename = __dirname + "/build/contracts/NetworkManagerContract.abi";
+    var json = JSON.parse(fs.readFileSync(abiFilename, 'utf8'));
+    if(json == "") {    
+        return;
+    }
+
+    var networkManagerAddress = "0x0000000000000000000000000000000000002023";
+    var nmContract = new web3.eth.Contract(json,networkManagerAddress);
+    var encodedABI = nmContract.methods.init().encodeABI();
+    var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+    console.log("TransactionLog for Network Manager init() method -", transactionObject.transactionHash);
+  
+    var peerNodejson = JSON.parse(fs.readFileSync(peerNodesfileName, 'utf8'));
+    if(peerNodejson == "") {    
+        return;
+    }
+
+    var peerNodes = peerNodejson["nodes"];
+    for(var index = 0; index < peerNodes.length; index++){
+        encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
+                                                    peerNodes[index].hostname,
+                                                    peerNodes[index].role,
+                                                    peerNodes[index].ipaddress,
+                                                    peerNodes[index].port.toString(),
+                                                    peerNodes[index].publickey,
+                                                    peerNodes[index].enodeUrl
+        ).encodeABI();
+        transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privateKey[ethAccountToUse],web3,0);
+        console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+    }
+
+    var noOfNodes = await nmContract.methods.getNodesCounter().call();
+    for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+        let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
+        console.log("****** Details of peer index -", nodeIndex, "**********");
+        console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
+    }
+    return;
+  }
+
 
 test();
 
