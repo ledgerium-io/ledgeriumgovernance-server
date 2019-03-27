@@ -395,39 +395,26 @@ class SimpleValidator{
 
     async istanbulAddValidator(validatorAddress)
     {
-        await this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         for(var index = 0; index < peerNodes.length; index++){
             var peerNode = peerNodes[index];
             await this.addIstanbulValidator(peerNode,validatorAddress);
         }
-        // await this.addIstanbulValidator(8545,validatorAddress);
-        // await this.addIstanbulValidator(8546,validatorAddress);
-        // await this.addIstanbulValidator(8547,validatorAddress);
-        // await this.addIstanbulValidator(8548,validatorAddress);
-        // await this.addIstanbulValidator(8549,validatorAddress);
-        // await this.addIstanbulValidator(8550,validatorAddress);
 
         await this.delay(10000); //wait for 10 seconds!
-        await this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
     }
 
     async istanbulRemoveValidator(validatorAddress){
         
-        await this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         for(var index = 0; index < peerNodes.length; index++){
             var peerNode = peerNodes[index];
             await this.removeIstanbulValidator(peerNode,validatorAddress);
         }
-        // await this.removeIstanbulValidator(8545,validatorAddress);
-        // await this.removeIstanbulValidator(8546,validatorAddress);
-        // await this.removeIstanbulValidator(8547,validatorAddress);
-        // await this.removeIstanbulValidator(8548,validatorAddress);
-        // await this.removeIstanbulValidator(8549,validatorAddress);
-        // await this.removeIstanbulValidator(8550,validatorAddress);
-
         await this.delay(10000); //wait for 10 seconds!
-        await this.listIstanbulValidator();
+        //await this.listIstanbulValidator();
         return;
     }
 

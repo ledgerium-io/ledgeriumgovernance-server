@@ -88,17 +88,16 @@ console.log(`consortiumId: ${consortiumId}`)
 console.log(`listenPort: ${listenPort}`)
 console.log(`ethRpcPort: ${ethRpcPort}`)
 console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
-console.log(`Started Governanceapp website - Ver.${appjson.version}`);
+//console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 console.log('Start EtherAdmin Site');
-//setInterval(getNodesfromBlob, refreshInterval);
-getAbiData();
-readNetworkManagerContract();
-getNodesfromBlockchain();
+setInterval(getNodesfromBlockchain, 120000);
 
 function readNetworkManagerContract() {
+  console.log("networkManagerAddress",networkManagerAddress);
   var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
   networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
+  console.log("networkmanagerContract ", networkmanagerContract);
 }
 
 function getRecentBlock() {
@@ -188,6 +187,7 @@ function getAbiData() {
   adminContractABI = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
   simpleContractABI = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
   networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
+  console.log("networkManagerContractABI",networkManagerContractABI);
 
   var addresses = require("../keystore/contractsConfig.json");
   adminValidatorSetAddress = addresses.adminValidatorSetAddress;
@@ -212,7 +212,7 @@ function getActiveNodeDetails(noOfNodes) {
       if (values.length == 0) {
         resolve("No Values");
       }
-      timeStamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY');
+      timeStamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
       var resultSet = values.sort();
       resolve(resultSet);
     });
@@ -221,6 +221,9 @@ function getActiveNodeDetails(noOfNodes) {
 }
 
 function getNodesfromBlockchain() {
+
+  getAbiData();
+  readNetworkManagerContract();
   // Get Node info
   getNoOfNodes()
     .then(getActiveNodeDetails).catch(function (error) {
@@ -228,6 +231,8 @@ function getNodesfromBlockchain() {
     })
     .then(function (activeNodesList) {
       console.log("getActiveNodeDetails output", activeNodesList);
+      if(activeNodesList == undefined)
+      activeNodes = [];
       activeNodes = activeNodesList;
     });
 }
@@ -245,6 +250,7 @@ app.get('/', function (req, res) {
     }
   }
   if(!activeNodes || activeNodes.length <= 0) {
+    console.log("activeNodes", activeNodes);
     data.hasNodeRows = activeNodes.length;
     data.timestamp = "timeStamp";
     data.nodeRows = []; 
