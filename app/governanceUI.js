@@ -238,11 +238,12 @@ function getNodesfromBlockchain() {
 }
 
 app.get('/', function (req, res) {
+  //var time = moment().format('h:mm:ss A UTC,  MMM Do YYYY');
   var data = {
     consortiumid: consortiumId,
     refreshinterval: (refreshInterval / 1000),
     contractAbi: adminContractABI,
-    data.timestamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
+    timestamp : moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
     nodes: {
       adminContractAbi: adminContractABI,
       adminContractAddress: adminValidatorSetAddress,
