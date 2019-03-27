@@ -19,7 +19,6 @@ var gethIpRpcPort = process.argv[3];
 var listenPort = "3003";
 var consortiumId = "2018";
 var ethRpcPort = gethIpRpcPort;
-var logFilePath = "log1.txt";
 
 /*
  * Constants
@@ -60,12 +59,12 @@ app.use(bodyParser.json());
 
 process.on('uncaughtException', err => {
   if (err.message.includes("ECONNRESET")) {
-    console.log(err);
+    //(err);
   } else throw err;
 });
 process.on('unhandledRejection', err => {
   if (err.message.includes("ECONNRESET")) {
-    console.log(err);
+    //(err);
   } else throw err;
 });
 
@@ -75,7 +74,7 @@ process.on('unhandledRejection', err => {
 // });
 // var log_stdout = process.stdout;
 
-// console.log = function (d) {
+// // = function (d) {
 //   log_file.write(util.format(d) + '\n');
 //   log_stdout.write(util.format(d) + '\n');
 // };
@@ -83,23 +82,23 @@ process.on('unhandledRejection', err => {
 /*
  * Output Parameters to log file
  */
-console.log("governanceapp starting parameters")
-console.log(`consortiumId: ${consortiumId}`)
-console.log(`listenPort: ${listenPort}`)
-console.log(`ethRpcPort: ${ethRpcPort}`)
-console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
-//console.log(`Started Governanceapp website - Ver.${appjson.version}`);
+//("governanceapp starting parameters")
+//(`consortiumId: ${consortiumId}`)
+//(`listenPort: ${listenPort}`)
+//(`ethRpcPort: ${ethRpcPort}`)
+//(`validator node: http://${gethIp}:${ethRpcPort}`)
+////(`Started Governanceapp website - Ver.${appjson.version}`);
 
-console.log('Start EtherAdmin Site');
+//('Start EtherAdmin Site');
 //setInterval(getNodesfromBlockchain, 120000);
 
 getNodesfromBlockchain();
 
 function readNetworkManagerContract() {
-  console.log("networkManagerAddress",networkManagerAddress);
+  //("networkManagerAddress",networkManagerAddress);
   var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
   networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
-  console.log("networkmanagerContract ", networkmanagerContract);
+  //("networkmanagerContract ", networkmanagerContract);
 }
 
 function getRecentBlock() {
@@ -137,7 +136,7 @@ function readNodesFromNetworkManager(nodeIndex) {
     reject('NetworkManagerContract not initialised!');
     networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
       if (!error) {
-        //console.log(`No of nodes: ${noOfNodes}`)
+        ////(`No of nodes: ${noOfNodes}`)
         if (nodeIndex < noOfNodes) {
           networkmanagerContract.methods.getNodeDetails(nodeIndex).call(function (error, result) {
             if (!error) {
@@ -223,20 +222,23 @@ function getActiveNodeDetails(noOfNodes) {
 }
 
 function getNodesfromBlockchain() {
-
-  getAbiData();
-  readNetworkManagerContract();
-  // Get Node info
-  getNoOfNodes()
-    .then(getActiveNodeDetails).catch(function (error) {
-      console.log(`Error occurs while getting node details : ${error}`);
-    })
-    .then(function (activeNodesList) {
-      console.log("getActiveNodeDetails output", activeNodesList);
-      if(activeNodesList == undefined)
-      activeNodes = [];
-      activeNodes = activeNodesList;
-    });
+  return new Promise(function (resolve, reject) {
+    getAbiData();
+    readNetworkManagerContract();
+    // Get Node info
+    getNoOfNodes()
+      .then(getActiveNodeDetails).catch(function (error) {
+        console.log(`Error occurs while getting node details : ${error}`);
+        reject('Unable to get active nodes');
+      })
+      .then(function (activeNodesList) {
+        console.log("getActiveNodeDetails output", activeNodesList);
+        if(activeNodesList == undefined)
+          activeNodes = [];
+        activeNodes = activeNodesList;
+        resolve(activeNodes);
+      });
+  });
 }
 
 app.get('/', function (req, res) {
@@ -251,18 +253,21 @@ app.get('/', function (req, res) {
       simpleContractAddress: simpleValidatorSetAddress
     }
   }
-  if(!activeNodes || activeNodes.length <= 0) {
-    console.log("activeNodes", activeNodes);
-    data.hasNodeRows = activeNodes.length;
-    data.timestamp = "timeStamp";
-    data.nodeRows = []; 
-  }
-  else {
-    data.hasNodeRows = activeNodes.length;
-    data.timestamp = timeStamp;
-    data.nodeRows = activeNodes; 
-  }
-  res.render('etheradmin', data);
+
+  getNodesfromBlockchain()
+  .then(function (activeNodes) {
+    if(activeNodes == undefined) {
+      data.hasNodeRows = 0;
+      data.timestamp = timeStamp;
+      data.nodeRows = [];
+    } else {
+      //console.log("activeNodes", activeNodes);
+      data.hasNodeRows = activeNodes.length;
+      data.timestamp = "timeStamp";
+      data.nodeRows = activeNodes; 
+    }
+    res.render('etheradmin', data);
+  });
 });
 
 // Get:networkinfo
@@ -276,25 +281,49 @@ app.get('/networkinfo', function (req, res) {
     networkInfo.networkID = "2018";
     //networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
     //networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
+
+  // getNodesfromBlockchain()
+  // .then(function (activeNodesList) {
+  //   if(activeNodesList == undefined) {
+  //     //(`Error occurs while getting node details`);
+  //     networkInfo.errorMessage += error + "\n";
+  //   } else {
+  //     //("activeNodes", activeNodesList);
+  //     if (activeNodesList.length > 0) {
+  //       activeNodes = activeNodesList;
+  //       for(var index = 0; index < activeNodesList.length; index++) {
+  //         var nodeInfo = activeNodesList[index];
+  //         networkInfo.addressList.push(nodeInfo.publickey);
+  //       }
+  //     }
+  //     else {
+  //       networkInfo.errorMessage += "Couldn't find any active nodes\n";
+  //     }  
+  //   }
+  //   res.send(JSON.stringify(networkInfo));
+  // });
+  //})
+    // getNoOfNodes()
+    // .then(getActiveNodeDetails).catch(function (error) {
+    //   //(`Error occurs while getting node details : ${error}`);
+    //   networkInfo.errorMessage += error + "\n";
+    // })
+    // .then(function (activeNodesList) {
+    //   //("getActiveNodeDetails output", activeNodesList);
+    //   if(activeNodesList == undefined)
+    //     activeNodes = [];
+    //   if (activeNodesList.length > 0) {
+    //     activeNodes = activeNodesList;
+    //     for(var index = 0; index < activeNodesList.length; index++) {
+    //       var nodeInfo = activeNodesList[index];
+    //       networkInfo.addressList.push(nodeInfo.publickey);
+    //     }
+    //   } else {
+    //     networkInfo.errorMessage += "Couldn't find any active nodes\n";
+    //   } 
+    // })
     res.send(JSON.stringify(networkInfo));
   });
-  
-  getNoOfNodes()
-    .then(getActiveNodeDetails).catch(function (error) {
-      console.log(`Error occurs while getting node details : ${error}`);
-      networkInfo.errorMessage += error + "\n";
-    })
-    .then(function (activeNodesList) {
-      if (activeNodesList.length > 0) {
-        activeNodes = activeNodesList;
-        for(var index = 0; index < activeNodesList.length; index++) {
-          var nodeInfo = activeNodesList[index];
-          networkInfo.addressList.push(nodeInfo.publickey);
-        }
-      } else {
-        networkInfo.errorMessage += "Couldn't find any active nodes\n";
-      } 
-    })
 })
 
 // Used for sharing information about the network to joining members
@@ -337,15 +366,15 @@ app.get('/web3.1-beta.js', function (req, res) {
 });
 
 app.listen(listenPort, function () {
-  console.log('Admin webserver listening on port ' + listenPort);
+  //('Admin webserver listening on port ' + listenPort);
 });
 
 app.post('/istanbul_propose', function(req, res) {
   var web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
 
-  console.log("Initiated a web3 ipc interface");
+  //("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
-    console.log(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
+    //(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
     if(coinbase && (coinbase.toLowerCase() === req.body.sender.toLowerCase())) {
       
       var message = {
@@ -355,16 +384,16 @@ app.post('/istanbul_propose', function(req, res) {
         id: new Date().getTime()
       };
 
-      console.log(JSON.stringify(message));
+      //(JSON.stringify(message));
 
       web3.currentProvider.sendAsync(message, (err,result)=>{
-          console.log("received results:removeIstanbulValidator");
+          //("received results:removeIstanbulValidator");
           if(result){
-              console.log("results", result.result);
+              //("results", result.result);
               res.status(200).send(result);
           }
           else if(err) {
-            console.log("print result", err);
+            //("print result", err);
             res.status(500).send(err);
           }
       });
