@@ -35,7 +35,6 @@ var networkManagerContractABI = '';
 var adminValidatorSetAddress, simpleValidatorSetAddress, networkManagerAddress;
 
 var timeStamp;
-//var addressList = undefined;
 var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
 var networkmanagerContract;
 
@@ -82,23 +81,23 @@ process.on('unhandledRejection', err => {
 /*
  * Output Parameters to log file
  */
-//("governanceapp starting parameters")
-//(`consortiumId: ${consortiumId}`)
-//(`listenPort: ${listenPort}`)
-//(`ethRpcPort: ${ethRpcPort}`)
-//(`validator node: http://${gethIp}:${ethRpcPort}`)
-////(`Started Governanceapp website - Ver.${appjson.version}`);
+console.log("governanceapp starting parameters")
+console.log(`consortiumId: ${consortiumId}`)
+console.log(`listenPort: ${listenPort}`)
+console.log(`ethRpcPort: ${ethRpcPort}`)
+console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
+console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 //('Start EtherAdmin Site');
 //setInterval(getNodesfromBlockchain, 120000);
 
+getAbiData();
+readNetworkManagerContract();
 getNodesfromBlockchain();
 
 function readNetworkManagerContract() {
-  //("networkManagerAddress",networkManagerAddress);
   var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
   networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
-  //("networkmanagerContract ", networkmanagerContract);
 }
 
 function getRecentBlock() {
@@ -208,12 +207,11 @@ function getActiveNodeDetails(noOfNodes) {
       });
       nodePromiseArray.push(promise);
     }
-
     Promise.all(nodePromiseArray).then(function (values) {
       if (values.length == 0) {
         resolve("No Values");
       }
-      timeStamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
+      //timeStamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
       var resultSet = values.sort();
       resolve(resultSet);
     });
@@ -223,8 +221,6 @@ function getActiveNodeDetails(noOfNodes) {
 
 function getNodesfromBlockchain() {
   return new Promise(function (resolve, reject) {
-    getAbiData();
-    readNetworkManagerContract();
     // Get Node info
     getNoOfNodes()
       .then(getActiveNodeDetails).catch(function (error) {
@@ -246,6 +242,7 @@ app.get('/', function (req, res) {
     consortiumid: consortiumId,
     refreshinterval: (refreshInterval / 1000),
     contractAbi: adminContractABI,
+    data.timestamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
     nodes: {
       adminContractAbi: adminContractABI,
       adminContractAddress: adminValidatorSetAddress,
@@ -258,16 +255,20 @@ app.get('/', function (req, res) {
   .then(function (activeNodes) {
     if(activeNodes == undefined) {
       data.hasNodeRows = 0;
-      data.timestamp = timeStamp;
       data.nodeRows = [];
     } else {
       //console.log("activeNodes", activeNodes);
       data.hasNodeRows = activeNodes.length;
-      data.timestamp = "timeStamp";
       data.nodeRows = activeNodes; 
     }
     res.render('etheradmin', data);
-  });
+  })
+  .catch(function (error) {
+    console.log(`Error occurs while getting node details : ${error}`);
+    data.hasNodeRows = 0;
+    data.nodeRows = [];
+    res.render('etheradmin', data);
+  })
 });
 
 // Get:networkinfo
@@ -383,9 +384,7 @@ app.post('/istanbul_propose', function(req, res) {
         jsonrpc: "2.0",
         id: new Date().getTime()
       };
-
       //(JSON.stringify(message));
-
       web3.currentProvider.sendAsync(message, (err,result)=>{
           //("received results:removeIstanbulValidator");
           if(result){
@@ -397,7 +396,6 @@ app.post('/istanbul_propose', function(req, res) {
             res.status(500).send(err);
           }
       });
-      
     }
     else{
       res.status(400).send("Invalid sender address for the node");
