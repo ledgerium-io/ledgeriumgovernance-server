@@ -74,6 +74,18 @@ class SimpleValidatorSet {
         }
     }
     
+    async getAllValidatorsAsync2() {
+        var resultList = [];
+        try {
+            resultList = await this.contract.methods.getAllValidators().call({});
+            console.log(resultList);
+            return resultList;
+        } catch (error) {
+            console.log("Error in SimpleValidatorSet:getAllValidatorsAsync2(): " + error);
+            return resultList;
+        }
+    }
+
     async getAllValidatorsAsync(ethAccountToUse) {
         var resultList = [];
         try {

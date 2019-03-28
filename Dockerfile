@@ -8,10 +8,10 @@ RUN apk add --no-cache --virtual .build-deps \
         make \
         g++
 
-RUN mkdir -p /ledgerium/governanceapp \
-    && cd /ledgerium/governanceapp \
-    && git clone -b feat/LB-101 https://github.com/ledgerium/governanceapp.git
-#ADD . /ledgerium/governanceapp
+RUN mkdir -p /ledgerium/governanceapp/governanceapp \
+    && cd /ledgerium/governanceapp 
+ #   && git clone -b feat/LB-101 https://github.com/ledgerium/governanceapp.git
+ADD . /ledgerium/governanceapp/governanceapp
 
 # to be removed in the future
 WORKDIR /ledgerium/governanceapp/governanceapp

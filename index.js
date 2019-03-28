@@ -83,6 +83,7 @@ var main = async function () {
             //     break;
             case "readkeyconfig":
                 readAccountsAndKeys();
+                readContractsFromConfig();
                 //await initiateApp();
                 break;
             case "privateKeys":

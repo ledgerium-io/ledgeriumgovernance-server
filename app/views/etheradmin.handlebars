@@ -301,7 +301,7 @@
               addAdminButtonCell.innerHTML = `<button class="button-primary" onclick="addAdminButtonClicked()">Propose to add</button>`;
             }
             // Add validators for this account 
-            let validatorsResult = await simpleHelper.getAllValidatorsAsync(currentAccount);
+            let validatorsResult = await simpleHelper.getAllValidatorsAsync2();
             {
                 var validatorsTable = document.getElementById("validatorsTable");
                 validatorsResult.forEach(async (eachValidator) => {
