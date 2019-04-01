@@ -15,6 +15,7 @@ var Web3 = require('web3');
  */
 var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
+//var listenPort = process.argv[4];
 
 var listenPort = "3003";
 var consortiumId = "2018";
@@ -103,17 +104,23 @@ function readNetworkManagerContract() {
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
     var latestBlockNumber;
+    //web3RPC = undefined;
     web3RPC.eth.getBlockNumber(function(err, latest) {
-      latestBlockNumber = latest;
-      web3RPC.eth.getBlock(latestBlockNumber, function (error, result) {
-        if (!error) {
-          resolve(result);
-        } else {
-          reject('Unable to get a recent block');
-        }
-      });
-    })
-  });
+      if(err) {
+        reject(`getBlockNumber error $(err)`);
+      }
+      else {
+        latestBlockNumber = latest;
+        web3RPC.eth.getBlock(latestBlockNumber, function (error, result) {
+          if (!error) {
+            resolve(result);
+          } else {
+            reject('Unable to get a recent block');
+          }
+        }); //web3RPC.eth.getBlock
+      }// else err  
+    }) //web3RPC.eth.getBlockNumber
+  }); //new Promise(function (resolve, reject)
 }
 
 /* 
@@ -187,7 +194,7 @@ function getAbiData() {
   adminContractABI = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
   simpleContractABI = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
   networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
-  console.log("networkManagerContractABI",networkManagerContractABI);
+  //console.log("networkManagerContractABI",networkManagerContractABI);
 
   var addresses = require("../keystore/contractsConfig.json");
   adminValidatorSetAddress = addresses.adminValidatorSetAddress;
@@ -281,61 +288,16 @@ app.get('/networkinfo', function (req, res) {
   .then(function (recentBlock) {
     networkInfo.recentBlock = recentBlock;
     networkInfo.networkID = "2018";
-    //networkInfo.adminContract = fs.readFileSync("../contracts/AdminValidatorSet.sol")
-    //networkInfo.valSetContract = fs.readFileSync("../contracts/SimpleValidatorSet.sol");
-
-  // getNodesfromBlockchain()
-  // .then(function (activeNodesList) {
-  //   if(activeNodesList == undefined) {
-  //     //(`Error occurs while getting node details`);
-  //     networkInfo.errorMessage += error + "\n";
-  //   } else {
-  //     //("activeNodes", activeNodesList);
-  //     if (activeNodesList.length > 0) {
-  //       activeNodes = activeNodesList;
-  //       for(var index = 0; index < activeNodesList.length; index++) {
-  //         var nodeInfo = activeNodesList[index];
-  //         networkInfo.addressList.push(nodeInfo.publickey);
-  //       }
-  //     }
-  //     else {
-  //       networkInfo.errorMessage += "Couldn't find any active nodes\n";
-  //     }  
-  //   }
-  //   res.send(JSON.stringify(networkInfo));
-  // });
-  //})
-    // getNoOfNodes()
-    // .then(getActiveNodeDetails).catch(function (error) {
-    //   //(`Error occurs while getting node details : ${error}`);
-    //   networkInfo.errorMessage += error + "\n";
-    // })
-    // .then(function (activeNodesList) {
-    //   //("getActiveNodeDetails output", activeNodesList);
-    //   if(activeNodesList == undefined)
-    //     activeNodes = [];
-    //   if (activeNodesList.length > 0) {
-    //     activeNodes = activeNodesList;
-    //     for(var index = 0; index < activeNodesList.length; index++) {
-    //       var nodeInfo = activeNodesList[index];
-    //       networkInfo.addressList.push(nodeInfo.publickey);
-    //     }
-    //   } else {
-    //     networkInfo.errorMessage += "Couldn't find any active nodes\n";
-    //   } 
-    // })
     res.send(JSON.stringify(networkInfo));
-  });
+  })
+  .catch(function (error) {
+    console.log(`Error getRecentBlock : ${error}`);
+    res.send(JSON.stringify(networkInfo));
+  })
 })
 
 // Used for sharing information about the network to joining members
 function NetworkInfo() {
-  // Indicates break in compatibility
-  //this.majorVersion = 0;
-  // Indicates backward compatible change
-  //this.minorVersion = 0;
-  //this.valSetContract = "";
-  //this.adminContract = "";
   this.adminContractABI = "";
   this.networkID = "";
   this.errorMessage = "";
