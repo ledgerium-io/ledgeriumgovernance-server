@@ -18,6 +18,8 @@ var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
 var privatekey = process.argv[4];
 
+console.log("privatekey", privatekey);
+
 var listenPort = "3003";
 var consortiumId = "2018";
 var ethRpcPort = gethIpRpcPort;
