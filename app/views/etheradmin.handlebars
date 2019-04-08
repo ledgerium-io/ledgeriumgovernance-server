@@ -112,8 +112,6 @@
   <script type="text/javascript" async defer>
     var isLoaded = false;
     var localWeb3;
-    //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8546"));
-    //var web3provider = new Web3.providers.HttpProvider("http://localhost:8546");
    
     var contractAbi = '{{{json this.contractAbi}}}';
     var nodeInfo = {{{json this.nodes}}};
@@ -134,11 +132,11 @@
     
     async function onload () {
 
-       if (window.ethereum) {
-          localWeb3 = new Web3(ethereum);
+       if (window.ledgerium) {
+          localWeb3 = new Web3(ledgerium);
           try {
               // Request account access if needed
-              await ethereum.enable();
+              await ledgerium.enable();
           } catch (error) {
               // User denied account access...
           }
