@@ -2,20 +2,21 @@ var express = require('express');
 var exphbs = require('express-handlebars');
 var bodyParser = require('body-parser');
 var fs = require('fs');
-var util = require('util');
+var utils = require('../web3util');
 var Web3 = require('web3');
 var moment = require('moment');
 var Promise = require('promise');
 var appjson = require('./version.json')
 var net = require('net');
 var Web3 = require('web3');
+const ethUtil = require('ethereumjs-util');
 
 /*
  * Parameters
  */
 var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
-//var listenPort = process.argv[4];
+var privatekey = process.argv[4];
 
 var listenPort = "3003";
 var consortiumId = "2018";
@@ -28,6 +29,7 @@ const refreshInterval = 60000;
 const nodeRegexExp = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
 
 //const recentBlockDecrement = 10; // To find a recent block for "/networkInfo", take the "currentBlock - recentBlockDecrement"
+var hostURL = "http://" + gethIp + ":" + ethRpcPort;
 var activeNodes = [];
 var abiContent = '';
 var adminContractABI = '';
@@ -36,7 +38,8 @@ var networkManagerContractABI = '';
 var adminValidatorSetAddress, simpleValidatorSetAddress, networkManagerAddress;
 
 var timeStamp;
-var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
+
+var web3RPC = new Web3(new Web3.providers.HttpProvider(hostURL));
 var networkmanagerContract;
 
 var app = express();
@@ -86,20 +89,20 @@ console.log("governanceapp starting parameters")
 console.log(`consortiumId: ${consortiumId}`)
 console.log(`listenPort: ${listenPort}`)
 console.log(`ethRpcPort: ${ethRpcPort}`)
-console.log(`validator node: http://${gethIp}:${ethRpcPort}`)
+console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 //('Start EtherAdmin Site');
 //setInterval(getNodesfromBlockchain, 120000);
 
 getAbiData();
-readNetworkManagerContract();
+networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
 getNodesfromBlockchain();
 
-function readNetworkManagerContract() {
-  var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
-  networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI),networkManagerAddress);
-}
+// function readNetworkManagerContract() {
+//   //var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
+  
+// }
 
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
@@ -244,7 +247,7 @@ function getNodesfromBlockchain() {
   });
 }
 
-app.get('/', function (req, res) {
+app.get('/', async function (req, res) {
   //var time = moment().format('h:mm:ss A UTC,  MMM Do YYYY');
   var data = {
     consortiumid: consortiumId,
@@ -258,6 +261,8 @@ app.get('/', function (req, res) {
       simpleContractAddress: simpleValidatorSetAddress
     }
   }
+
+  await synchPeers(hostURL);
 
   getNodesfromBlockchain()
   .then(function (activeNodes) {
@@ -366,4 +371,88 @@ app.post('/istanbul_propose', function(req, res) {
   });
 });
 
+async function synchPeers(URL) {
+
+  var nodesList = await getAdminPeers(URL);
+  var ethAccountToUse = '0x'+ethUtil.privateToAddress(privatekey).toString('hex');
+
+  var nodesListBlockchain = [];
+  var noOfNodes = await networkmanagerContract.methods.getNodesCounter().call();
+  console.log("No of Nodes -", noOfNodes);
+  for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
+      let result = await networkmanagerContract.methods.getNodeDetails(nodeIndex).call();
+      nodesListBlockchain.push(result);
+  }
+  
+  for(var index = 0; index < nodesList.length; index++) {
+      let flag = false;
+      for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) { 
+          var nodeBlockChain = nodesListBlockchain[nodeIndex];
+          if (nodesList[index].enode == nodeBlockChain.enode) {
+              flag = true;
+              break;
+          }
+      }
+      if(!flag) {
+          let encodedABI = networkmanagerContract.methods.registerNode(nodesList[index].hostname,
+              nodesList[index].hostname,
+              nodesList[index].role,
+              nodesList[index].ipaddress,
+              nodesList[index].port,
+              nodesList[index].publickey,
+              nodesList[index].enode
+          ).encodeABI();
+          var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privatekey,web3RPC,0);
+          console.log("TransactionLog for adding peer", nodesList[index].enode, "Network Manager registerNode -", transactionObject.transactionHash);
+      }
+  }
+  return;
+}
+
+async function getAdminPeers(url) {
+  return new Promise(function (resolve, reject) {
+      const axios = require('axios');
+      let nodesList= [];
+      axios.post(url, {
+          jsonrpc: '2.0',
+          id: + new Date(),
+          method: 'admin_peers',
+          params: {
+          },
+          }, {
+          headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+          },
+          })
+          .then(function(retValue) {
+              if(retValue.data.result.length > 0) {
+                  for(var index = 0; index < retValue.data.result.length; index++) {
+                      let eachElement =  retValue.data.result[index];
+                      let remoteAddress = eachElement.network.remoteAddress;
+                      let valIndex = remoteAddress.indexOf(":");
+                      let ipaddress = remoteAddress.slice(0,valIndex);
+                      let port = remoteAddress.slice(valIndex+1,remoteAddress.length)
+                      let hostName = eachElement.name.slice(5,eachElement.name.length);
+                      valIndex = hostName.indexOf("/");
+                      let nodeInfo = {
+                          hostname: hostName.slice(0,valIndex),
+                          role: "addon",
+                          ipaddress:ipaddress,
+                          port:port,
+                          publickey:"",
+                          enode: eachElement.id
+                        }
+                        console.log("HostName ", nodeInfo.hostname,"\nRole ", nodeInfo.role, "\nIP Address ", nodeInfo.ipaddress, "\nPort ", nodeInfo.port, "\nPublic Key ", nodeInfo.publickey, "\nEnode ", nodeInfo.enode);
+                        nodesList.push(nodeInfo);
+                  }
+              }
+              resolve(nodesList);
+          })
+          .catch(function (error) {
+              console.log(`Error occurs while getting node details : ${error}`);
+              reject(nodesList);
+          })
+      });    
+}
 
