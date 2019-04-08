@@ -9,12 +9,13 @@ var Promise = require('promise');
 var appjson = require('./version.json')
 var net = require('net');
 var Web3 = require('web3');
+const ethUtils = require('ethereumjs-util');
 
 /*
  * Parameters
  */
-var gethIp = process.argv[2];
-var gethIpRpcPort = process.argv[3];
+var gethIp = process.argv[2] || "http://localhost" ;
+var gethIpRpcPort = process.argv[3]||"8545";
 //var listenPort = process.argv[4];
 
 var listenPort = "3003";
@@ -335,11 +336,15 @@ app.listen(listenPort, function () {
 
 app.post('/istanbul_propose', function(req, res) {
   var web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
-
+  const signature = req.body.signature;
+  if(!signature || !signature.v || signature.r || signature.s)
+    res.status(400).send("Signature Not Valid")
+  var pubkey = ethUtils.ecrecover(data,  req.body.signature.v,  req.body.signature.r,  req.body.signature.s);
   //("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
     //(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
-    if(coinbase && (coinbase.toLowerCase() === req.body.sender.toLowerCase())) {
+
+    if(coinbase && (coinbase.toLowerCase() === pubkey)) {
       
       var message = {
         method: "istanbul_propose",
@@ -361,7 +366,7 @@ app.post('/istanbul_propose', function(req, res) {
       });
     }
     else{
-      res.status(400).send("Invalid sender address for the node");
+      res.status(400).send("Invalid Signature");
     }
   });
 });
