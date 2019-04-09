@@ -18,6 +18,8 @@ var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
 var privatekey = process.argv[4];
 
+console.log("privatekey", privatekey);
+
 var listenPort = "3003";
 var consortiumId = "2018";
 var ethRpcPort = gethIpRpcPort;
@@ -149,8 +151,8 @@ function readNodesFromNetworkManager(nodeIndex) {
         if (nodeIndex < noOfNodes) {
           networkmanagerContract.methods.getNodeDetails(nodeIndex).call(function (error, result) {
             if (!error) {
-              console.log(`details of: ${nodeIndex}`)
-              console.log(`HostName : ${result.hostName} \nRole : ${result.role} \nIPAddress : ${result.ipAddress}  \nPort : ${result.port} \nPublic key : ${result.publicKey} \nEnode : ${result.enode}`);
+              //console.log(`details of: ${nodeIndex}`)
+              //console.log(`HostName : ${result.hostName} \nRole : ${result.role} \nIPAddress : ${result.ipAddress}  \nPort : ${result.port} \nPublic key : ${result.publicKey} \nEnode : ${result.enode}`);
               var nodeInfo = {
                 hostname: result.hostName,
                 role: result.role,
@@ -180,7 +182,7 @@ function getNoOfNodes() {
     if(networkmanagerContract) {
       networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
         if(!error) {
-          console.log(`No of nodes: ${noOfNodes}`);
+          //console.log(`No of nodes: ${noOfNodes}`);
           resolve(noOfNodes);
         }
         else {
@@ -238,7 +240,7 @@ function getNodesfromBlockchain() {
         reject('Unable to get active nodes');
       })
       .then(function (activeNodesList) {
-        console.log("getActiveNodeDetails output", activeNodesList);
+        //console.log("getActiveNodeDetails output", activeNodesList);
         if(activeNodesList == undefined)
           activeNodes = [];
         activeNodes = activeNodesList;
@@ -261,8 +263,10 @@ app.get('/', async function (req, res) {
       simpleContractAddress: simpleValidatorSetAddress
     }
   }
-
-  await synchPeers(hostURL);
+  //synchPeers feature is enabled only for governanceui0. So the privatekey will not be available for rest of the containers including addon nodes
+  if(privatekey) {
+    await synchPeers(hostURL);
+  }
 
   getNodesfromBlockchain()
   .then(function (activeNodes) {
@@ -352,7 +356,7 @@ app.post('/istanbul_propose', function(req, res) {
         jsonrpc: "2.0",
         id: new Date().getTime()
       };
-      //(JSON.stringify(message));
+      //(JSON.stringify(message)); 
       web3.currentProvider.sendAsync(message, (err,result)=>{
           //("received results:removeIstanbulValidator");
           if(result){
@@ -435,12 +439,13 @@ async function getAdminPeers(url) {
                       let port = remoteAddress.slice(valIndex+1,remoteAddress.length)
                       let hostName = eachElement.name.slice(5,eachElement.name.length);
                       valIndex = hostName.indexOf("/");
+                      let publickey = ethUtil.bufferToHex(ethUtil.publicToAddress("0x" + eachElement.id));
                       let nodeInfo = {
                           hostname: hostName.slice(0,valIndex),
                           role: "addon",
                           ipaddress:ipaddress,
                           port:port,
-                          publickey:"",
+                          publickey:publickey,
                           enode: eachElement.id
                         }
                         console.log("HostName ", nodeInfo.hostname,"\nRole ", nodeInfo.role, "\nIP Address ", nodeInfo.ipaddress, "\nPort ", nodeInfo.port, "\nPublic Key ", nodeInfo.publickey, "\nEnode ", nodeInfo.enode);
