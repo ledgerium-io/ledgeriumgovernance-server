@@ -2,7 +2,7 @@ var express = require('express');
 var exphbs = require('express-handlebars');
 var bodyParser = require('body-parser');
 var fs = require('fs');
-var utils = require('../web3util');
+const Utils = require('../web3util');
 var Web3 = require('web3');
 var moment = require('moment');
 var Promise = require('promise');
@@ -11,6 +11,7 @@ var net = require('net');
 var Web3 = require('web3');
 const ethUtil = require('ethereumjs-util');
 
+const utils = new Utils();
 /*
  * Parameters
  */
@@ -18,7 +19,7 @@ var gethIp = process.argv[2];
 var gethIpRpcPort = process.argv[3];
 var privatekey = process.argv[4];
 
-console.log("privatekey", privatekey);
+//console.log("privatekey", privatekey);
 
 var listenPort = "3003";
 var consortiumId = "2018";
@@ -406,6 +407,8 @@ async function synchPeers(URL) {
               nodesList[index].publickey,
               nodesList[index].enode
           ).encodeABI();
+          if(privatekey.indexOf("0x") == 0)
+          privatekey = privatekey.slice(2);
           var transactionObject = await utils.sendMethodTransaction(ethAccountToUse,networkManagerAddress,encodedABI,privatekey,web3RPC,0);
           console.log("TransactionLog for adding peer", nodesList[index].enode, "Network Manager registerNode -", transactionObject.transactionHash);
       }
