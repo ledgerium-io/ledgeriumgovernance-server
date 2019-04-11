@@ -41,7 +41,7 @@
       <tr>
         <td> {{this}} </td>
         <td>
-          <button onclick="castVote('{{this}}',true)" class="button-primary" name="VFButton" value="{{this}}"> Vote For </button>
+          {{!-- <button onclick="castVote('{{this}}',true)" class="button-primary" name="VFButton" value="{{this}}"> Vote For </button> --}}
           <button onclick="castVote('{{this}}',false)" name="VAButton" value="{{this}}"> Vote Against </button>
         </td>
       </tr>
@@ -146,11 +146,11 @@
     //console.log(data);
     const displayNodes = ()=> {
       document.getElementById('adminContent').style.display = "none";
-      document.getElementById('validatorContent').style.display = "none";
+      //document.getElementById('validatorContent').style.display = "none";
       document.getElementById('nodeStatusContent').style.display = "block";
       document.getElementById('nodeStatusTab').classList.add("tabSelected");
       document.getElementById('adminTab').classList.remove("tabSelected");
-      document.getElementById('validatorTab').classList.remove("tabSelected");
+      //document.getElementById('validatorTab').classList.remove("tabSelected");
     }
     
     const showAdminTab = ()=> {
@@ -158,7 +158,7 @@
       document.getElementById('nodeStatusContent').style.display = "none";
       document.getElementById('adminContent').style.display = "block";
       document.getElementById('adminTab').classList.add("tabSelected");
-      document.getElementById('validatorTab').classList.remove("tabSelected");
+      //document.getElementById('validatorTab').classList.remove("tabSelected");
       document.getElementById('nodeStatusTab').classList.remove("tabSelected");
     }
     
@@ -175,6 +175,18 @@
           return true;
       }
       return false;
+    }
+
+    const errorMessage = (message) => {
+      document.getElementById("transactionStatus").style.display = "none";
+      document.getElementById("failureStatus").style.display = "block";
+      document.getElementById("errorMessage").innerHTML = message;
+    }
+
+    const successMessage = (message) => {
+      document.getElementById("failureStatus").style.display = "none";
+      document.getElementById("transactionStatus").style.display = "block";
+      document.getElementById("statusMessage").innerHTML = "Transaction Complete, page will refresh in 10 seconds";
     }
 
     window.addEventListener('load', () => onload(), false);
@@ -245,7 +257,7 @@
         }
       }
       for(var i=0;i<disabledButtons.length;i++){
-        if(disabledButtons[i].value.toLowerCase() === currentAccount || map[enabledButtons[i].value]){
+        if(disabledButtons[i].value.toLowerCase() === currentAccount || map[disabledButtons[i].value]){
           disabledButtons[i].style.display = "none"
         }
       }
@@ -253,7 +265,6 @@
     const castVote = (address,vote)=>{
       var myBody = {};
       myBody = { account:address, proposal:vote };
-      console.log(myBody);
       fetch("/istanbul_propose", {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         mode: "cors", // no-cors, cors, *same-origin
@@ -267,8 +278,14 @@
         referrer: "no-referrer", // no-referrer, *client
         body: JSON.stringify(myBody), // body data type must match "Content-Type" header
       })
-      .then(data => console.log(JSON.stringify(data))) // JSON-string from `response.json()` call
-      .catch(error => console.error(error));
+      .then((data) => {
+        successMessage()
+        setTimeout(()=>{ location.reload(true); },10000);
+      }) // JSON-string from `response.json()` call
+      .catch((err) => {
+        console.error(err);
+        errorMessage("Server Responded with a error message please contact your admin")
+      });
     }
   </script>
 </div>

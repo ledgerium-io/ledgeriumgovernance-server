@@ -297,7 +297,6 @@ app.get('/', async function (req, res) {
       getIstanbulSnapshot(hostURL)
         .then((snapshot) => {
           data.snapshot = snapshot;
-          //console.log(data.snapshot.votes);
           res.render('etheradmin', data);
         })
         .catch((err) => {
@@ -409,7 +408,7 @@ app.listen(listenPort, function () {
 
 app.post('/istanbul_propose', function (req, res) {
   //const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-  const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
+  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
   /* const signature = req.body.signature;
   if(!signature || !signature.v || signature.r || signature.s)
     res.status(400).send("Signature Not Valid")
@@ -440,7 +439,7 @@ app.post('/istanbul_propose', function (req, res) {
       //("print result", err);
       console.log(err);
       console.log("failure");
-      res.status(500).send({err:"errrororororo"});
+      res.status(500).send({err:"error"});
     }
   });
   /* }
@@ -497,41 +496,40 @@ async function getAdminPeers(url) {
       id: new Date().getTime(),
       method: 'admin_peers',
       params: []
-    }, function (err,retValue) {
-        /* for (var index = 0; index < retValue.data.result.length; index++) {
-          let eachElement = retValue.data.result[index];
-          let remoteAddress = eachElement.network.remoteAddress;
-          let valIndex = remoteAddress.indexOf(":");
-          let ipaddress = remoteAddress.slice(0, valIndex);
-          let port = remoteAddress.slice(valIndex + 1, remoteAddress.length)
-          let hostName = eachElement.name.slice(5, eachElement.name.length);
-          valIndex = hostName.indexOf("/");
-          let nodeInfo = {
-            hostname: hostName.slice(0, valIndex),
-            role: "addon",
-            ipaddress: ipaddress,
-            port: port,
-            publickey: "",
-            enode: eachElement.id
-          }
-          console.log("HostName ", nodeInfo.hostname, "\nRole ", nodeInfo.role, "\nIP Address ", nodeInfo.ipaddress, "\nPort ", nodeInfo.port, "\nPublic Key ", nodeInfo.publickey, "\nEnode ", nodeInfo.enode);
-          nodesList.push(nodeInfo);
-        } */
+    }, function (err,retValue) {        
         if(err){
           reject("Admin peers returned null");
         }
-        for( var i in retValue.result){
-          Ip = retValue.result[i].network.remoteAddress.split(":");
+        w3.currentProvider.send({
+          jsonrpc: '2.0',
+          id: new Date().getTime(),
+          method: 'admin_nodeInfo',
+          params: []
+        }, function (error,curNode){
+          if(error){
+            reject("Admin peers returned null");
+          }
           nodesList.push({
-            name      : retValue.result[i].name.split('/')[1],
-            role      : "node",
-            ip        : Ip[0],
-            port      : Ip[1],
-            publicKey : '0x'+ethUtil.pubToAddress('0x'+retValue.result[i].id).toString('hex'),
-            enode     : retValue.result[i].id
+            enode        : curNode.result.id,
+            name         : curNode.result.name.split("/")[1],
+            role         : "node",
+            ip           : "127.0.0.1",
+            publicKey    : '0x'+ethUtil.pubToAddress('0x'+curNode.result.id).toString('hex'),
+            port         : curNode.result.ports.listener
           });
-        }
-        resolve(nodesList);
+          for( var i in retValue.result){
+            Ip = retValue.result[i].network.remoteAddress.split(":");
+            nodesList.push({
+              name      : retValue.result[i].name.split('/')[1],
+              role      : "node",
+              ip        : Ip[0],
+              port      : Ip[1],
+              publicKey : '0x'+ethUtil.pubToAddress('0x'+retValue.result[i].id).toString('hex'),
+              enode     : retValue.result[i].id
+            });
+          }
+          resolve(nodesList);
+        });
       });
   });
 }
