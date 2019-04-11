@@ -24,7 +24,7 @@ class Utils  {
         } 
     }
     
-    async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, web3 /*callback*/) {
+    async deployContract(contractAbi, bytecode, deployedAddress, constructorParameters, web3) {
         console.log("deployContract");
         try{
             let deployedContract = new web3.eth.Contract(JSON.parse(contractAbi));
@@ -43,7 +43,7 @@ class Utils  {
         }    
     }
     
-    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas) {//, calleeMethodName,callback) {
+    async sendMethodTransaction (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas) {
         try
         {
             var gasPrice = await web3.eth.getGasPrice();
@@ -86,6 +86,36 @@ class Utils  {
             return "";
         }
     }
+
+    sendMethodTransactionCb (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas, fn) {
+        web3.eth.getTransactionCount(fromAccountAddress, 'pending', function(err,  nonceToUse) {
+            console.log("nonceToUse ",nonceToUse);
+            const txParams = {
+                nonce: nonceToUse,
+                gasPrice: '0x00',
+                gasLimit: 4700000, //estimatedGas, //20000000, // Todo, estimate gas
+                from: fromAccountAddress,
+                to: toContractAddress,
+                value: '0x00',
+                data: methodData
+            }
+            const tx = new ethereumjs.Tx(txParams)
+            //const privateKeyBuffer = new ethereumjs.Buffer.Buffer.from(privateKey, 'hex');
+            //tx.sign(privateKeyBuffer);
+            const serializedTx = tx.serialize();
+
+            //web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+            web3.eth.sendTransaction(txParams, (err, txHash) => {
+                fn(err, txHash);
+            });
+            // .on('receipt', function(r, e) {
+            //     fn(null, r);
+            // })
+            // .on('error', function(e, r) {
+            //     fn(e, null);
+            // })
+        });
+   }
     
     /** To get estimate of gas consumption for the given transaction prior to actual
      * execution on blockchain! Extremely useful feature however, giving issues on quorum

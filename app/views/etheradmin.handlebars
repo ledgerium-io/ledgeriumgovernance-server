@@ -1,4 +1,3 @@
-
 <link rel="stylesheet" href="style.css">
 <div class="container">
   <table class="u-full-width">
@@ -16,8 +15,8 @@
 
   <div id="menuTab">
     <span id="adminTab" class="menuItem tabSelected" onclick="showAdminTab()">Administrators</span>
-    <span id="validatorTab" class="menuItem" onclick="showValidatorTab()">Validators</span>
-    <span id="nodeStatusTab" class="menuItem" onclick="showNodeStatusTab()">Node Status</span>
+    {{!-- <span id="validatorTab" class="menuItem" onclick="showValidatorTab()">Validators</span> --}}
+    <span id="nodeStatusTab" class="menuItem" onclick="displayNodes()">Node Status</span>
   </div>
 
   <div id="transactionStatus" class="statusBar">
@@ -35,25 +34,59 @@
       <thead>
         <tr>
           <th>Current Admins</th>
-          <th colspan="2">Alias</th>
+          <th colspan="2">Action</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      {{#each snapshot.validators }}
+      <tr>
+        <td> {{this}} </td>
+        <td>
+          <button onclick="castVote('{{this}}',true)" class="button-primary" name="VFButton" value="{{this}}"> Vote For </button>
+          <button onclick="castVote('{{this}}',false)" name="VAButton" value="{{this}}"> Vote Against </button>
+        </td>
+      </tr>
+      {{/each }}
     </table>
-
     <div id="proposeAdminTable">
+      <h5><b>Current Voting Snapshot</b></h5>
+      {{#if snapshot.votes.length}}
       <table class="u-full-width" id="proposedAdminTable">
         <thead>
           <tr>
-            <th>Proposed Admins</th>
-            <th colspan="2">Alias</th>
+            <th>Admin Voted</th>
+            <th>Voted For</th>
+            <th colspan="2">Vote</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        {{#each snapshot.votes}}
+        <tr>
+          <td>{{this.validator}} </td>
+          <td>{{this.address}} </td>
+          {{#if this.authorize}}
+            <td> ADD</td>
+          {{else}}
+            <td> REMOVE </td>
+          {{/if}}  
+        </tr>
+        {{/each}}
+      </table>
+      {{else}}
+      <h6> No Votes Have Been Cast yet </h6>
+      {{/if}}
+    </div>
+    <div id="NewNodesTable">
+      <h5><b> Peer Nodes In The Network</b></h5>
+      <table class="u-full-width" id="newNodes">
+        <thead>
+          <tr>
+            <th>New Nodes</th>
+            <th>Action</th>
+          </tr>
+          <tbody></tbody>
+        </thead>
       </table>
     </div>
   </div>
-
   <div id="validatorContent" style="display: none">
     <p id="validatorsHeader"></p>
     <p id="Nodes in use"></p>
@@ -68,42 +101,40 @@
     </table>
   </div>
   <div id="nodeStatusContent" style="display: none">
-    <br/>
-    <br/>
+    <br />
+    <br />
     <b>Consortium: {{this.consortiumid}}</b>
-      {{#if hasNodeRows}}
-      <table class="u-full-width" id="nodesTable">
-        <thead>
-          <tr>
-            <th>Host Name</th>
-            <th>Role</th>
-            <th>IP Address</th>
-            <th>Port</th>
-            <th>Public Key</th>
-            <th>Enode ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each nodeRows}}
-          <tr>
-            <td>{{this.hostname}}</td>
-            <td>{{this.role}}</td>
-            <td>{{this.ipaddress}}</td>
-            <td>{{this.port}}</td>
-            <td>{{this.publickey}}</td>
-            <td>{{this.enode}}</td>
-          </tr>
-          {{/each}}
-        </tbody>
-      </table>
-      <hr />
-      <i>As of {{this.timestamp}} (Refresh interval: ~{{this.refreshinterval}} seconds)</i>
-      <hr /> {{else}}
-      <h6>Waiting on all Ledgerium nodes to boot up...</h6>
-      {{/if}}
+    {{#if hasNodeRows}}
+    <table class="u-full-width" id="nodesTable">
+      <thead>
+        <tr>
+          <th>Host Name</th>
+          <th>Role</th>
+          <th>IP Address</th>
+          <th>Port</th>
+          <th>Public Key</th>
+          <th>Enode ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each nodeRows}}
+        <tr>
+          <td>{{this.name}}</td>
+          <td>{{this.role}}</td>
+          <td>{{this.ip}}</td>
+          <td>{{this.port}}</td>
+          <td>{{this.publicKey}}</td>
+          <td>{{this.enode}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <hr />
+    <i>As of {{this.timestamp}} (Refresh interval: ~{{this.refreshinterval}} seconds)</i>
+    <hr /> {{else}}
+    <h6>Waiting on all Ledgerium nodes to boot up...</h6>
+    {{/if}}
   </div>
-
-
   <script src="ethereumjs-tx-1.3.3.min.js" type="text/javascript"></script>
   <script src="web3.1-beta.js"></script>
   <script src="web3util.js" type="text/javascript"></script>
@@ -112,527 +143,8 @@
   <script type="text/javascript" async defer>
     var isLoaded = false;
     var localWeb3;
-    //var localWeb3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8546"));
-    //var web3provider = new Web3.providers.HttpProvider("http://localhost:8546");
-   
-    var contractAbi = '{{{json this.contractAbi}}}';
-    var nodeInfo = {{{json this.nodes}}};
-    var adminAddress = {{{json this.nodes.adminContractAddress}}};
-    var simpleAddress = {{{json this.nodes.simpleContractAddress}}};
-    var adminContractAbi = {{{json this.nodes.adminContractAbi}}};
-    var simpleContractAbi = {{{json this.nodes.simpleContractAbi}}};
-    var utils = new Utils();
-    var helper; //= new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, {{{json this.nodes.adminContractAbi}}}, Web3)
-    var simpleHelper; // = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, {{{json this.nodes.simpleContractAbi}}}, Web3)
-    var validatorCapacity = 0;
-    var userIsAdmin = false;
-    var consortiumValidatorAddresses = [];
-    var request = new XMLHttpRequest();
-    var currentAccount = "0x";
-
-    window.addEventListener('load', () => onload(), false);
-    
-    async function onload () {
-
-       if (window.ethereum) {
-          localWeb3 = new Web3(ethereum);
-          try {
-              // Request account access if needed
-              await ethereum.enable();
-          } catch (error) {
-              // User denied account access...
-          }
-      }
-      // Legacy dapp browsers...
-      else if (window.web3) {
-          localWeb3 = new Web3(web3.currentProvider);
-      }
-
-      var helper = new AdminValidatorSet(localWeb3.currentProvider, utils, adminAddress, adminContractAbi, Web3)
-      var simpleHelper = new SimpleValidatorSet(localWeb3.currentProvider, utils, simpleAddress, simpleContractAbi, Web3)
-      // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-      if (typeof web3 !== 'undefined') {
-        // Use the browser's ethereum provider
-        var networkInfoRequest = new XMLHttpRequest();
-        networkInfoRequest.open('GET', '/networkinfo', true);
-        networkInfoRequest.onload = async function () {
-          console.log(`NetworkInfo returned: ${networkInfoRequest.response}`);
-          var baseNetworkInfo = JSON.parse(networkInfoRequest.response);
-          var networkID = JSON.parse(baseNetworkInfo.networkID);
-
-          {{!-- localWeb3.eth.getAccounts((error, accounts) => {
-            console.log(accounts[0]);
-            currentAccount = accounts[0];//.toLowerCase();
-            // refresh the page in the case that web3 account changes
-            var accountInterval = setInterval(async function () {
-              let f = await helper.isActiveAdmin(currentAccount, currentAccount);
-              if(!f) {
-                location.reload();
-              }    
-              if (web3.eth.accounts[0] !== currentAccount) {
-                location.reload();
-              }
-            }, 60000);
-            if (`${accounts[0]}` == "undefined") {
-              showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a>");
-            }
-            else {
-              document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${accounts[0]}`;
-            }
-          }) --}}
-
-          accounts = await localWeb3.eth.getAccounts();
-          currentAccount = accounts[0];//.toLowerCase();
-          let f = await helper.isActiveAdmin(currentAccount, currentAccount);
-          var accountInterval = setInterval(async function () {
-            let f = await helper.isActiveAdmin(currentAccount, currentAccount);
-            if(!f) {
-              location.reload();
-            }    
-            if (web3.eth.accounts[0] !== currentAccount) {
-              location.reload();
-            }
-          }, 60000);
-          if (`${accounts[0]}` == "undefined") {
-            showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a>");
-          }
-          else {
-            document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${accounts[0]}`;
-          }
-
-          // Print the Metamask providers network Id
-          localWeb3.eth.net.getId((error, networkId) => {
-            var webServerNetworkId = parseInt(networkID);
-            console.log(`Web server ethererum networkId: ${webServerNetworkId}`);
-            console.log(`Local Web3 NetworkId: ${networkId}`);
-            if (webServerNetworkId != networkId) {              
-              errorMessage(`The web server is connected to a network with an ID of: ${webServerNetworkId}, and Metamask is connected to a network with an ID of: ${networkId}`);
-            }            
-          })
-
-          // Make sure the local and remote networks match by comparing a recent block hash
-          localWeb3.eth.getBlock(baseNetworkInfo.recentBlock.number, function (error, result) {
-            console.log(`Web server recent block#: ${baseNetworkInfo.recentBlock.number} - hash: ${baseNetworkInfo.recentBlock.hash}`);
-            console.log(`Local web3 hash: ${result.hash}`);
-            if (baseNetworkInfo.recentBlock.hash != result.hash) {
-              errorMessage(`The web server and Metamask block hashes do not match. You may not be connected to the same ethereum network in Metamask`);
-            }
-          });
-
-          //var validatorCapacityHtml = `Each administrator is allowed ${inWords(2)} nodes`;
-          document.getElementById('validatorsHeader').innerHTML = "List of validators on network";
-          //currentAccount = "0xf232a4bf183cf17d09bea23e19ceff58ad9dbfed";
-          //console.log("currentAccount - ", currentAccount)
-          let result = await helper.getAllAdmins(currentAccount);
-          {
-            // Add rows to the adminTable
-            var table = document.getElementById("adminTable");
-          
-            result.forEach(eachAdmin => {
-              if (currentAccount.toLowerCase() == eachAdmin.toLowerCase()) {
-                userIsAdmin = true;
-              }
-            });
-            // Is current user an admin?
-            result.forEach(async (eachAdmin) => {
-              if (currentAccount.toLowerCase() == eachAdmin.toLowerCase()) {
-                userIsAdmin = true;
-              }
-                // Create an empty <tr> element and add it to the last position of the table:
-                var adminRow = table.insertRow(-1);
-                // Add the admin account number
-                var cell1 = adminRow.insertCell(0);
-                cell1.innerHTML = eachAdmin;
-
-                // Add the admin's alias
-                var cell2 = adminRow.insertCell(1);
-                cell2.id = `AliasCell-${eachAdmin}`
-                cell2.innerHTML = "Loading";
-
-                helper.GetAliasForAdmin(eachAdmin, (aliasResult) => {
-                  var aliasCell = document.getElementById(`AliasCell-${eachAdmin}`);
-                  if (aliasResult == "") {
-                    aliasResult = "Anon"
-                  }
-                  if (currentAccount == eachAdmin) {
-                    document.getElementById("aliasDisplay").innerHTML = aliasResult;
-                    document.getElementById("aliasEditorText").placeholder = aliasResult;
-                    aliasResult += " (You)";
-                  }
-                  aliasCell.innerHTML = aliasResult;
-                });
-
-                // Add Vote Against Button if is existing admin
-                if (userIsAdmin && (eachAdmin.toLowerCase() != currentAccount.toLowerCase())) {
-                  var cell3 = adminRow.insertCell(2);
-                  cell3.id = `VoteAgainst-${eachAdmin}`;
-                  
-                  let isAdmin = await helper.isActiveAdmin("", eachAdmin);
-                  {
-                    if(isAdmin) {
-                      let proposal = await helper.checkProposal(currentAccount, eachAdmin);
-                      {
-                        if(proposal.toLowerCase() == "proposal not created") {
-                          cell3.innerHTML = `<button class="button-primary" onclick="proposeToVoteOutButtonClicked('${eachAdmin}')">Propose to remove</button>`;
-                        }else {
-                          cell3.innerHTML = `<div> Current proposal - ${proposal} </div>`
-                          cell3.innerHTML += `<button class="button-primary" onclick="voteForAdminButtonClicked('${eachAdmin}', '${proposal}')">Accept</button>`;
-                          cell3.innerHTML += `<button class="button-primary" onclick="voteAgainstAdminButtonClicked('${eachAdmin}', '${proposal}')">Reject</button>`;
-                        }
-                      }
-                    }else{
-                      cell3.innerHTML += `<button class="button-disabled">Removed</button>`;
-                    }
-                  }
-                }
-            });
-
-            // Add a list of this accounts validators
-            if (result.includes(currentAccount)) {
-              var addAdminRow = table.insertRow(-1);
-
-              var addAdminAccountCell = addAdminRow.insertCell(0);
-              addAdminAccountCell.innerHTML = `<input id="addAdminAccountInput" class="u-full-width" type="text" placeholder="Ex: 0x17Bf5e7b3CE6779DBaeDEB907010601A8c1e3118">`;
-
-              var addAdminAliasCell = addAdminRow.insertCell(1);
-              addAdminAliasCell.innerHTML = `<input id="addAdminAliasInput" class="u-full-width" type="text" placeholder="Ex: Admin 2">`;
-
-              var addAdminButtonCell = addAdminRow.insertCell(2);
-              addAdminButtonCell.innerHTML = `<button class="button-primary" onclick="addAdminButtonClicked()">Propose to add</button>`;
-            }
-            // Add validators for this account 
-            let validatorsResult = await simpleHelper.getAllValidatorsAsync2();
-            {
-                var validatorsTable = document.getElementById("validatorsTable");
-                validatorsResult.forEach(async (eachValidator) => {
-                  if(eachValidator.toLowerCase() === currentAccount.toLowerCase()) return;
-
-                  var newRow = validatorsTable.insertRow(-1);
-                  var accountCell = newRow.insertCell(0);
-                  accountCell.innerHTML = eachValidator;
-                  var accountActionCell = newRow.insertCell(1);
-                  let data = await simpleHelper.isActiveValidator(currentAccount, eachValidator);
-                  {
-                    if(data) {
-                      let res = await simpleHelper.checkProposal(currentAccount, eachValidator);
-                      {
-                        if(res.toLowerCase() == "remove") {
-                          accountActionCell.innerHTML = `<div> Current proposal - ${res} </div>`;
-                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorAcceptClicked('${eachValidator}')">Accept</button>`;
-                          accountActionCell.innerHTML += `<button class="button-primary" onclick="removeValidatorDeniedClicked('${eachValidator}')">Reject</button>`;
-                        }else{
-                          accountActionCell.innerHTML = `<button class="button-primary" onclick="removeValidatorClicked('${eachValidator}')">Propose to remove</button>`;
-                        }
-                      }
-                    }else{
-                      accountActionCell.innerHTML = `<button class="button-disabled" onclick="addValidatorClicked('${accountCell.innerHTML}')">Propose to add</button>`;
-                    }
-                  };                  
-                });
-
-                // If there are less validators than max, then add the "addvalidator" form
-                if (!validatorsResult || validatorsResult.length < validatorCapacity) {
-                  var addValidatorRow = validatorsTable.insertRow(-1);
-
-                  var addValidatorAccountCell = addValidatorRow.insertCell(0);
-                  addValidatorAccountCell.innerHTML = `<input id="addValidatorAccountInput" class="u-full-width" type="text" placeholder="Ex: 0x17Bf5e7b3CE6779DBaeDEB907010601A8c1e3118">`;
-
-                  var addValidatorButtonCell = addValidatorRow.insertCell(1);
-                  addValidatorButtonCell.innerHTML = `<button class="button-primary" onclick="addValidatorClicked()">Add Validator</button>`;
-
-                  if ('addressList' in baseNetworkInfo) {
-                    consortiumValidatorAddresses = baseNetworkInfo.addressList.addresses
-                    consortiumValidatorAddresses.forEach(function (eachAddress) {
-                      if (!validatorsResult.includes(eachAddress)) {
-
-                        console.log(`Potential Address: ${eachAddress}`);
-
-                        addValidatorRow = validatorsTable.insertRow(-1);
-                        var addPotentialValidatorAccountCell = addValidatorRow.insertCell(0);
-                        addPotentialValidatorAccountCell.innerHTML = `${eachAddress}`;
-
-                        var addPotentialValidatorButtonCell = addValidatorRow.insertCell(1);
-                        addPotentialValidatorButtonCell.innerHTML = `<button class="button-primary" onclick="addValidatorClicked('${eachAddress}')">Add Validator</button>`;
-                      }
-                    });
-                  }
-                }
-
-              };
-            
-            helper.GetProposedAdminsAsync((result) => {
-              // Add rows to the adminTable
-              var table = document.getElementById("proposedAdminTable");
-
-              if (!result || result.length < 1) {
-                document.getElementById("proposeAdminTable").style.display = "none";
-              }
-              else {
-                result.forEach(eachAdmin => {
-                  // Create an empty <tr> element and add it to the last position of the table:
-                  var adminRow = table.insertRow(-1);
-                  // Add the admin account number
-                  var cell1 = adminRow.insertCell(0);
-                  cell1.innerHTML = eachAdmin;
-
-                  // Add the admin's alias
-                  var cell2 = adminRow.insertCell(1);
-                  cell2.id = `AliasCell-${eachAdmin}`
-                  cell2.innerHTML = "Loading";
-                  helper.GetAliasForAdmin(eachAdmin, (aliasResult) => {
-                    var aliasCell = document.getElementById(`AliasCell-${eachAdmin}`);
-                    aliasCell.innerHTML = aliasResult;
-                  });
-
-                  // Add Vote Against Button if not the current account and is existing admin
-                  if (userIsAdmin && currentAccount != eachAdmin) {
-                    var cell3 = adminRow.insertCell(2);
-                    cell3.id = `VoteFor-${eachAdmin}`;
-                    cell3.innerHTML = `<button class="button-primary" onclick="voteForProposedAdminButtonClicked('${eachAdmin}')">Vote For</button>`;
-                  }
-                });
-              }
-              isLoaded = true;
-            });
-          };
-        };
-        networkInfoRequest.send(null);
-
-      } else {
-        console.log('No web3? You should consider trying MetaMask!')
-      }
-    }
-
-    function addAdminButtonClicked() {
-      submittingTransaction();
-      var adminAccount = document.getElementById("addAdminAccountInput").value;
-      var adminAlias = document.getElementById("addAdminAliasInput").value;
-      document.getElementById("addAdminAccountInput").value = "";
-      document.getElementById("addAdminAliasInput").value = "";
-      console.log(`Proposing to add ${adminAccount} as a new administrator`);
-
-      helper.proposalToAddAdmin(currentAccount, adminAccount, "", function (err, result) {
-        if (err) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Proposed Admin Transaction #: ${result}`);
-        submittedTransaction(result.transactionHash);
-      });
-    }
-
-    function proposeToVoteOutButtonClicked(adminAccount) {
-      submittingTransaction();
-      console.log(`Proposal to vote out ${adminAccount}`);
-
-      helper.proposalToRemoveAdmin(currentAccount, adminAccount, "", (err, result) => {
-          if (err != null) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Proposal to vote out, Transaction #: ${result}`);
-        submittedTransaction(result.transactionHash);
-      })
-    }
-
-    function voteForAdminButtonClicked(adminAccount, action) {
-      submittingTransaction();
-      console.log(`Voting for ${adminAccount} for ${action}`);
-
-      if(action == "remove") {
-        helper.voteForRemovingAdmin(currentAccount, adminAccount, pk, function (error, result) {
-          if (error) {
-            showError("Transaction cancelled");
-            return;
-          }
-          console.log(`Voted For ${action}, Transaction #: ${result}`);
-          submittedTransaction(result);
-        });
-
-      }else if(action == "add") {
-        helper.voteForAddingAdmin(currentAccount, adminAccount, pk, function (error, result) {
-          if (error) {
-            showError("Transaction cancelled");
-            return;
-          }
-          console.log(`Voted For ${action}, Transaction #: ${result}`);
-          submittedTransaction(result);
-        });
-      }
-    }
-
-    function voteAgainstAdminButtonClicked(adminAccount, action) {
-      submittingTransaction();
-      console.log(`Voting against ${adminAccount} for ${action}`);
-
-      if(action == "remove") {
-        helper.voteAgainstRemovingAdmin(currentAccount, adminAccount, "", function (error, result) {
-          if (error) {
-            showError("Transaction cancelled");
-            return;
-          }
-          console.log(`Voted Against ${action}, Transaction #: ${result}`);
-          submittedTransaction(result);
-        });
-      }
-      else if(action == "add") {
-          helper.voteAgainstAddingAdmin(currentAccount, adminAccount, "", function (error, result) {
-          if (error) {
-            showError("Transaction cancelled");
-            return;
-          }
-          console.log(`Voted Against ${action}, Transaction #: ${result}`);
-          submittedTransaction(result);
-        });
-      }
-    }
-
-    function voteForProposedAdminButtonClicked(adminAccount) {
-      submittingTransaction();
-      console.log(`Voting for ${adminAccount}`);
-      helper.VoteForProposedAdminAsync(adminAccount, function (error, result) {
-        if (error) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Voted for transaction #: ${result}`);
-        submittedTransaction(result);
-      });
-    }
-
-    function addValidatorClicked(validatorAccount) {
-      simpleHelper.GetValidatorsForAdmin(currentAccount, validators => {
-        if (!validatorAccount) {
-          validatorAccount = document.getElementById("addValidatorAccountInput").value;
-        }
-        console.log(`User wishes to add: ${validatorAccount} as a new validator`);
-
-        submittingTransaction();
-        {{!-- fetch('/pk?acc='+currentAccount)
-        .then(data => {
-          data.text().then(function(pk){ --}}
-
-             simpleHelper.addValidator(currentAccount, validatorAccount, "", function (error, result) {
-              if (error) {
-                showError("Transaction cancelled");
-                return;
-              }
-              console.log(`Added validator at transaction #: ${result}`);
-              submittedTransaction(result.transactionHash);
-            });
-
-          {{!-- });
-        });     --}}
-      })
-    }
-
-    function removeValidatorAcceptClicked(validatorAccount) {
-      submittingTransaction();
-      console.log(`User wants to accept proposal to remove validator: ${validatorAccount}`);
-      simpleHelper.voteForRemovingValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
-        if (error) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Remove validator vote for Transaction #: ${hash}`);
-        simpleHelper.ProposeRemoveValidatorFromChain(currentAccount, validatorAccount, (err, chain_result)=>{
-          console.log("received results:removeIstanbulValidator");
-          if(chain_result) {
-            console.log("results", chain_result.result);
-            submittedTransaction(hash);
-          }
-          else if(err) {
-            console.log("print result", err);
-            showError("Transaction cancelled");
-          }
-        });
-      });
-    }
-
-    function removeValidatorDeniedClicked(validatorAccount) {
-      submittingTransaction();
-      console.log(`User wants to accept proposal to remove validator: ${validatorAccount}`);
-      simpleHelper.voteAgainstRemovingValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
-        if (error) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Remove validator vote for Transaction #: ${hash}`);
-        simpleHelper.ProposeAddValidatorFromChain(currentAccount, validatorAccount, (err, chain_result)=>{
-          console.log("received results:addIstanbulValidator");
-          if(chain_result) {
-            console.log("results", chain_result.result);
-            submittedTransaction(hash);
-          }
-          else if(err) {
-            console.log("Error: ProposeAddValidatorFromChain", err);
-            showError("Transaction cancelled");
-          }
-        });
-      });
-    }
-
-    function removeValidatorClicked(validatorAccount) {
-      submittingTransaction();
-      console.log(`User wants to remove validator: ${validatorAccount}`);
-      simpleHelper.proposalToRemoveValidatorCb(currentAccount, "", validatorAccount, (error, hash) => {
-        if (error) {
-          showError("Transaction cancelled");
-          return;
-        }
-        console.log(`Remove validator vote against Transaction #: ${hash}`);
-        simpleHelper.ProposeRemoveValidatorFromChain(currentAccount, validatorAccount, (err, chain_result)=>{
-          console.log("received results:removeIstanbulValidator");
-          if(chain_result) {
-            console.log("results", chain_result.result);
-            submittedTransaction(hash);
-          }
-          else if(err) {
-            console.log("print result", err);
-            showError("Transaction cancelled");
-          }
-        });
-
-      });
-    }
-
-    function submittingTransaction() {
-      document.getElementById("failureStatus").style.display = "none";
-      document.getElementById("transactionStatus").style.display = "block";
-      document.getElementById("statusMessage").innerHTML = "Submitting transaction";
-    }
-
-    function submittedTransaction(txHash) {
-      document.getElementById("failureStatus").style.display = "none";
-      document.getElementById("transactionStatus").style.display = "block";
-      document.getElementById("statusMessage").innerHTML = "Transaction submitted: " + txHash;
-    }
-
-    function showError(errorMessage) {
-      document.getElementById("transactionStatus").style.display = "none";
-      document.getElementById("failureStatus").style.display = "block";
-      document.getElementById("errorMessage").innerHTML = errorMessage;
-    }
-
-    function showAdminTab() {
-      document.getElementById('validatorContent').style.display = "none";
-      document.getElementById('nodeStatusContent').style.display = "none";
-      document.getElementById('adminContent').style.display = "block";
-      document.getElementById('adminTab').classList.add("tabSelected");
-      document.getElementById('validatorTab').classList.remove("tabSelected");
-      document.getElementById('nodeStatusTab').classList.remove("tabSelected");
-    }
-
-    function showValidatorTab() {
-      document.getElementById('adminContent').style.display = "none";
-      document.getElementById('nodeStatusContent').style.display = "none";
-      document.getElementById('validatorContent').style.display = "block";
-      document.getElementById('adminTab').classList.remove("tabSelected");
-      document.getElementById('validatorTab').classList.add("tabSelected");
-      document.getElementById('nodeStatusTab').classList.remove("tabSelected");
-    }
-
-    function showNodeStatusTab() {
+    //console.log(data);
+    const displayNodes = ()=> {
       document.getElementById('adminContent').style.display = "none";
       document.getElementById('validatorContent').style.display = "none";
       document.getElementById('nodeStatusContent').style.display = "block";
@@ -640,33 +152,123 @@
       document.getElementById('adminTab').classList.remove("tabSelected");
       document.getElementById('validatorTab').classList.remove("tabSelected");
     }
-
-    function showAliasEditor() {
-      document.getElementById('aliasContainer').style.display = "none";
-      document.getElementById('aliasEditor').style.display = "block";
-      document.getElementById('aliasEditorText').focus();
+    
+    const showAdminTab = ()=> {
+      document.getElementById('validatorContent').style.display = "none";
+      document.getElementById('nodeStatusContent').style.display = "none";
+      document.getElementById('adminContent').style.display = "block";
+      document.getElementById('adminTab').classList.add("tabSelected");
+      document.getElementById('validatorTab').classList.remove("tabSelected");
+      document.getElementById('nodeStatusTab').classList.remove("tabSelected");
     }
-
-    function errorMessage(message) {
+    
+    const showError = (errorMessage) => {
       document.getElementById("transactionStatus").style.display = "none";
       document.getElementById("failureStatus").style.display = "block";
-      document.getElementById("errorMessage").innerHTML = message;
+      document.getElementById("errorMessage").innerHTML = errorMessage;
     }
 
-    // Allows for spelling out of numerics
-    var a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
-    var b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    const checkValidator = (address)=>{
+      const validators = {{{ json this.snapshot.validators }}};
+      for(var i=0;i<validators.length;i++){
+        if(validators[i].toLowerCase() === address.toLowerCase())
+          return true;
+      }
+      return false;
+    }
 
-    function inWords(num) {
-      if ((num = num.toString()).length > 9) return 'overflow';
-      n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-      if (!n) return; var str = '';
-      str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
-      str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
-      str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
-      str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
-      str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-      return str;
+    window.addEventListener('load', () => onload(), false);
+    const onload = async function() {
+      const validators = {{{ json this.snapshot.validators }}};
+      const nodes      = {{{ json this.nodeRows }}};
+      const votes      = {{{ json this.snapshot.votes }}}
+      if(window.ledgerium){
+        //latest
+        localWeb3 = new Web3(ledgerium);
+        try{
+          await ledgerium.enable();
+        }catch (err){
+          alert("Please Allow Connection from ledgerium wallet");
+          // ask user to connect to ledgerium wallet
+        }
+      } else if (window.web3){
+        //legacy
+        localWeb3 = await new Web3(window.web3.currentProvider);
+      }else{
+        return;
+      }
+      const currentAccount = localWeb3.currentProvider.selectedAddress.toLowerCase();
+      if (!currentAccount || !checkValidator(currentAccount)) {
+        // show error and return 
+        showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a> or make sure you are using an admin account");
+        return;
+      }
+      else {
+        // show current meta mask account
+        document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${currentAccount}`;
+      }
+      var map = {};     
+      
+      for(var i=0; i<validators.length; i++){
+        // create a map to access fast
+        map[validators[i].toLowerCase()] = true;
+      }
+      const table = document.getElementById('newNodes');
+      // table to add button and new nodes
+      nodes.push({publicKey:"0x2ad682de2c5a81e4b661a3a038d73f03df6a79c1"})
+      for(var i=0; i<nodes.length; i++){
+        var temp = nodes[i].publicKey.toLowerCase();
+        if(!map[temp]){
+          const adminRow = table.insertRow(-1);
+          const cell1    = adminRow.insertCell(0);
+          cell1.innerHTML= temp;
+          const cell2    = adminRow.insertCell(1);
+          cell2.innerHTML= `<button class='button-primary' onclick='castVote("${temp}",true)' value='${temp}' name="VFButton">Vote For</button><button onclick='castVote("${temp}",true)' value='${temp}' name="VAButton">Vote Against</button>`;
+        }
+      }
+      // check newly added nodes
+
+      const enabledButtons = document.getElementsByName('VFButton');
+      const disabledButtons = document.getElementsByName('VAButton');
+      map = {};
+      map[currentAccount] = true;
+      for( var i=0; i<votes.length; i++ ){
+        const v = votes[i].validator.toLowerCase();
+        if(v == currentAccount)
+          map[votes[i].address.toLowerCase()]   = true;
+      }
+
+      // disable Vote for and vote against buttons which admin has already voted on
+      for( var i=0; i<enabledButtons.length;i++){
+        if(enabledButtons[i].value.toLowerCase() === currentAccount || map[enabledButtons[i].value]){
+          enabledButtons[i].style.display = "none";
+        }
+      }
+      for(var i=0;i<disabledButtons.length;i++){
+        if(disabledButtons[i].value.toLowerCase() === currentAccount || map[enabledButtons[i].value]){
+          disabledButtons[i].style.display = "none"
+        }
+      }
+    }
+    const castVote = (address,vote)=>{
+      var myBody = {};
+      myBody = { account:address, proposal:vote };
+      console.log(myBody);
+      fetch("/istanbul_propose", {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "Content-Type": "application/json",
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrer: "no-referrer", // no-referrer, *client
+        body: JSON.stringify(myBody), // body data type must match "Content-Type" header
+      })
+      .then(data => console.log(JSON.stringify(data))) // JSON-string from `response.json()` call
+      .catch(error => console.error(error));
     }
   </script>
 </div>
