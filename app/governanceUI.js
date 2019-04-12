@@ -11,6 +11,8 @@ var net = require('net');
 var Web3 = require('web3');
 const ethUtil = require('ethereumjs-util');
 const utils = new Utils();
+const execSync = require('child_process').execSync;
+const currentIp = execSync('curl -s https://api.ipify.org');
 /*
  * Parameters
  */
@@ -284,8 +286,8 @@ app.get('/', async function (req, res) {
     consortiumid: consortiumId,
     timestamp: moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
     refreshinterval: (refreshInterval / 1000),
-    nodeRows : [],
-    hasNodeRows : 0,
+    nodeRows: [],
+    hasNodeRows: 0,
     snapshot: {
       validators: []
     }
@@ -412,41 +414,39 @@ app.post('/istanbul_propose', function (req, res) {
   /* const signature = req.body.signature;
   if(!signature || !signature.v || signature.r || signature.s)
     res.status(400).send("Signature Not Valid")
-  var pubkey = ethUtils.ecrecover(data,  req.body.signature.v,  req.body.signature.r,  req.body.signature.s);
+  var pubkey = ethUtils.ecrecover(data,  req.body.signature.v,  req.body.signature.r,  req.body.signature.s); */
   //("Initiated a web3 ipc interface");
   web3.eth.getCoinbase((err, coinbase) => {
-    //(`coinbase - ${coinbase} & sender - ${req.body.sender}`);
-
-    if(coinbase && (coinbase.toLowerCase() === pubkey)) { */
-  if(typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string')
-      res.status(405).send({mes:"wrong request"});
-  var message = {
-    method: "istanbul_propose",
-    params: [req.body.account, req.body.proposal],
-    jsonrpc: "2.0",
-    id: new Date().getTime()
-  };
-  //(JSON.stringify(message));
-  web3.currentProvider.send(message, (err, result) => {
-    //("received results:removeIstanbulValidator");
-    if (result) {
-      //("results", result.result);
-      console.log(result);
-      console.log("success");
-      res.status(200).send({result:"success"});
+    if (coinbase && (coinbase.toLowerCase() === req.body.currentAccount)) {
+      if (typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string')
+        res.status(405).send({ mes: "wrong request" });
+      var message = {
+        method: "istanbul_propose",
+        params: [req.body.account, req.body.proposal],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+      };
+      //(JSON.stringify(message));
+      web3.currentProvider.send(message, (err, result) => {
+        //("received results:removeIstanbulValidator");
+        if (result) {
+          //("results", result.result);
+          console.log(result);
+          console.log("success");
+          res.status(200).send({ result: "success" });
+        }
+        else if (err) {
+          //("print result", err);
+          console.log(err);
+          console.log("failure");
+          res.status(500).send({ err: "error" });
+        }
+      });
     }
-    else if (err) {
-      //("print result", err);
-      console.log(err);
-      console.log("failure");
-      res.status(500).send({err:"error"});
+    else {
+      res.status(400).send("Not an Admin Account");
     }
   });
-  /* }
-  else{
-    res.status(400).send("Invalid Signature");
-  }
-}); */
 });
 
 async function synchPeers(URL) {
@@ -496,40 +496,40 @@ async function getAdminPeers(url) {
       id: new Date().getTime(),
       method: 'admin_peers',
       params: []
-    }, function (err,retValue) {        
-        if(err){
+    }, function (err, retValue) {
+      if (err) {
+        reject("Admin peers returned null");
+      }
+      w3.currentProvider.send({
+        jsonrpc: '2.0',
+        id: new Date().getTime(),
+        method: 'admin_nodeInfo',
+        params: []
+      }, function (error, curNode) {
+        if (error) {
           reject("Admin peers returned null");
         }
-        w3.currentProvider.send({
-          jsonrpc: '2.0',
-          id: new Date().getTime(),
-          method: 'admin_nodeInfo',
-          params: []
-        }, function (error,curNode){
-          if(error){
-            reject("Admin peers returned null");
-          }
-          nodesList.push({
-            enode        : curNode.result.id,
-            name         : curNode.result.name.split("/")[1],
-            role         : "node",
-            ip           : "127.0.0.1",
-            publicKey    : '0x'+ethUtil.pubToAddress('0x'+curNode.result.id).toString('hex'),
-            port         : curNode.result.ports.listener
-          });
-          for( var i in retValue.result){
-            Ip = retValue.result[i].network.remoteAddress.split(":");
-            nodesList.push({
-              name      : retValue.result[i].name.split('/')[1],
-              role      : "node",
-              ip        : Ip[0],
-              port      : Ip[1],
-              publicKey : '0x'+ethUtil.pubToAddress('0x'+retValue.result[i].id).toString('hex'),
-              enode     : retValue.result[i].id
-            });
-          }
-          resolve(nodesList);
+        nodesList.push({
+          enode: curNode.result.id,
+          name: curNode.result.name.split("/")[1],
+          role: "node",
+          ip: currentIp,
+          publicKey: '0x' + ethUtil.pubToAddress('0x' + curNode.result.id).toString('hex'),
+          port: curNode.result.ports.listener
         });
+        for (var i in retValue.result) {
+          Ip = retValue.result[i].network.remoteAddress.split(":");
+          nodesList.push({
+            name: retValue.result[i].name.split('/')[1],
+            role: "node",
+            ip: Ip[0],
+            port: Ip[1],
+            publicKey: '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex'),
+            enode: retValue.result[i].id
+          });
+        }
+        resolve(nodesList);
       });
+    });
   });
 }

@@ -4,7 +4,8 @@
     <tbody>
       <tr>
         <td>
-          <h2>Ledgerium governance UI</h2>
+          <img src="./assets/ledgerium_logo.png" class="main-logo"/>
+          <h2 class="main-title">Governance UI</h2>
         </td>
       </tr>
       <tr>
@@ -111,7 +112,7 @@
           <th>Host Name</th>
           <th>Role</th>
           <th>IP Address</th>
-          <th>Port</th>
+          {{!-- <th>Port</th> --}}
           <th>Public Key</th>
           <th>Enode ID</th>
         </tr>
@@ -122,7 +123,7 @@
           <td>{{this.name}}</td>
           <td>{{this.role}}</td>
           <td>{{this.ip}}</td>
-          <td>{{this.port}}</td>
+          {{!-- <td>{{this.port}}</td> --}}
           <td>{{this.publicKey}}</td>
           <td>{{this.enode}}</td>
         </tr>
@@ -143,6 +144,7 @@
   <script type="text/javascript" async defer>
     var isLoaded = false;
     var localWeb3;
+    var currentAccount = '';
     //console.log(data);
     const displayNodes = ()=> {
       document.getElementById('adminContent').style.display = "none";
@@ -189,7 +191,19 @@
       document.getElementById("statusMessage").innerHTML = "Transaction Complete, page will refresh in 10 seconds";
     }
 
+    const disableAllButtons = ()=>{
+      var VFButtons = document.getElementsByName('VFButton');
+      var VAButtons = document.getElementsByName('VAButton');
+      for(var i=0; i<VFButtons.length; i++){
+        VFButtons[i].style.display = "none";
+      }
+      for(var i=0; i<VAButtons.length; i++){
+        VAButtons[i].style.display = "none";
+      }
+    }
+
     window.addEventListener('load', () => onload(), false);
+    
     const onload = async function() {
       const validators = {{{ json this.snapshot.validators }}};
       const nodes      = {{{ json this.nodeRows }}};
@@ -203,22 +217,27 @@
           alert("Please Allow Connection from ledgerium wallet");
           // ask user to connect to ledgerium wallet
         }
-      } else if (window.web3){
+      /*} else if (window.web3){
         //legacy
-        localWeb3 = await new Web3(window.web3.currentProvider);
+        localWeb3 = await new Web3(window.web3.currentProvider);*/
       }else{
+        showError("Please install and unlock <a href='https://github.com/ledgerium-io/metamask-extension'>Ledgerium Wallet</a> or make sure you are using an admin account");
+        disableAllButtons();
         return;
+        //throw new Error('Ledgerium Wallet Not fount');
       }
-      const currentAccount = localWeb3.currentProvider.selectedAddress.toLowerCase();
-      if (!currentAccount || !checkValidator(currentAccount)) {
+      if (!localWeb3.currentProvider.selectedAddress || !checkValidator(localWeb3.currentProvider.selectedAddress.toLowerCase())) {
         // show error and return 
-        showError("Please install and unlock <a href='https://metamask.io/'>MetaMask</a> or make sure you are using an admin account");
+        showError("Please install and unlock <a href='https://github.com/ledgerium-io/metamask-extension'>Ledgerium Wallet</a> or make sure you are using an admin account");
+        disableAllButtons();
         return;
+        //throw new Error('Ledgerium Wallet Not fount');
       }
       else {
         // show current meta mask account
-        document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${currentAccount}`;
+        document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${localWeb3.currentProvider.selectedAddress}`;
       }
+      currentAccount = localWeb3.currentProvider.selectedAddress.toLowerCase();
       var map = {};     
       
       for(var i=0; i<validators.length; i++){
@@ -227,7 +246,7 @@
       }
       const table = document.getElementById('newNodes');
       // table to add button and new nodes
-      nodes.push({publicKey:"0x2ad682de2c5a81e4b661a3a038d73f03df6a79c1"})
+      //nodes.push({publicKey:"0xa05f26c53c63a87195e19865ea5ac7fd01599123"})
       for(var i=0; i<nodes.length; i++){
         var temp = nodes[i].publicKey.toLowerCase();
         if(!map[temp]){
@@ -238,8 +257,13 @@
           cell2.innerHTML= `<button class='button-primary' onclick='castVote("${temp}",true)' value='${temp}' name="VFButton">Vote For</button><button onclick='castVote("${temp}",true)' value='${temp}' name="VAButton">Vote Against</button>`;
         }
       }
+      console.log("before");
+      if(currentAccount != nodes[0].publicKey){
+        disableAllButtons();
+        return;
+      }
+      console.log("here");
       // check newly added nodes
-
       const enabledButtons = document.getElementsByName('VFButton');
       const disabledButtons = document.getElementsByName('VAButton');
       map = {};
@@ -258,13 +282,19 @@
       }
       for(var i=0;i<disabledButtons.length;i++){
         if(disabledButtons[i].value.toLowerCase() === currentAccount || map[disabledButtons[i].value]){
-          disabledButtons[i].style.display = "none"
+          disabledButtons[i].style.display = "none";
         }
       }
     }
+    setInterval(function () {
+      const nodes = {{{ json this.nodeRows }}};
+      if ( localWeb3 && localWeb3.currentProvider.selectedAddress && currentAccount != localWeb3.currentProvider.selectedAddress.toLowerCase() ){
+        location.reload();
+      }
+    }, 200);
     const castVote = (address,vote)=>{
       var myBody = {};
-      myBody = { account:address, proposal:vote };
+      myBody = { account:address, proposal:vote, currentAccount:currentAccount };
       fetch("/istanbul_propose", {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         mode: "cors", // no-cors, cors, *same-origin
