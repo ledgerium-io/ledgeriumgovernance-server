@@ -18,7 +18,7 @@ const currentIp = execSync('curl -s https://api.ipify.org');
  */
 var gethIp = process.argv[2] || "localhost";
 var gethIpRpcPort = process.argv[3] || "8545";
-var privatekey = process.argv[4] || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
+var privatekey = process.argv[4];// || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
 
 var listenPort = "3003";
 var consortiumId = "2018";
@@ -512,7 +512,7 @@ async function getAdminPeers(url) {
         nodesList.push({
           enode: curNode.result.id,
           name: curNode.result.name.split("/")[1],
-          role: "node",
+          role: "Node",
           ip: currentIp,
           publicKey: '0x' + ethUtil.pubToAddress('0x' + curNode.result.id).toString('hex'),
           port: curNode.result.ports.listener
@@ -521,7 +521,7 @@ async function getAdminPeers(url) {
           Ip = retValue.result[i].network.remoteAddress.split(":");
           nodesList.push({
             name: retValue.result[i].name.split('/')[1],
-            role: "node",
+            role: "Node",
             ip: Ip[0],
             port: Ip[1],
             publicKey: '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex'),
