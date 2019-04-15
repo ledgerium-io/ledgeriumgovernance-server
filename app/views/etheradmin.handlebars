@@ -289,7 +289,7 @@
     }
     setInterval(function () {
       const nodes = {{{ json this.nodeRows }}};
-      if ( localWeb3 && localWeb3.currentProvider.selectedAddress && currentAccount != localWeb3.currentProvider.selectedAddress.toLowerCase()){
+      if ( localWeb3 && localWeb3.currentProvider.selectedAddress && currentAccount != localWeb3.currentProvider.selectedAddress.toLowerCase() && isLoaded){
         currentAccount = localWeb3.currentProvider.selectedAddress.toLowerCase();
         location.reload();
       }
