@@ -3,7 +3,6 @@ var exphbs = require('express-handlebars');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var Utils = require('../web3util');
-var Web3 = require('web3');
 var moment = require('moment');
 var Promise = require('promise');
 var appjson = require('./version.json')
@@ -13,12 +12,13 @@ const ethUtil = require('ethereumjs-util');
 const utils = new Utils();
 const execSync = require('child_process').execSync;
 const currentIp = execSync('curl -s https://api.ipify.org');
+const sigUtil = require('eth-sig-util');
 /*
  * Parameters
  */
 var gethIp = process.argv[2] || "localhost";
 var gethIpRpcPort = process.argv[3] || "8545";
-var privatekey = process.argv[4];// || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
+var privatekey = process.argv[4] || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
 
 var listenPort = "3003";
 var consortiumId = "2018";
@@ -29,8 +29,6 @@ var ethRpcPort = gethIpRpcPort;
  */
 const refreshInterval = 60000;
 const nodeRegexExp = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
-
-//const recentBlockDecrement = 10; // To find a recent block for "/networkInfo", take the "currentBlock - recentBlockDecrement"
 var hostURL = "http://" + gethIp + ":" + ethRpcPort;
 var activeNodes = [];
 var abiContent = '';
@@ -38,13 +36,12 @@ var adminContractABI = '';
 var simpleContractABI = '';
 var networkManagerContractABI = '';
 var adminValidatorSetAddress, simpleValidatorSetAddress, networkManagerAddress;
-
 var timeStamp;
-
 var web3RPC = new Web3(new Web3.providers.HttpProvider(hostURL));
 var networkmanagerContract;
-
 var app = express();
+var tokenMap = {};
+
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
   helpers: {
@@ -73,16 +70,6 @@ process.on('unhandledRejection', err => {
   } else throw err;
 });
 
-// Set logging
-// var log_file = fs.createWriteStream(logFilePath, {
-//   flags: 'a'
-// });
-// var log_stdout = process.stdout;
-
-// // = function (d) {
-//   log_file.write(util.format(d) + '\n');
-//   log_stdout.write(util.format(d) + '\n');
-// };
 
 /*
  * Output Parameters to log file
@@ -94,17 +81,9 @@ console.log(`ethRpcPort: ${ethRpcPort}`)
 console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
-//('Start EtherAdmin Site');
-//setInterval(getNodesfromBlockchain, 120000);
-
 getAbiData();
 networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), networkManagerAddress);
 getNodesfromBlockchain();
-
-// function readNetworkManagerContract() {
-//   //var web3RPC = new Web3(new Web3.providers.HttpProvider(`http://${gethIp}:${ethRpcPort}`));
-
-// }
 
 function getRecentBlock() {
   return new Promise(function (resolve, reject) {
@@ -268,187 +247,6 @@ function getIstanbulSnapshot(url) {
   });
 }
 
-app.get('/', async function (req, res) {
-  //var time = moment().format('h:mm:ss A UTC,  MMM Do YYYY');
-  /* var data = {
-    consortiumid: consortiumId,
-    refreshinterval: (refreshInterval / 1000),
-    contractAbi: adminContractABI,
-    timestamp : moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
-    nodes: {
-      adminContractAbi: adminContractABI,
-      adminContractAddress: adminValidatorSetAddress,
-      simpleContractAbi: simpleContractABI,
-      simpleContractAddress: simpleValidatorSetAddress
-    }
-  } */
-  var data = {
-    consortiumid: consortiumId,
-    timestamp: moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
-    refreshinterval: (refreshInterval / 1000),
-    nodeRows: [],
-    hasNodeRows: 0,
-    snapshot: {
-      validators: []
-    }
-  };
-  getAdminPeers(hostURL)
-    .then((activeNodes) => {
-      data.nodeRows = activeNodes;
-      data.hasNodeRows = activeNodes.length;
-      getIstanbulSnapshot(hostURL)
-        .then((snapshot) => {
-          data.snapshot = snapshot;
-          res.render('etheradmin', data);
-        })
-        .catch((err) => {
-          console.log("error at istanbul snapshot", err);
-          res.render('etheradmin', data);
-        })
-    })
-    .catch((err) => {
-      console.log("error at getting admin list", err);
-      res.render('etheradmin', data);
-    });
-  //await synchPeers(hostURL);
-  /* getNodesfromBlockchain()
-  .then(function (activeNodes) {
-    if(activeNodes == undefined) {
-      data.hasNodeRows = 0;
-      data.nodeRows = [];
-    } else {
-      console.log("activeNodes", activeNodes);
-      data.hasNodeRows = activeNodes.length;
-      data.nodeRows = activeNodes; 
-    }
-    getIstanbulSnapshot().then((snapshot)=>{
-      console.log(snapshot);
-      var temp = {}, newNodes = [];
-      data.proposed = snapshot.votes;
-      data.votes = snapshot.votes.length;
-      for(var ind=0;ind<snapshot.validators.length;ind++){
-        temp[snapshot.validators[ind].toLowerCase()] = true;
-        if(ind<snapshot.votes.length){
-          temp[snapshot.votes[ind].address.toLowerCase()] = true;
-        }
-      }
-      for(var ind=0;ind<activeNodes;ind++){
-        if(temp[activeNodes[ind].toLowerCase()])
-          newNodes.push({address:"0x"+ethUtil.pubToAddress("0x"+activeNodes[ind].enode).toString('hex')});
-      }
-      data.newNodes = newNodes;
-      data.newFlag = newNodes.length;
-      console.log("--------");
-      res.render('etheradmin', data);
-    }).catch((err)=>{
-      console.log(err);
-      console.log("=======");
-      res.render('etheradmin', data);
-    });
-  })
-  .catch(function (error) {
-    console.log(`Error occurs while getting node details : ${error}`);
-    data.hasNodeRows = 0;
-    data.nodeRows = [];
-    res.render('etheradmin', data);
-  }) */
-});
-
-// Get:networkinfo
-app.get('/networkinfo', function (req, res) {
-  var networkInfo = new NetworkInfo();
-  networkInfo.adminContractABI = abiContent;
-
-  getRecentBlock()
-    .then(function (recentBlock) {
-      networkInfo.recentBlock = recentBlock;
-      networkInfo.networkID = "2018";
-      res.send(JSON.stringify(networkInfo));
-    })
-    .catch(function (error) {
-      console.log(`Error getRecentBlock : ${error}`);
-      res.send(JSON.stringify(networkInfo));
-    })
-})
-
-// Used for sharing information about the network to joining members
-function NetworkInfo() {
-  this.adminContractABI = "";
-  this.networkID = "";
-  this.errorMessage = "";
-  this.recentBlock = "";
-}
-
-app.get('/AdminValidatorSet.js', function (req, res) {
-  var file = __dirname.replace("/app", "") + '/adminvalidatorset.js';
-  res.download(file);
-});
-
-app.get('/SimpleValidatorSet.js', function (req, res) {
-  var file = __dirname.replace("/app", "") + '/simplevalidatorset.js';
-  res.download(file);
-});
-
-app.get('/ethereumjs-tx-1.3.3.min.js', function (req, res) {
-  var file = __dirname.replace("/app", "/app/dist") + '/ethereumjs-tx-1.3.3.min.js';
-  res.download(file);
-});
-
-app.get('/web3util.js', function (req, res) {
-  var file = __dirname + '/web3util.js';
-  res.download(file);
-});
-
-app.get('/web3.1-beta.js', function (req, res) {
-  var file = __dirname.replace("/app", "/app/dist") + '/web3.min.js';
-  res.download(file);
-});
-
-app.listen(listenPort, function () {
-  //('Admin webserver listening on port ' + listenPort);
-});
-
-app.post('/istanbul_propose', function (req, res) {
-  //const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
-  /* const signature = req.body.signature;
-  if(!signature || !signature.v || signature.r || signature.s)
-    res.status(400).send("Signature Not Valid")
-  var pubkey = ethUtils.ecrecover(data,  req.body.signature.v,  req.body.signature.r,  req.body.signature.s); */
-  //("Initiated a web3 ipc interface");
-  web3.eth.getCoinbase((err, coinbase) => {
-    if (coinbase && (coinbase.toLowerCase() === req.body.currentAccount)) {
-      if (typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string')
-        res.status(405).send({ mes: "wrong request" });
-      var message = {
-        method: "istanbul_propose",
-        params: [req.body.account, req.body.proposal],
-        jsonrpc: "2.0",
-        id: new Date().getTime()
-      };
-      //(JSON.stringify(message));
-      web3.currentProvider.send(message, (err, result) => {
-        //("received results:removeIstanbulValidator");
-        if (result) {
-          //("results", result.result);
-          console.log(result);
-          console.log("success");
-          res.status(200).send({ result: "success" });
-        }
-        else if (err) {
-          //("print result", err);
-          console.log(err);
-          console.log("failure");
-          res.status(500).send({ err: "error" });
-        }
-      });
-    }
-    else {
-      res.status(400).send("Not an Admin Account");
-    }
-  });
-});
-
 async function synchPeers(URL) {
 
   var nodesList = await getAdminPeers(URL);
@@ -533,3 +331,178 @@ async function getAdminPeers(url) {
     });
   });
 }
+
+// Used for sharing information about the network to joining members
+function NetworkInfo() {
+  this.adminContractABI = "";
+  this.networkID = "";
+  this.errorMessage = "";
+  this.recentBlock = "";
+}
+
+app.get('/', async function (req, res) {
+  var data = {
+    consortiumid: consortiumId,
+    timestamp: moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
+    refreshinterval: (refreshInterval / 1000),
+    nodeRows: [],
+    hasNodeRows: 0,
+    snapshot: {
+      validators: []
+    }
+  };
+  getAdminPeers(hostURL)
+    .then((activeNodes) => {
+      data.nodeRows = activeNodes;
+      data.hasNodeRows = activeNodes.length;
+      getIstanbulSnapshot(hostURL)
+        .then((snapshot) => {
+          data.snapshot = snapshot;
+          res.render('etheradmin', data);
+        })
+        .catch((err) => {
+          console.log("error at istanbul snapshot", err);
+          res.render('etheradmin', data);
+        })
+    })
+    .catch((err) => {
+      console.log("error at getting admin list", err);
+      res.render('etheradmin', data);
+    });
+});
+
+// Get:networkinfo
+app.get('/networkinfo', function (req, res) {
+  var networkInfo = new NetworkInfo();
+  networkInfo.adminContractABI = abiContent;
+
+  getRecentBlock()
+    .then(function (recentBlock) {
+      networkInfo.recentBlock = recentBlock;
+      networkInfo.networkID = "2018";
+      res.send(JSON.stringify(networkInfo));
+    })
+    .catch(function (error) {
+      console.log(`Error getRecentBlock : ${error}`);
+      res.send(JSON.stringify(networkInfo));
+    })
+})
+
+app.get('/AdminValidatorSet.js', function (req, res) {
+  var file = __dirname.replace("/app", "") + '/adminvalidatorset.js';
+  res.download(file);
+});
+
+app.get('/SimpleValidatorSet.js', function (req, res) {
+  var file = __dirname.replace("/app", "") + '/simplevalidatorset.js';
+  res.download(file);
+});
+
+app.get('/ethereumjs-tx-1.3.3.min.js', function (req, res) {
+  var file = __dirname.replace("/app", "/app/dist") + '/ethereumjs-tx-1.3.3.min.js';
+  res.download(file);
+});
+
+app.get('/web3util.js', function (req, res) {
+  var file = __dirname + '/web3util.js';
+  res.download(file);
+});
+
+app.get('/web3.1-beta.js', function (req, res) {
+  var file = __dirname.replace("/app", "/app/dist") + '/web3.min.js';
+  res.download(file);
+});
+
+app.post('/start_propose', (req, res)=>{
+  if(typeof req.body.proposal != 'boolean' || typeof req.body.sender != 'string' || typeof req.body.vote != 'string'){
+    res.status(405).send({ message: "Wrong typeof request" });
+    return;
+  }
+  var methodData = '';
+  const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
+  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
+  Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
+  .then((result)=>{
+    if(result[0] == '0' && result[1] == '0'){
+      if(req.body.proposal){
+        console.log("create proposal");
+        methodData = Admin.methods.proposalToAddAdmin(req.body.vote).encodeABI();
+      }
+      else{
+        console.log("remove proposal");
+        methodData = Admin.methods.proposalToRemoveAdmin(req.body.vote).encodeABI();
+      }
+    }else{
+      if(req.body.proposal){
+        console.log("vote add");
+        methodData = Admin.methods.voteForAddingAdmin(req.body.vote).encodeABI();
+      }
+      else{
+        console.log("vote remove");
+        methodData = Admin.methods.voteForRemovingAdmin(req.body.vote).encodeABI();
+      }
+    }
+    web3.eth.getTransactionCount(req.body.sender,(err, nonceToUse)=>{
+      if(err){
+        res.status(405).send({});
+      }else{
+        const token = '0x'+ethUtil.keccak256(Math.random().toString()).toString('hex');
+        tokenMap[token] = true;
+        res.status(200).send({
+          tx:{
+            nonce: nonceToUse,
+            gasPrice: '0x4A817C800', //20Gwei
+            gasLimit: '0x47b760',//'0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
+            from: req.body.sender,
+            to: adminValidatorSetAddress,
+            value: web3.utils.toHex(0),
+            data: methodData
+          },
+          token : token
+        });
+      }
+    })
+  })
+  .catch((err)=>{
+    console.log(err);
+    res.status(500).send();
+  });
+});
+
+app.listen(listenPort, function () {
+  //('Admin webserver listening on port ' + listenPort);
+});
+
+app.post('/istanbul_propose', function (req, res) {
+  const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
+  if(!tokenMap[req.body.hash]){
+    console.log("here")
+    res.status(400).send({ message:"agalla" });
+    return;
+  }
+  delete tokenMap[req.body.hash];
+  const recovered = sigUtil.recoverPersonalSignature({ data: req.body.hash, sig:req.body.signature});
+  web3.eth.getCoinbase((err, coinbase) => {
+    if (coinbase && (coinbase.toLowerCase() === recovered.toLowerCase())) {
+      if (typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string')
+        res.status(405).send({ mes: "wrong request" });
+      var message = {
+        method: "istanbul_propose",
+        params: [req.body.account, req.body.proposal],
+        jsonrpc: "2.0",
+        id: new Date().getTime()
+      };
+      web3.currentProvider.send(message, (err, result) => {
+        if (result) {
+          res.status(200).send({ result: "success" });
+        }
+        else if (err) {
+          res.status(500).send({ err: "error" });
+        }
+      });
+    }
+    else {
+      res.status(400).send("Not an Admin Account");
+    }
+  });
+});

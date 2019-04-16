@@ -21,7 +21,7 @@
   </div>
 
   <div id="transactionStatus" class="statusBar">
-    <img src="./assets/progress.gif" class="statusIcon" />
+    <img src="./assets/progress.gif" class="statusIcon" id="gif-1" />
     <span id="statusMessage" class="statusMessage"></span>
   </div>
 
@@ -42,8 +42,8 @@
       <tr>
         <td> {{this}} </td>
         <td>
-          {{!-- <button onclick="castVote('{{this}}',true)" class="button-primary" name="VFButton" value="{{this}}"> Vote For </button> --}}
-          <button onclick="castVote('{{this}}',false)" name="VAButton" value="{{this}}"> Vote Against </button>
+          {{!-- <button onclick="startVote('{{this}}',true)" class="button-primary" name="VFButton" value="{{this}}"> Vote For </button> --}}
+          <button onclick="startVote('{{this}}',false)" name="VAButton" value="{{this}}"> Vote Against </button>
         </td>
       </tr>
       {{/each }}
@@ -179,16 +179,15 @@
       return false;
     }
 
-    const errorMessage = (message) => {
-      document.getElementById("transactionStatus").style.display = "none";
-      document.getElementById("failureStatus").style.display = "block";
-      document.getElementById("errorMessage").innerHTML = message;
-    }
-
-    const successMessage = (message) => {
+    const transactionMessage = (message, flag) => {
       document.getElementById("failureStatus").style.display = "none";
       document.getElementById("transactionStatus").style.display = "block";
-      document.getElementById("statusMessage").innerHTML = "Transaction Complete, page will refresh in 10 seconds";
+      document.getElementById("statusMessage").innerHTML = message;
+    }
+
+    const removeMessages = ()=>{
+      document.getElementById("transactionStatus").style.display = "none";
+      document.getElementById("failureStatus").style.display = "none";
     }
 
     const disableAllButtons = ()=>{
@@ -254,15 +253,13 @@
           const cell1    = adminRow.insertCell(0);
           cell1.innerHTML= temp;
           const cell2    = adminRow.insertCell(1);
-          cell2.innerHTML= `<button class='button-primary' onclick='castVote("${temp}",true)' value='${temp}' name="VFButton">Vote For</button><button onclick='castVote("${temp}",true)' value='${temp}' name="VAButton">Vote Against</button>`;
+          cell2.innerHTML= `<button class='button-primary' onclick='startVote("${temp}",true)' value='${temp}' name="VFButton">Vote For</button><button onclick='startVote("${temp}",true)' value='${temp}' name="VAButton">Vote Against</button>`;
         }
       }
-      console.log("before");
       if(currentAccount != nodes[0].publicKey){
         disableAllButtons();
         return;
       }
-      console.log("here");
       // check newly added nodes
       const enabledButtons = document.getElementsByName('VFButton');
       const disabledButtons = document.getElementsByName('VAButton');
@@ -287,6 +284,7 @@
       }
       isLoaded = true;
     }
+
     setInterval(function () {
       const nodes = {{{ json this.nodeRows }}};
       if ( localWeb3 && localWeb3.currentProvider.selectedAddress && currentAccount != localWeb3.currentProvider.selectedAddress.toLowerCase() && isLoaded){
@@ -294,29 +292,85 @@
         location.reload();
       }
     }, 200);
-    const castVote = (address,vote)=>{
+
+    const castVote = (transactionHash, vote, decision)=>{
+      var pending = JSON.parse(localStorage.getItem('pending'));
+      console.log(pending);
+      var myBody = { proposal:decision, account:vote, hash:pending.token };
+      web3.personal.sign(pending.token, pending.account,(err,signature)=>{
+        if(err){
+          console.log(err);
+          localStorage.setItem('pending','');
+        }else{
+          console.log(signature);
+          myBody.signature = signature;
+          fetch("/istanbul_propose", {
+            method: "POST", // *GET, POST, PUT, DELETE, etc.
+            mode: "cors", // no-cors, cors, *same-origin
+            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: "same-origin", // include, *same-origin, omit
+            headers: {
+              "Content-Type": "application/json",
+              // "Content-Type": "application/x-www-form-urlencoded",
+            },
+              redirect: "follow", // manual, *follow, error
+              referrer: "no-referrer", // no-referrer, *client
+              body: JSON.stringify(myBody), // body data type must match "Content-Type" header
+          })   
+          .then((data) => {
+            transactionMessage("Transaction Complete, page will refresh in 10 seconds");
+            localStorage.setItem('pending','');
+            setTimeout(()=>{ location.reload(true); },10000);
+          }) // JSON-string from `response.json()` call
+          .catch((err) => {
+            console.error(err);
+            localStorage.setItem('pending','');
+            showError("Server Responded with a error message please contact your admin")
+          });
+        }
+      });
+    }
+
+    const startVote = (address,decision)=>{
       var myBody = {};
-      myBody = { account:address, proposal:vote, currentAccount:currentAccount };
-      fetch("/istanbul_propose", {
-        method: "POST", // *GET, POST, PUT, DELETE, etc.
-        mode: "cors", // no-cors, cors, *same-origin
-        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: "same-origin", // include, *same-origin, omit
-        headers: {
-            "Content-Type": "application/json",
-            // "Content-Type": "application/x-www-form-urlencoded",
+      myBody = { vote:address, proposal:decision, sender:currentAccount };
+      var temp = localStorage.getItem('pending');
+      if(temp){
+        return;
+      }
+      temp = {};
+      temp['account'] = currentAccount;
+      localStorage.setItem('pending',JSON.stringify(temp));
+      fetch("/start_propose",{
+        method      : "POST",
+        mode        : "cors",
+        cache       : "no-cache",
+        credentials : "same-origin",
+        headers     : {
+          "Content-Type" : "application/json"
         },
-        redirect: "follow", // manual, *follow, error
-        referrer: "no-referrer", // no-referrer, *client
-        body: JSON.stringify(myBody), // body data type must match "Content-Type" header
+        redirect    : "follow",
+        referrer    : "no-referrer",
+        body        : JSON.stringify(myBody)
       })
-      .then((data) => {
-        successMessage()
-        setTimeout(()=>{ location.reload(true); },10000);
-      }) // JSON-string from `response.json()` call
-      .catch((err) => {
-        console.error(err);
-        errorMessage("Server Responded with a error message please contact your admin")
+      .then((response)=>{
+        return response.json();
+      })
+      .then((data)=>{
+        temp = JSON.parse(localStorage.getItem('pending'));
+        temp['token'] = data.token;
+        localStorage.setItem('pending',JSON.stringify(temp));
+        transactionMessage("Mining Transaction...");
+        return localWeb3.eth.sendTransaction(data.tx)
+      })
+      .then((receipt)=>{
+        //if(receipt.status)
+        castVote(receipt.transactionHash, address, decision, myBody.sender);
+      })
+      .catch((err)=>{
+        console.log(err);
+        localStorage.setItem('pending','');
+        showError("Your tranasction failed");
       });
     }
   </script>
