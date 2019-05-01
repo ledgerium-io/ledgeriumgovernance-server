@@ -293,54 +293,49 @@
       }
     }, 200);
 
-    const castVote = (transactionHash, vote, decision)=>{
-      var pending = JSON.parse(localStorage.getItem('pending'));
-      console.log(pending);
+    const castVote = (transactionHash, vote, decision, pending)=>{
+      //var pending = JSON.parse(localStorage.getItem('pending'));
+      //console.log(pending);
+      const signature = pending.signature;
       var myBody = { proposal:decision, account:vote, hash:pending.token };
-      web3.personal.sign(pending.token, pending.account,(err,signature)=>{
-        if(err){
-          console.log(err);
-          localStorage.setItem('pending','');
-        }else{
-          console.log(signature);
-          myBody.signature = signature;
-          fetch("/istanbul_propose", {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-            mode: "cors", // no-cors, cors, *same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            headers: {
-              "Content-Type": "application/json",
-              // "Content-Type": "application/x-www-form-urlencoded",
-            },
-              redirect: "follow", // manual, *follow, error
-              referrer: "no-referrer", // no-referrer, *client
-              body: JSON.stringify(myBody), // body data type must match "Content-Type" header
-          })   
-          .then((data) => {
-            transactionMessage("Transaction Complete, page will refresh in 10 seconds");
-            localStorage.setItem('pending','');
-            setTimeout(()=>{ location.reload(true); },10000);
-          }) // JSON-string from `response.json()` call
-          .catch((err) => {
-            console.error(err);
-            localStorage.setItem('pending','');
-            showError("Server Responded with a error message please contact your admin")
-          });
-        }
+      console.log(signature);
+      myBody.signature = signature;
+      fetch("/istanbul_propose", {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+          "Content-Type": "application/json",
+          // "Content-Type": "application/x-www-form-urlencoded",
+        },
+          redirect: "follow", // manual, *follow, error
+          referrer: "no-referrer", // no-referrer, *client
+          body: JSON.stringify(myBody), // body data type must match "Content-Type" header
+      })   
+      .then((data) => {
+        transactionMessage("Transaction Complete, page will refresh in 10 seconds");
+        console.log("3");        
+        localStorage.clear();
+        setTimeout(()=>{ location.reload(true); },10000);
+      }) // JSON-string from `response.json()` call
+      .catch((err) => {
+        console.error(err);        
+        localStorage.clear();
+        showError("Server Responded with a error message please contact your admin")
       });
     }
 
     const startVote = (address,decision)=>{
       var myBody = {};
       myBody = { vote:address, proposal:decision, sender:currentAccount };
-      var temp = localStorage.getItem('pending');
-      if(temp){
+      var inProgress = localStorage.getItem('pending');
+      if(inProgress){
         return;
       }
-      temp = {};
+      var temp = {};
+      var tx = {};
       temp['account'] = currentAccount;
-      localStorage.setItem('pending',JSON.stringify(temp));
       fetch("/start_propose",{
         method      : "POST",
         mode        : "cors",
@@ -357,19 +352,40 @@
         return response.json();
       })
       .then((data)=>{
-        temp = JSON.parse(localStorage.getItem('pending'));
         temp['token'] = data.token;
-        localStorage.setItem('pending',JSON.stringify(temp));
+        tx = data.tx;
+        /*localStorage.setItem('pending',JSON.stringify(temp));
+        setTimeout(()=>{
+          localStorage.clear();
+        },30000);*/
         transactionMessage("Mining Transaction...");
-        return localWeb3.eth.sendTransaction(data.tx)
+        return localWeb3.eth.personal.sign(data.token, currentAccount);
+        //return localWeb3.eth.sendTransaction(data.tx)
       })
-      .then((receipt)=>{
-        //if(receipt.status)
-        castVote(receipt.transactionHash, address, decision, myBody.sender);
+      .then((signature)=>{
+        console.log("1");
+        console.log(signature);
+        temp['signature'] = signature;
+        localWeb3.eth.sendTransaction(tx)
+        .once('transactionHash', function(hash){
+            console.log("2");
+            //localStorage.setItem('pending','true');
+            transactionMessage("Transaction Received By Blockchain ...")
+        })
+        .once('receipt', function(receipt){
+            console.log("3");
+            transactionMessage("Transaction mined ..");
+            castVote(receipt.transactionHash, address, decision, myBody.sender, temp);
+        })
+        .once('error', (err)=>{
+          console.log(err);
+          localStorage.clear();
+          showError("Your tranasction failed");
+        });
       })
       .catch((err)=>{
         console.log(err);
-        localStorage.setItem('pending','');
+        localStorage.clear();
         showError("Your tranasction failed");
       });
     }
