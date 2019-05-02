@@ -414,13 +414,16 @@ app.get('/web3.1-beta.js', function (req, res) {
 });
 
 app.post('/start_propose', (req, res)=>{
+  console.log("Istanbul propose started");
   if(typeof req.body.proposal != 'boolean' || typeof req.body.sender != 'string' || typeof req.body.vote != 'string'){
+    console.log("Type Error");
     res.status(405).send({ message: "Wrong typeof request" });
     return;
   }
   var methodData = '';
   const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
   const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
+  console.log("Checking Votes");
   Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
   .then((result)=>{
     if(result[0] == '0' && result[1] == '0'){
@@ -444,8 +447,11 @@ app.post('/start_propose', (req, res)=>{
     }
     web3.eth.getTransactionCount(req.body.sender,(err, nonceToUse)=>{
       if(err){
+        console.log("Error Getting Transaction Count");
+        console.log(err);
         res.status(405).send({});
       }else{
+        console.log("Got Transaction Count");
         const token = '0x'+ethUtil.keccak256(Math.random().toString()).toString('hex');
         tokenMap[token] = true;
         res.status(200).send({
@@ -460,10 +466,12 @@ app.post('/start_propose', (req, res)=>{
           },
           token : token
         });
+        console.log("Response Sent");
       }
     })
   })
   .catch((err)=>{
+    console.log("Error Checking Votes");
     console.log(err);
     res.status(500).send();
   });
@@ -474,34 +482,62 @@ app.listen(listenPort, function () {
 });
 
 app.post('/istanbul_propose', function (req, res) {
-  const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
-  if(!tokenMap[req.body.hash]){
-    console.log("here")
+  console.log("Istanbul Propose Started");
+  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
+  if(!tokenMap[req.body.hash] ){//|| !req.body.transactionHash){
+    console.log("Incomplete Request or Wrong Request");
     res.status(400).send({ message:"agalla" });
     return;
   }
   delete tokenMap[req.body.hash];
   const recovered = sigUtil.recoverPersonalSignature({ data: req.body.hash, sig:req.body.signature});
   web3.eth.getCoinbase((err, coinbase) => {
+    console.log("Got Coinbase Account");
     if (coinbase && (coinbase.toLowerCase() === recovered.toLowerCase())) {
-      if (typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string')
+      console.log("Signatures from Request and Token Match");
+      if (typeof req.body.proposal != 'boolean' || typeof req.body.account != 'string'){
+        console.log("Request Variables Are Of Wrong Type");
         res.status(405).send({ mes: "wrong request" });
+      }
       var message = {
         method: "istanbul_propose",
         params: [req.body.account, req.body.proposal],
         jsonrpc: "2.0",
         id: new Date().getTime()
       };
-      web3.currentProvider.send(message, (err, result) => {
-        if (result) {
-          res.status(200).send({ result: "success" });
-        }
-        else if (err) {
+      let count = 0;
+      const getTransactionReceipt = (hash)=>{
+        count++;
+        if(count == 30){
+          console.log("Transaction Receipt Not Received Within 30 Seconds");
           res.status(500).send({ err: "error" });
+          return;
         }
-      });
+        web3.eth.getTransactionReceipt(hash,(err,callbackReceipt)=>{
+          if(callbackReceipt && callbackReceipt.status){
+            web3.currentProvider.send(message, (err, result) => {
+              if (result) {
+                console.log("Istanbul Propose Successful");
+                res.status(200).send({ result: "success" });
+              }
+              else {
+                console.log("Istanbul Propose Failed");
+                res.status(500).send({ err: "error" });
+              }
+            });
+          }else if( !callbackReceipt ) {
+            setTimeout(getTransactionReceipt, 1000, hash);                  
+          }else if(!callbackReceipt.status){
+            console.log("Blockchain Transaction Failed");
+            res.status(500).send({ err: "error" });
+          }
+        });
+      }
+      console.log("Getting Transaction Receipt");
+      getTransactionReceipt(req.body.transactionHash);
     }
     else {
+      console.log("wrong signature");
       res.status(400).send("Not an Admin Account");
     }
   });
