@@ -421,7 +421,7 @@ app.post('/start_propose', (req, res)=>{
     return;
   }
   var methodData = '';
-  const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
+  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
   const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
   console.log("Checking Votes");
   Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
@@ -484,7 +484,7 @@ app.listen(listenPort, function () {
 app.post('/istanbul_propose', function (req, res) {
   console.log("Istanbul Propose Started");
   const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
-  if(!tokenMap[req.body.hash] ){//|| !req.body.transactionHash){
+  if(!tokenMap[req.body.hash] || !req.body.transactionHash){
     console.log("Incomplete Request or Wrong Request");
     res.status(400).send({ message:"agalla" });
     return;
