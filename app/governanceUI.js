@@ -1,47 +1,48 @@
-var express = require('express');
-var exphbs = require('express-handlebars');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var Utils = require('../web3util');
-var moment = require('moment');
-var Promise = require('promise');
-var appjson = require('./version.json')
-var net = require('net');
-var Web3 = require('web3');
-const ethUtil = require('ethereumjs-util');
-const utils = new Utils();
-const execSync = require('child_process').execSync;
-const currentIp = execSync('curl -s https://api.ipify.org');
-const sigUtil = require('eth-sig-util');
+const express     = require('express');
+const exphbs      = require('express-handlebars');
+const bodyParser  = require('body-parser');
+const fs          = require('fs');
+//const Utils       = require('../web3util');
+const moment      = require('moment');
+const Promise     = require('promise');
+const appjson     = require('./version.json')
+const net         = require('net');
+const Web3        = require('web3');
+const ethUtil     = require('ethereumjs-util');
+const execSync    = require('child_process').execSync;
+const sigUtil     = require('eth-sig-util');
+const addresses   = require("../keystore/contractsConfig.json");
+const EthereumTx  = require('ethereumjs-tx');
 /*
  * Parameters
  */
-var gethIp = process.argv[2] || "localhost";
-var gethIpRpcPort = process.argv[3] || "8545";
-var privatekey = process.argv[4] || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
-
-var listenPort = "3003";
-var consortiumId = "2018";
-var ethRpcPort = gethIpRpcPort;
+const privatekey    = process.argv[4] || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
+//const utils         = new Utils();
+const currentIp     = execSync('curl -s https://api.ipify.org');
+const listenPort    = "3003";
+const consortiumId  = "2018";
 
 /*
  * Constants
  */
-const refreshInterval = 60000;
-const nodeRegexExp = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
-var hostURL = "http://" + gethIp + ":" + ethRpcPort;
-var activeNodes = [];
-var abiContent = '';
-var adminContractABI = '';
-var simpleContractABI = '';
-var networkManagerContractABI = '';
-var adminValidatorSetAddress, simpleValidatorSetAddress, networkManagerAddress;
-var timeStamp;
-var web3RPC = new Web3(new Web3.providers.HttpProvider(hostURL));
-var networkmanagerContract;
-var app = express();
-var tokenMap = {};
+const refreshInterval           = 60000;
+const nodeRegexExp              = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
+const hostURL                   = "http://" + (process.argv[2] || "localhost") + ":" + (process.argv[3] || "8545");
+const adminContractABI          = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
+const simpleContractABI         = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
+const networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
+var activeNodes                 = [];
+const abiContent                = '';
+const web3RPC                   = new Web3(new Web3.providers.HttpProvider(hostURL));
+var networkManagerContract      = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), addresses.networkManagerAddress);
+const tokenMap                  = {};
 
+/*
+
+Set Up express to use handlebars and required Middleware
+
+*/
+const app = express();
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
   helpers: {
@@ -59,14 +60,17 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+/*
+
+Exception Handler for an Uncaught Exception
+
+*/
 process.on('uncaughtException', err => {
   if (err.message.includes("ECONNRESET")) {
-    //(err);
   } else throw err;
 });
 process.on('unhandledRejection', err => {
   if (err.message.includes("ECONNRESET")) {
-    //(err);
   } else throw err;
 });
 
@@ -77,158 +81,12 @@ process.on('unhandledRejection', err => {
 console.log("governanceapp starting parameters")
 console.log(`consortiumId: ${consortiumId}`)
 console.log(`listenPort: ${listenPort}`)
-console.log(`ethRpcPort: ${ethRpcPort}`)
+console.log(`ethRpcPort: ${(process.argv[3] || "8545")}`)
 console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
-getAbiData();
-networkmanagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), networkManagerAddress);
-getNodesfromBlockchain();
-
-function getRecentBlock() {
-  return new Promise(function (resolve, reject) {
-    var latestBlockNumber;
-    //web3RPC = undefined;
-    web3RPC.eth.getBlockNumber(function (err, latest) {
-      if (err) {
-        reject(`getBlockNumber error $(err)`);
-      }
-      else {
-        latestBlockNumber = latest;
-        web3RPC.eth.getBlock(latestBlockNumber, function (error, result) {
-          if (!error) {
-            resolve(result);
-          } else {
-            reject('Unable to get a recent block');
-          }
-        }); //web3RPC.eth.getBlock
-      }// else err  
-    }) //web3RPC.eth.getBlockNumber
-  }); //new Promise(function (resolve, reject)
-}
-
-/* 
- * Given a node hostinfo object, collect node information (Consortium Id, PeerCount, Latest Block #) 
- */
-function getNodeInfo(indexNode) {
-  return new Promise(function (resolve, reject) {
-    readNodesFromNetworkManager(indexNode)
-      .then(function (nodeInfo) {
-        resolve(nodeInfo);
-      });//end of then
-  });
-  // });
-}
-
-function readNodesFromNetworkManager(nodeIndex) {
-  return new Promise(function (resolve, reject) {
-    if (networkmanagerContract == undefined)
-      reject('NetworkManagerContract not initialised!');
-    networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
-      if (!error) {
-        ////(`No of nodes: ${noOfNodes}`)
-        if (nodeIndex < noOfNodes) {
-          networkmanagerContract.methods.getNodeDetails(nodeIndex).call(function (error, result) {
-            if (!error) {
-              //console.log(`details of: ${nodeIndex}`)
-              //console.log(`HostName : ${result.hostName} \nRole : ${result.role} \nIPAddress : ${result.ipAddress}  \nPort : ${result.port} \nPublic key : ${result.publicKey} \nEnode : ${result.enode}`);
-              var nodeInfo = {
-                hostname: result.hostName,
-                role: result.role,
-                ipaddress: result.ipAddress,
-                port: result.port,
-                publickey: result.publicKey,
-                enode: result.enode
-              }
-              resolve(nodeInfo);
-            }
-            else {
-              console.log("NetworkManager.getNodeDetails failed!");
-              reject('NetworkManager.getNodeDetails failed!');
-            }
-          });
-        }
-      } else {
-        console.log("web3.eth.getNodesCounter failed!");
-        reject('NetworkManager.getNodesCounter failed!');
-      }
-    });
-  });//end of promise 
-}
-
-function getNoOfNodes() {
-  var promise = new Promise((resolve, reject) => {
-    if (networkmanagerContract) {
-      networkmanagerContract.methods.getNodesCounter().call(function (error, noOfNodes) {
-        if (!error) {
-          console.log(`No of nodes: ${noOfNodes}`);
-          resolve(noOfNodes);
-        }
-        else {
-          reject('networkmanagerContract.getNodesCounter failed')
-        }
-      });
-    }
-  });
-  return promise;
-}
-
-function getAbiData() {
-
-  adminContractABI = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
-  simpleContractABI = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
-  networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
-  //console.log("networkManagerContractABI",networkManagerContractABI);
-
-  var addresses = require("../keystore/contractsConfig.json");
-  adminValidatorSetAddress = addresses.adminValidatorSetAddress;
-  simpleValidatorSetAddress = addresses.simpleValidatorSetAddress;
-  networkManagerAddress = addresses.networkManagerAddress;
-}
-
-function getActiveNodeDetails(noOfNodes) {
-  var nodePromiseArray = [];
-  var promise = new Promise((resolve, reject) => {
-    if (noOfNodes.length == 0) {
-      resolve([]);
-    }
-    for (var index = 0; index < noOfNodes; index++) {
-      var promise = new Promise(function (resolve, reject) {
-        resolve(getNodeInfo(index));
-      });
-      nodePromiseArray.push(promise);
-    }
-    Promise.all(nodePromiseArray).then(function (values) {
-      if (values.length == 0) {
-        resolve("No Values");
-      }
-      //timeStamp = moment().format('h:mm:ss A UTC,  MMM Do YYYY'); 
-      var resultSet = values.sort();
-      resolve(resultSet);
-    });
-  });
-  return promise;
-}
-
-function getNodesfromBlockchain() {
-  return new Promise(function (resolve, reject) {
-    // Get Node info
-    getNoOfNodes()
-      .then(getActiveNodeDetails).catch(function (error) {
-        console.log(`Error occurs while getting node details : ${error}`);
-        reject('Unable to get active nodes');
-      })
-      .then(function (activeNodesList) {
-        //console.log("getActiveNodeDetails output", activeNodesList);
-        if (activeNodesList == undefined)
-          activeNodes = [];
-        activeNodes = activeNodesList;
-        resolve(activeNodes);
-      });
-  });
-}
-
 function getIstanbulSnapshot(url) {
+  console.log("Istanbul Get Snapshot called");
   return new Promise((resolve, reject) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(url));
     w3.currentProvider.send({
@@ -239,53 +97,18 @@ function getIstanbulSnapshot(url) {
     }, (err, result) => {
       //("received results:removeIstanbulValidator");
       if (err) {
+        console.log("Istanbul Get Snapshot Error");
         reject(err);
       } else {
+        console.log("Istanbul Get Snapshot Success");
         resolve(result.result);
       }
     });
   });
 }
 
-async function synchPeers(URL) {
-
-  var nodesList = await getAdminPeers(URL);
-  var ethAccountToUse = '0x' + ethUtil.privateToAddress('0x' + privatekey).toString('hex');
-
-  var nodesListBlockchain = [];
-  var noOfNodes = await networkmanagerContract.methods.getNodesCounter().call();
-  console.log("No of Nodes -", noOfNodes);
-  for (let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-    let result = await networkmanagerContract.methods.getNodeDetails(nodeIndex).call();
-    nodesListBlockchain.push(result);
-  }
-
-  for (var index = 0; index < nodesList.length; index++) {
-    let flag = false;
-    for (let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-      var nodeBlockChain = nodesListBlockchain[nodeIndex];
-      if (nodesList[index].enode == nodeBlockChain.enode) {
-        flag = true;
-        break;
-      }
-    }
-    if (!flag) {
-      let encodedABI = networkmanagerContract.methods.registerNode(nodesList[index].hostname,
-        nodesList[index].hostname,
-        nodesList[index].role,
-        nodesList[index].ipaddress,
-        nodesList[index].port,
-        nodesList[index].publickey,
-        nodesList[index].enode
-      ).encodeABI();
-      var transactionObject = await utils.sendMethodTransaction(ethAccountToUse, networkManagerAddress, encodedABI, privatekey, web3RPC, 0);
-      console.log("TransactionLog for adding peer", nodesList[index].enode, "Network Manager registerNode -", transactionObject.transactionHash);
-    }
-  }
-  return;
-}
-
-async function getAdminPeers(url) {
+function getAdminPeers(url) {
+  console.log("getAdminPeers called");
   return new Promise(function (resolve, reject) {
     let nodesList = [];
     const w3 = new Web3(new Web3.providers.HttpProvider(url));
@@ -296,6 +119,7 @@ async function getAdminPeers(url) {
       params: []
     }, function (err, retValue) {
       if (err) {
+        console.log("getAdminPeers admin_peers Error");
         reject("Admin peers returned null");
       }
       w3.currentProvider.send({
@@ -305,6 +129,7 @@ async function getAdminPeers(url) {
         params: []
       }, function (error, curNode) {
         if (error) {
+          console.log("getAdminPeers admin_nodeInfo Error");
           reject("Admin peers returned null");
         }
         nodesList.push({
@@ -326,18 +151,138 @@ async function getAdminPeers(url) {
             enode: retValue.result[i].id
           });
         }
+        console.log("getAdminPeers success");
         resolve(nodesList);
       });
     });
   });
 }
 
-// Used for sharing information about the network to joining members
-function NetworkInfo() {
-  this.adminContractABI = "";
-  this.networkID = "";
-  this.errorMessage = "";
-  this.recentBlock = "";
+function getRecentBlock() {
+  console.log("getRecentBlock called");
+  return new Promise((resolve,reject)=>{
+    web3RPC.eth.getBlockNumber()
+    .then((blockNumber)=>{
+      console.log("getRecentBlock got blockNumber");
+      return web3RPC.eth.getBlock(blockNumber);
+    })
+    .then((block)=>{
+      console.log("getRecentBlock got complete block");
+      resolve(block);
+    })
+    .catch((err)=>{
+      console.log("error in getBlockNumber or getBlock");
+      reject(err);
+    });
+  });
+}
+
+function readNodesFromNetworkManager (nodeIndex){
+  return new Promise((resolve,reject)=>{
+    if(!networkManagerContract){
+      networkManagerContract = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), addresses.networkManagerAddress);
+      reject("Network Manager Contract not defined");
+    }
+    networkManagerContract.methods.getNodeDetails(nodeIndex)
+    .call()
+    .then(resolve)
+    .catch(reject);
+  })
+}
+
+function getAllNodeInfoFromContract(){
+  console.log("getAllNodeInfoFromContract called");
+  return new Promise((resolve, reject)=>{
+    networkManagerContract.methods.getNodesCounter()
+    .call()
+    .then((nodeCount)=>{
+      console.log("getAllNodeInfoFromContract got node count");
+      const promises = [];
+      for(var i=0; i<nodeCount; i++){
+        promises.push(
+          new Promise((resolveInternal,rejectInternal)=>{
+            readNodesFromNetworkManager(i)
+            .then(resolveInternal)
+            .catch(rejectInternal);
+          })
+        );
+      }
+      Promise.all(promises)
+      .then((allNodes)=>{
+        console.log("getAllNodeInfoFromContract got all promises pending after sending transaction");
+        const nodes = [];
+        for(var i=0; i<allNodes.length; i++){
+          nodes.push({
+            hostName  : allNodes[i]['0'],
+            role      : allNodes[i]['1'],
+            ipAddress : allNodes[i]['2'],
+            port      : allNodes[i]['3'],
+            publicKey : allNodes[i]['4'],
+            enode     : allNodes[i]['5']
+          });
+        }
+        resolve(nodes);
+      })
+      .catch(reject);
+    });
+  });
+}
+
+const refreshNodeList = ()=>{
+  console.log("refreshing node list");  
+  getAllNodeInfoFromContract()
+  .then((allNodes)=>{
+    console.log("refreshed List");
+    activeNodes = allNodes;
+  })
+  .catch(console.log);
+}
+
+const checkNewNodes = async ()=>{
+  const nodeMap = {};
+  console.log("checking new nodes");
+  for(var i=0; i<activeNodes.length; i++){
+    nodeMap[activeNodes[i].publicKey] = true;
+  }
+  getAdminPeers(hostURL)
+  .then((peers)=>{
+    console.log("checkNewNodes got admin peers");
+    const transactionPromises = [];
+    for(var i=0; i<peers.length; i++){
+      if(!nodeMap[peers[i].publicKey]){
+        console.log("New Peer added");
+        let encodedABI = networkmanagerContract.methods.registerNode(peers[index].hostname,
+          peers[index].hostname,
+          peers[index].role,
+          peers[index].ipaddress,
+          peers[index].port,
+          peers[index].publickey,
+          peers[index].enode
+        ).encodeABI();
+        const txParams = {
+          nonce    : nonceToUse,
+          gasPrice : web3.utils.toWei(20,'gwei'),
+          gasLimit : '0x47b760',
+          from     : '0x' + ethUtil.privateToAddress('0x' + privatekey).toString('hex'),
+          to       : addresses.networkManagerAddress,
+          value    : web3.utils.toHex(0),
+          data     : encodedABI
+        }
+        const tx = new EthereumTx(txParams);
+        const privateKeyBuffer = new Buffer(privateKey, 'hex');
+        tx.sign(privateKeyBuffer);
+        const serializedTx = tx.serialize();
+        transactionPromises.push(web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex')));
+      }
+    }
+    Promise.all(transactionPromises)
+    .then((transactionResults)=>{
+      console.log("Got All Transaction Results");
+      console.log(transactionResults);
+    })
+    .catch(console.log);
+  })
+  .catch(console.log)
 }
 
 app.get('/', async function (req, res) {
@@ -346,67 +291,59 @@ app.get('/', async function (req, res) {
     timestamp: moment().format('h:mm:ss A UTC,  MMM Do YYYY'),
     refreshinterval: (refreshInterval / 1000),
     nodeRows: [],
+    allNodes: [],
     hasNodeRows: 0,
     snapshot: {
       validators: []
     }
   };
   getAdminPeers(hostURL)
-    .then((activeNodes) => {
-      data.nodeRows = activeNodes;
-      data.hasNodeRows = activeNodes.length;
-      getIstanbulSnapshot(hostURL)
-        .then((snapshot) => {
-          data.snapshot = snapshot;
-          res.render('etheradmin', data);
-        })
-        .catch((err) => {
-          console.log("error at istanbul snapshot", err);
-          res.render('etheradmin', data);
-        })
-    })
-    .catch((err) => {
-      console.log("error at getting admin list", err);
+  .then((activeNodes) => {
+    data.nodeRows = activeNodes;
+    data.hasNodeRows = activeNodes.length;
+    return getIstanbulSnapshot(hostURL);
+  })
+  .then((snapshot) => {
+    data.snapshot = snapshot;
+    if(activeNodes.length){
+      data.allNodes = activeNodes;
+      /*console.log("=========================");
+      console.log(data);
+      console.log("=========================");*/
       res.render('etheradmin', data);
-    });
+    }
+    else{
+      getAllNodeInfoFromContract()
+      .then((allNodes)=>{
+        data.allNodes = allNodes;
+        /*console.log("--------------------------");
+        console.log(data.allNodes);
+        console.log("--------------------------");*/
+        res.render('etheradmin', data);
+      })
+    }
+  })
+  .catch((err) => {
+    console.log("error at getting admin list or getSnapshot", err);
+    res.render('etheradmin', data);
+  });
 });
 
-// Get:networkinfo
 app.get('/networkinfo', function (req, res) {
   var networkInfo = new NetworkInfo();
   networkInfo.adminContractABI = abiContent;
 
   getRecentBlock()
-    .then(function (recentBlock) {
-      networkInfo.recentBlock = recentBlock;
-      networkInfo.networkID = "2018";
-      res.send(JSON.stringify(networkInfo));
-    })
-    .catch(function (error) {
-      console.log(`Error getRecentBlock : ${error}`);
-      res.send(JSON.stringify(networkInfo));
-    })
+  .then(function (recentBlock) {
+    networkInfo.recentBlock = recentBlock;
+    networkInfo.networkID = "2018";
+    res.send(JSON.stringify(networkInfo));
+  })
+  .catch(function (error) {
+    console.log(`Error getRecentBlock : ${error}`);
+    res.send(JSON.stringify(networkInfo));
+  })
 })
-
-app.get('/AdminValidatorSet.js', function (req, res) {
-  var file = __dirname.replace("/app", "") + '/adminvalidatorset.js';
-  res.download(file);
-});
-
-app.get('/SimpleValidatorSet.js', function (req, res) {
-  var file = __dirname.replace("/app", "") + '/simplevalidatorset.js';
-  res.download(file);
-});
-
-app.get('/ethereumjs-tx-1.3.3.min.js', function (req, res) {
-  var file = __dirname.replace("/app", "/app/dist") + '/ethereumjs-tx-1.3.3.min.js';
-  res.download(file);
-});
-
-app.get('/web3util.js', function (req, res) {
-  var file = __dirname + '/web3util.js';
-  res.download(file);
-});
 
 app.get('/web3.1-beta.js', function (req, res) {
   var file = __dirname.replace("/app", "/app/dist") + '/web3.min.js';
@@ -422,7 +359,7 @@ app.post('/start_propose', (req, res)=>{
   }
   var methodData = '';
   const web3 = new Web3(new Web3.providers.IpcProvider('/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc', net));
-  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
+  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), addresses.adminValidatorSetAddress);
   console.log("Checking Votes");
   Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
   .then((result)=>{
@@ -457,10 +394,10 @@ app.post('/start_propose', (req, res)=>{
         res.status(200).send({
           tx:{
             nonce: nonceToUse,
-            gasPrice: '0x4A817C800', //20Gwei
+            gasPrice: web3.utils.toWei(20,'gwei'), //20Gwei
             gasLimit: '0x47b760',//'0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
             from: req.body.sender,
-            to: adminValidatorSetAddress,
+            to: addresses.adminValidatorSetAddress,
             value: web3.utils.toHex(0),
             data: methodData
           },
@@ -475,10 +412,6 @@ app.post('/start_propose', (req, res)=>{
     console.log(err);
     res.status(500).send();
   });
-});
-
-app.listen(listenPort, function () {
-  //('Admin webserver listening on port ' + listenPort);
 });
 
 app.post('/istanbul_propose', function (req, res) {
@@ -541,4 +474,11 @@ app.post('/istanbul_propose', function (req, res) {
       res.status(400).send("Not an Admin Account");
     }
   });
+});
+
+refreshNodeList();
+setInterval(checkNewNodes, refreshInterval/2);
+setInterval(refreshNodeList, refreshInterval);
+app.listen(listenPort, function () {
+  //('Admin webserver listening on port ' + listenPort);
 });
