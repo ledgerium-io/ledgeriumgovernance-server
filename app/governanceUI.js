@@ -359,7 +359,7 @@ app.post('/start_propose', (req, res)=>{
   }
   var methodData = '';
   const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
-  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
+  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), addresses.adminValidatorSetAddress);
   console.log("Checking Votes");
   Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
   .then((result)=>{
