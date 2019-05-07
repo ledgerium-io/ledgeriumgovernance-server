@@ -36,7 +36,7 @@ const abiContent                = '';
 const web3RPC                   = new Web3(new Web3.providers.HttpProvider(hostURL));
 var networkManagerContract      = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), addresses.networkManagerAddress);
 const tokenMap                  = {};
-const ipcPath                   = "/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc";
+const ipcPath                   = "/eth/geth.ipc";
 const fixedGasPrice             = "0x77359400";
 const fixedGasLimit             = '0x47b760';
 /*
