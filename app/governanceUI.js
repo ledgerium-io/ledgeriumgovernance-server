@@ -36,7 +36,9 @@ const abiContent                = '';
 const web3RPC                   = new Web3(new Web3.providers.HttpProvider(hostURL));
 var networkManagerContract      = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), addresses.networkManagerAddress);
 const tokenMap                  = {};
-
+const ipcPath                   = "/home/vivek/projects/ledgerium/ledgeriumtools/output/validator-msc0/geth.ipc";
+const fixedGasPrice             = "0x77359400";
+const fixedGasLimit             = '0x47b760';
 /*
 
 Set Up express to use handlebars and required Middleware
@@ -261,18 +263,18 @@ const checkNewNodes = async ()=>{
         ).encodeABI();
         const txParams = {
           nonce    : nonceToUse,
-          gasPrice : web3.utils.toWei(20,'gwei'),
-          gasLimit : '0x47b760',
+          gasPrice : fixedGasPrice,
+          gasLimit : fixedGasLimit,
           from     : '0x' + ethUtil.privateToAddress('0x' + privatekey).toString('hex'),
           to       : addresses.networkManagerAddress,
-          value    : web3.utils.toHex(0),
+          value    : web3RPC.utils.toHex(0),
           data     : encodedABI
         }
         const tx = new EthereumTx(txParams);
         const privateKeyBuffer = new Buffer(privateKey, 'hex');
         tx.sign(privateKeyBuffer);
         const serializedTx = tx.serialize();
-        transactionPromises.push(web3.eth.sendSignedTransaction('0x'+serializedTx.toString('hex')));
+        transactionPromises.push(web3RPC.eth.sendSignedTransaction('0x'+serializedTx.toString('hex')));
       }
     }
     Promise.all(transactionPromises)
@@ -358,8 +360,8 @@ app.post('/start_propose', (req, res)=>{
     return;
   }
   var methodData = '';
-  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
-  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), adminValidatorSetAddress);
+  const web3 = new Web3(new Web3.providers.IpcProvider(ipcPath, net));
+  const Admin = new web3.eth.Contract(JSON.parse(adminContractABI), addresses.adminValidatorSetAddress);
   console.log("Checking Votes");
   Admin.methods.checkVotes(req.body.vote).call({ from : req.body.sender })
   .then((result)=>{
@@ -394,8 +396,8 @@ app.post('/start_propose', (req, res)=>{
         res.status(200).send({
           tx:{
             nonce: nonceToUse,
-            gasPrice: web3.utils.toWei(20,'gwei'), //20Gwei
-            gasLimit: '0x47b760',//'0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
+            gasPrice: fixedGasPrice, //20Gwei
+            gasLimit: fixedGasLimit,//'0x48A1C0',//web3.utils.toWei(20,'gwei'), //estimatedGas, // Todo, estimate gas
             from: req.body.sender,
             to: addresses.adminValidatorSetAddress,
             value: web3.utils.toHex(0),
@@ -416,7 +418,7 @@ app.post('/start_propose', (req, res)=>{
 
 app.post('/istanbul_propose', function (req, res) {
   console.log("Istanbul Propose Started");
-  const web3 = new Web3(new Web3.providers.IpcProvider('/eth/geth.ipc', net));
+  const web3 = new Web3(new Web3.providers.IpcProvider(ipcPath, net));
   if(!tokenMap[req.body.hash] || !req.body.transactionHash){
     console.log("Incomplete Request or Wrong Request");
     res.status(400).send({ message:"agalla" });
