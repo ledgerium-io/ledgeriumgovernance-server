@@ -294,18 +294,6 @@ async function setupNetworkManagerContract() {
             console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
         }
     }
-    // var noOfNodes = await nmContract.methods.getNodesCounter().call();
-    // for(let nodeIndex = 0; nodeIndex < noOfNodes; nodeIndex++) {
-    //     let result = await nmContract.methods.getNodeDetails(nodeIndex).call();
-    //     for(let peerIndex = 0; peerIndex < peerNodes.length; peerIndex++) {
-    //         if(result.enode == peerNodes[nodeIndex].enodeUrl)
-    //             continue;
-    //         else
-
-    //     }
-    //     //console.log("****** Details of peer index -", nodeIndex, "**********");
-    //     //console.log("HostName -", result.hostName,"\nRole -", result.role, "\nIP Address -", result.ipAddress, "\nPort -", result.port, "\nPublic Key -", result.publicKey, "\nEnode -", result.enode);
-    // }
     return;
 }
 

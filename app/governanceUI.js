@@ -16,7 +16,7 @@ const EthereumTx  = require('ethereumjs-tx');
 /*
  * Parameters
  */
-const privatekey    = process.argv[4] || "fd53aa6ddae9d3848c2f961b8050991451112089de72bea8348482988cff8bb2";
+const privatekey    = process.argv[4];
 //const utils         = new Utils();
 const currentIp     = execSync('curl -s https://api.ipify.org');
 const listenPort    = "3003";
@@ -39,10 +39,9 @@ const tokenMap                  = {};
 const ipcPath                   = "/eth/geth.ipc";
 const fixedGasPrice             = "0x77359400";
 const fixedGasLimit             = '0x47b760';
+
 /*
-
 Set Up express to use handlebars and required Middleware
-
 */
 const app = express();
 app.engine('handlebars', exphbs({
@@ -63,9 +62,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 /*
-
 Exception Handler for an Uncaught Exception
-
 */
 process.on('uncaughtException', err => {
   if (err.message.includes("ECONNRESET")) {
