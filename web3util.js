@@ -87,10 +87,6 @@ class Utils  {
         }
     }
 
-    getSignedMethodTransaction(fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas){
-        
-    }
-
     sendMethodTransactionCb (fromAccountAddress, toContractAddress, methodData, privateKey, web3, estimatedGas, fn) {
         web3.eth.getTransactionCount(fromAccountAddress, 'pending', function(err,  nonceToUse) {
             console.log("nonceToUse ",nonceToUse);
