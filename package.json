@@ -1,7 +1,7 @@
 {
   "name": "governanceapp",
   "version": "0.2.0",
-  "description": "Goveranance App contains smart contracts to manage admin and individual validators to come on platform.",
+  "description": "Goveranance App contains smart contracts to manage admin and individual validators to come on the platform.",
   "main": "index.js",
   "scripts": {
     "test": "mocha protocol http --require ./setup.js --timeout=100000 --recursive --delay ./test"
@@ -10,17 +10,16 @@
     "type": "git",
     "url": "https://github.com/ledgerium/governanceapp"
   },
-  "author": "Ledgerium",
+  "author": "Rahul Golash",
   "license": "BSD-2-Clause",
   "dependencies": {
     "ajv-keywords": "^3.2.0",
-    "chai-bignumber": "^3.0.0",
     "ethereumjs-tx": "^1.3.4",
-    "htmlparser2": "^3.10.0",
     "keythereum": "^1.0.4",
     "moment": "^2.22.2",
     "promise": "7.1.1",
     "scrypt": "^6.0.3",
+    "tar": "^4.4.8",
     "truffle-hdwallet-provider": "0.0.6",
     "web3": "1.0.0-beta.36",
     "websocket": "^1.0.26"
