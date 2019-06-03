@@ -20,6 +20,6 @@ RUN npm install
 WORKDIR /ledgerium/governanceapp/governanceapp/app
 
 RUN npm install
-RUN npm install web3@1.0.0-beta.36
+#RUN npm install web3@1.0.0-beta.36
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]
