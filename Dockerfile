@@ -10,7 +10,7 @@ RUN apk add --no-cache --virtual .build-deps \
 
 RUN mkdir -p /ledgerium/governanceapp/governanceapp \
     && cd /ledgerium/governanceapp \
-    && git clone -b LB-170-Improvement https://github.com/ledgerium/governanceapp.git
+    && git clone -b build https://github.com/ledgerium/governanceapp.git
 #ADD . /ledgerium/governanceapp/governanceapp
 
 # to be removed in the future
