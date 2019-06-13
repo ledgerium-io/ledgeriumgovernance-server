@@ -2,7 +2,7 @@ const express     = require('express');
 const exphbs      = require('express-handlebars');
 const bodyParser  = require('body-parser');
 const fs          = require('fs');
-//const Utils       = require('../web3util');
+const Utils       = require('../web3util');
 const moment      = require('moment');
 const Promise     = require('promise');
 const appjson     = require('./version.json')
@@ -16,22 +16,27 @@ const EthereumTx  = require('ethereumjs-tx');
 /*
  * Parameters
  */
-const privatekey    = process.argv[4];
-//const utils         = new Utils();
-const currentIp     = execSync('curl -s https://api.ipify.org');
+const utils         = new Utils();
+const currentIp     = String(execSync('curl -s https://api.ipify.org'));
 const listenPort    = "3003";
 const consortiumId  = "2018";
+if(addresses.networkManagerAddress == undefined)
+{
+  console.log("networkManagerAddress was not defined")
+  addresses.networkManagerAddress = "0x0000000000000000000000000000000000002023"
+}
+console.log("networkManagerAddress ", addresses.networkManagerAddress)
 
 /*
  * Constants
  */
 const refreshInterval           = 60000;
-const nodeRegexExp              = /enode:\/\/\w{128}\@(\d+.\d+.\d+.\d+)\:\d+$/;
 const hostURL                   = "http://" + (process.argv[2] || "localhost") + ":" + (process.argv[3] || "8545");
 const adminContractABI          = fs.readFileSync(__dirname + "/../build/contracts/AdminValidatorSet.abi.json", 'utf8');
-const simpleContractABI         = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
+//const simpleContractABI         = fs.readFileSync(__dirname + "/../build/contracts/SimpleValidatorSet.abi.json", 'utf8');
 const networkManagerContractABI = fs.readFileSync(__dirname + "/../build/contracts/NetworkManagerContract.abi.json", 'utf8');
 var activeNodes                 = [];
+const nodeMap                   = {};
 const abiContent                = '';
 const web3RPC                   = new Web3(new Web3.providers.HttpProvider(hostURL));
 var networkManagerContract      = new web3RPC.eth.Contract(JSON.parse(networkManagerContractABI), addresses.networkManagerAddress);
@@ -84,6 +89,21 @@ console.log(`ethRpcPort: ${(process.argv[3] || "8545")}`)
 console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
+const refreshNodeList = ()=>{
+  console.log("refreshing node list");  
+  getAllNodeInfoFromContract()
+  .then((allNodes)=>{
+    console.log("refreshed List");
+    activeNodes = allNodes;
+    
+  console.log("populating activenode public key map");
+  for(var i=0; i< activeNodes.length; i++){
+    nodeMap[activeNodes[i].publicKey] = true;
+  }
+  })
+  .catch(console.log);
+}
+
 function getIstanbulSnapshot(url) {
   console.log("Istanbul Get Snapshot called");
   return new Promise((resolve, reject) => {
@@ -131,22 +151,38 @@ function getAdminPeers(url) {
           console.log("getAdminPeers admin_nodeInfo Error");
           reject("Admin peers returned null");
         }
+        var role;
+        currentPublicKey = '0x' + ethUtil.pubToAddress('0x' + curNode.result.id).toString('hex')
+        if(nodeMap[currentPublicKey]) {
+          role = "MasterNode"
+        } 
+        else {
+          role = "PeerNode"
+        }
         nodesList.push({
           enode: curNode.result.id,
           name: curNode.result.name.split("/")[1],
-          role: "Node",
+          role: role,
           ip: currentIp,
-          publicKey: '0x' + ethUtil.pubToAddress('0x' + curNode.result.id).toString('hex'),
+          publicKey: currentPublicKey,
           port: curNode.result.ports.listener
         });
+        var publicKey;
         for (var i in retValue.result) {
           Ip = retValue.result[i].network.remoteAddress.split(":");
+          publicKey = '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex');
+          if(nodeMap[publicKey]) {
+            role = "MasterNode"
+          } 
+          else {
+            role = "PeerNode"
+          }
           nodesList.push({
             name: retValue.result[i].name.split('/')[1],
-            role: "Node",
+            role: role,
             ip: Ip[0],
             port: Ip[1],
-            publicKey: '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex'),
+            publicKey: publicKey,
             enode: retValue.result[i].id
           });
         }
@@ -227,62 +263,32 @@ function getAllNodeInfoFromContract(){
   });
 }
 
-const refreshNodeList = ()=>{
-  console.log("refreshing node list");  
-  getAllNodeInfoFromContract()
-  .then((allNodes)=>{
-    console.log("refreshed List");
-    activeNodes = allNodes;
-  })
-  .catch(console.log);
-}
-
-const checkNewNodes = async ()=>{
-  const nodeMap = {};
-  console.log("checking new nodes");
-  for(var i=0; i<activeNodes.length; i++){
-    nodeMap[activeNodes[i].publicKey] = true;
-  }
-  getAdminPeers(hostURL)
-  .then((peers)=>{
-    console.log("checkNewNodes got admin peers");
-    const transactionPromises = [];
-    for(var i=0; i<peers.length; i++){
-      if(!nodeMap[peers[i].publicKey]){
-        console.log("New Peer added");
-        let encodedABI = networkmanagerContract.methods.registerNode(peers[index].hostname,
-          peers[index].hostname,
-          peers[index].role,
-          peers[index].ipaddress,
-          peers[index].port,
-          peers[index].publickey,
-          peers[index].enode
-        ).encodeABI();
-        const txParams = {
-          nonce    : nonceToUse,
-          gasPrice : fixedGasPrice,
-          gasLimit : fixedGasLimit,
-          from     : '0x' + ethUtil.privateToAddress('0x' + privatekey).toString('hex'),
-          to       : addresses.networkManagerAddress,
-          value    : web3RPC.utils.toHex(0),
-          data     : encodedABI
-        }
-        const tx = new EthereumTx(txParams);
-        const privateKeyBuffer = new Buffer(privateKey, 'hex');
-        tx.sign(privateKeyBuffer);
-        const serializedTx = tx.serialize();
-        transactionPromises.push(web3RPC.eth.sendSignedTransaction('0x'+serializedTx.toString('hex')));
+const checkNewNodes = async ()=> {
+  peers = await getAdminPeers(hostURL);
+  console.log("checkNewNodes got admin peers");
+  //privatekey = process.argv[4];
+  fromAccountAddress = '0x' + ethUtil.privateToAddress(process.argv[4]).toString('hex')
+  for(var index=0; index<peers.length; index++) {
+    if(!nodeMap[peers[index].publicKey]) {
+      console.log("New Peer to be added", peers[index].name, peers[index].publicKey);
+      let encodedABI = networkManagerContract.methods.registerNode(peers[index].name,
+        peers[index].name,
+        peers[index].role,
+        peers[index].ip,
+        peers[index].port,
+        peers[index].publicKey,
+        peers[index].enode
+      ).encodeABI();
+      key = process.argv[4];
+      if(key.indexOf("0x") == 0) {
+        key = key.slice(2);
       }
-    }
-    Promise.all(transactionPromises)
-    .then((transactionResults)=>{
-      console.log("Got All Transaction Results");
-      console.log(transactionResults);
-    })
-    .catch(console.log);
-  })
-  .catch(console.log)
-}
+      transactionObject = await utils.sendMethodTransaction(fromAccountAddress, addresses.networkManagerAddress,encodedABI, key, web3RPC, 0)
+      console.log("TransactionLog for Network Manager registerNode -", transactionObject.transactionHash);
+      nodeMap[peers[index].publicKey] = true;
+    } //end of if
+  }//end of for
+}//end of checkNewNodes
 
 app.get('/', async function (req, res) {
   var data = {
@@ -306,18 +312,12 @@ app.get('/', async function (req, res) {
     data.snapshot = snapshot;
     if(activeNodes.length){
       data.allNodes = activeNodes;
-      /*console.log("=========================");
-      console.log(data);
-      console.log("=========================");*/
       res.render('etheradmin', data);
     }
     else{
       getAllNodeInfoFromContract()
       .then((allNodes)=>{
         data.allNodes = allNodes;
-        /*console.log("--------------------------");
-        console.log(data.allNodes);
-        console.log("--------------------------");*/
         res.render('etheradmin', data);
       })
     }
@@ -479,5 +479,5 @@ refreshNodeList();
 setInterval(checkNewNodes, refreshInterval/2);
 setInterval(refreshNodeList, refreshInterval);
 app.listen(listenPort, function () {
-  //('Admin webserver listening on port ' + listenPort);
+  console.log('Admin webserver listening on port ' + listenPort);
 });
