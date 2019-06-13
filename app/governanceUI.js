@@ -476,8 +476,10 @@ app.post('/istanbul_propose', function (req, res) {
 });
 
 refreshNodeList();
-setInterval(checkNewNodes, refreshInterval/2);
+if(process.argv[4]) {
+  setInterval(checkNewNodes, refreshInterval/2);
+}  
 setInterval(refreshNodeList, refreshInterval);
 app.listen(listenPort, function () {
-  console.log('Admin webserver listening on port ' + listenPort);
+  console.log('Admin webserver started');
 });
