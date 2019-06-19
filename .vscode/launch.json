@@ -54,9 +54,9 @@
                 "action": "openExternally"
             },
             "args": [
-                "125.254.27.14",
-                "28545",
-                "0x8a042faa6dd0a606364d5080606670da5c235849b0a307848f18e83bdae6e0c9"
+                "localhost",
+                "8545",
+                "0xcdf096a1af873ff8cafd67839d84b0edae79d3f2e3396aee4a1de75726339bbc"
             ]
         }
     ]
