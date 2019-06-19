@@ -44,6 +44,7 @@ const tokenMap                  = {};
 const ipcPath                   = "/eth/geth.ipc";
 const fixedGasPrice             = "0x77359400";
 const fixedGasLimit             = '0x47b760';
+const eNodeStr                  = "enode://"
 
 /*
 Set Up express to use handlebars and required Middleware
@@ -78,7 +79,6 @@ process.on('unhandledRejection', err => {
   } else throw err;
 });
 
-
 /*
  * Output Parameters to log file
  */
@@ -89,7 +89,7 @@ console.log(`ethRpcPort: ${(process.argv[3] || "8545")}`)
 console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
-const refreshNodeList = ()=>{
+const readNetworkManagerContractNodeList = ()=>{
   console.log("refreshing node list");  
   getAllNodeInfoFromContract()
   .then((allNodes)=>{
@@ -126,8 +126,8 @@ function getIstanbulSnapshot(url) {
   });
 }
 
-function getAdminPeers(url) {
-  console.log("getAdminPeers called");
+function getNetworkNodesList(url) {
+  console.log("getNetworkNodesList called");
   return new Promise(function (resolve, reject) {
     let nodesList = [];
     const w3 = new Web3(new Web3.providers.HttpProvider(url));
@@ -138,7 +138,7 @@ function getAdminPeers(url) {
       params: []
     }, function (err, retValue) {
       if (err) {
-        console.log("getAdminPeers admin_peers Error");
+        console.log("getNetworkNodesList admin_peers Error");
         reject("Admin peers returned null");
       }
       w3.currentProvider.send({
@@ -148,11 +148,13 @@ function getAdminPeers(url) {
         params: []
       }, function (error, curNode) {
         if (error) {
-          console.log("getAdminPeers admin_nodeInfo Error");
+          console.log("getNetworkNodesList admin_nodeInfo Error");
           reject("Admin peers returned null");
         }
         var role;
-        currentPublicKey = '0x' + ethUtil.pubToAddress('0x' + curNode.result.id).toString('hex')
+        var nodeID = curNode.result.enode.slice(eNodeStr.length,curNode.result.enode.indexOf("@"));
+        currentPublicKey = '0x' + ethUtil.pubToAddress('0x' + nodeID).toString('hex')
+        curNode.result.id = nodeID;
         if(nodeMap[currentPublicKey]) {
           role = "MasterNode"
         } 
@@ -170,7 +172,9 @@ function getAdminPeers(url) {
         var publicKey;
         for (var i in retValue.result) {
           Ip = retValue.result[i].network.remoteAddress.split(":");
-          publicKey = '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex');
+          var nodeID = retValue.result[i].enode.slice(eNodeStr.length,retValue.result[i].enode.indexOf("@"));
+          retValue.result[i].id = nodeID;
+          publicKey = '0x' + ethUtil.pubToAddress('0x' + nodeID).toString('hex')
           if(nodeMap[publicKey]) {
             role = "MasterNode"
           } 
@@ -186,7 +190,7 @@ function getAdminPeers(url) {
             enode: retValue.result[i].id
           });
         }
-        console.log("getAdminPeers success");
+        console.log("getNetworkNodesList success");
         resolve(nodesList);
       });
     });
@@ -263,10 +267,12 @@ function getAllNodeInfoFromContract(){
   });
 }
 
-const checkNewNodes = async ()=> {
-  peers = await getAdminPeers(hostURL);
-  console.log("checkNewNodes got admin peers");
-  //privatekey = process.argv[4];
+const syncContractListToNetworkNodeList = async ()=> {
+  peers = await getNetworkNodesList(hostURL);
+  console.log("syncContractListToNetworkNodeList got admin peers");
+  if(process.argv[4] == undefined) {
+    return;
+  }  
   fromAccountAddress = '0x' + ethUtil.privateToAddress(process.argv[4]).toString('hex')
   for(var index=0; index<peers.length; index++) {
     if(!nodeMap[peers[index].publicKey]) {
@@ -288,7 +294,7 @@ const checkNewNodes = async ()=> {
       nodeMap[peers[index].publicKey] = true;
     } //end of if
   }//end of for
-}//end of checkNewNodes
+}//end of syncContractListToNetworkNodeList
 
 app.get('/', async function (req, res) {
   var data = {
@@ -302,7 +308,7 @@ app.get('/', async function (req, res) {
       validators: []
     }
   };
-  getAdminPeers(hostURL)
+  getNetworkNodesList(hostURL)
   .then((activeNodes) => {
     data.nodeRows = activeNodes;
     data.hasNodeRows = activeNodes.length;
@@ -475,11 +481,9 @@ app.post('/istanbul_propose', function (req, res) {
   });
 });
 
-refreshNodeList();
-if(process.argv[4]) {
-  setInterval(checkNewNodes, refreshInterval/2);
-}  
-setInterval(refreshNodeList, refreshInterval);
+readNetworkManagerContractNodeList();
+setInterval(syncContractListToNetworkNodeList, refreshInterval/2);
+setInterval(readNetworkManagerContractNodeList, refreshInterval);
 app.listen(listenPort, function () {
   console.log('Admin webserver started');
 });
