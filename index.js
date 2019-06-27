@@ -282,6 +282,35 @@ async function setupNetworkManagerContract() {
         }
         if(!flag)
         {
+            if(!peerNodes[index].nodename) {
+                console.log("setupNetworkManagerContract nodename for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].hostname) {
+                console.log("setupNetworkManagerContract hostname for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].role) {
+                console.log("setupNetworkManagerContract role for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].ipaddress) {
+                console.log("setupNetworkManagerContract ipaddress for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].port) {
+                console.log("setupNetworkManagerContract port for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].publickey) {
+                console.log("setupNetworkManagerContract publickey for index", index, "does not exist");
+                return;
+            }
+            if(!peerNodes[index].enodeUrl) {
+                console.log("setupNetworkManagerContract enodeUrl for index", index, "does not exist");
+                return;
+            }
+            console.log("Adding following peer node to Network Manager", "\nnodename", peerNodes[index].nodename, "\nhostname", peerNodes[index].hostname, "\nrole", peerNodes[index].role, "\nipaddress", peerNodes[index].ipaddress, "\nport", peerNodes[index].port.toString(), "\npublickey", peerNodes[index].publickey, "\nenode", peerNodes[index].enodeUrl)
             encodedABI = nmContract.methods.registerNode(peerNodes[index].nodename,
                 peerNodes[index].hostname,
                 peerNodes[index].role,
