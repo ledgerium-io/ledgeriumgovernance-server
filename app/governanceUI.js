@@ -134,47 +134,80 @@ function getNetworkNodesList(url) {
     w3.currentProvider.send({
       jsonrpc: '2.0',
       id: new Date().getTime(),
+      method: 'admin_nodeInfo',
+      params: []
+    }, function (error, curNode) {
+    if (error) {
+      console.log("getNetworkNodesList admin_nodeInfo Error");
+      //reject("Admin peers returned null");
+      resolve(nodesList);
+      return;
+    }
+    //Add the the current info to the nodelist first
+    //validate the values!
+    if(!curNode.result.enode) {
+      console.log("getNetworkNodesList listener call did not fetch node enode!");
+      resolve(nodesList);
+      return;
+    }
+    if(!curNode.result.name) {
+      console.log("getNetworkNodesList listener call did not fetch node name!");
+      resolve(nodesList);
+      return;
+    }
+    if(!curNode.result.ports.listener) {
+      console.log("getNetworkNodesList listener call did not fetch node listener port!");
+      resolve(nodesList);
+      return;
+    }
+    var role;
+    var nodeID = curNode.result.enode.slice(eNodeStr.length,curNode.result.enode.indexOf("@"));
+    currentPublicKey = '0x' + ethUtil.pubToAddress('0x' + nodeID).toString('hex')
+    curNode.result.id = nodeID;
+    if(nodeMap[currentPublicKey]) {
+      role = "MasterNode"
+    } 
+    else {
+      role = "PeerNode"
+    }
+    nodesList.push({
+      enode: curNode.result.id,
+      name: curNode.result.name.split("/")[1],
+      role: role,
+      ip: currentIp,
+      publicKey: currentPublicKey,
+      port: curNode.result.ports.listener
+    });
+    //Now add the the peer nodes info to the nodelist
+    w3.currentProvider.send({
+      jsonrpc: '2.0',
+      id: new Date().getTime(),
       method: 'admin_peers',
       params: []
     }, function (err, retValue) {
-      if (err) {
-        console.log("getNetworkNodesList admin_peers Error");
-        reject("Admin peers returned null");
-      }
-      w3.currentProvider.send({
-        jsonrpc: '2.0',
-        id: new Date().getTime(),
-        method: 'admin_nodeInfo',
-        params: []
-      }, function (error, curNode) {
-        if (error) {
-          console.log("getNetworkNodesList admin_nodeInfo Error");
+        if (err) {
+          console.log("getNetworkNodesList admin_peers Error");
           reject("Admin peers returned null");
         }
-        var role;
-        var nodeID = curNode.result.enode.slice(eNodeStr.length,curNode.result.enode.indexOf("@"));
-        currentPublicKey = '0x' + ethUtil.pubToAddress('0x' + nodeID).toString('hex')
-        curNode.result.id = nodeID;
-        if(nodeMap[currentPublicKey]) {
-          role = "MasterNode"
-        } 
-        else {
-          role = "PeerNode"
-        }
-        nodesList.push({
-          enode: curNode.result.id,
-          name: curNode.result.name.split("/")[1],
-          role: role,
-          ip: currentIp,
-          publicKey: currentPublicKey,
-          port: curNode.result.ports.listener
-        });
         var publicKey;
         for (var i in retValue.result) {
+          //validate the values!
+          if(!retValue.result[i].id) {
+            console.log("getNetworkNodesList admin_peers call did not fetch node id!");
+            resolve(nodesList);
+          }
+          if(!retValue.result[i].name) {
+            console.log("getNetworkNodesList admin_peers call did not fetch node name!");
+            resolve(nodesList);
+            return;
+          }
+          if(!retValue.result[i].network.remoteAddress) {
+            console.log("getNetworkNodesList admin_peers call did not fetch node IP address!");
+            resolve(nodesList);
+            return;
+          }
           Ip = retValue.result[i].network.remoteAddress.split(":");
-          var nodeID = retValue.result[i].enode.slice(eNodeStr.length,retValue.result[i].enode.indexOf("@"));
-          retValue.result[i].id = nodeID;
-          publicKey = '0x' + ethUtil.pubToAddress('0x' + nodeID).toString('hex')
+          publicKey = '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex')
           if(nodeMap[publicKey]) {
             role = "MasterNode"
           } 
