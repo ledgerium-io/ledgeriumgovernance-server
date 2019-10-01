@@ -90,12 +90,12 @@ console.log(`validator node: ${hostURL}`)
 console.log(`Started Governanceapp website - Ver.${appjson.version}`);
 
 const readNetworkManagerContractNodeList = ()=>{
-  console.log("refreshing node list");  
+  console.log("refreshing node list");
   getAllNodeInfoFromContract()
   .then((allNodes)=>{
     console.log("refreshed List");
     activeNodes = allNodes;
-    
+
   console.log("populating activenode public key map");
   for(var i=0; i< activeNodes.length; i++){
     nodeMap[activeNodes[i].publicKey] = true;
@@ -166,7 +166,7 @@ function getNetworkNodesList(url) {
     curNode.result.id = nodeID;
     if(nodeMap[currentPublicKey]) {
       role = "MasterNode"
-    } 
+    }
     else {
       role = "PeerNode"
     }
@@ -210,7 +210,7 @@ function getNetworkNodesList(url) {
           publicKey = '0x' + ethUtil.pubToAddress('0x' + retValue.result[i].id).toString('hex')
           if(nodeMap[publicKey]) {
             role = "MasterNode"
-          } 
+          }
           else {
             role = "PeerNode"
           }
@@ -305,7 +305,7 @@ const syncContractListToNetworkNodeList = async ()=> {
   console.log("syncContractListToNetworkNodeList got admin peers");
   if(process.argv[4] == undefined) {
     return;
-  }  
+  }
   fromAccountAddress = '0x' + ethUtil.privateToAddress(process.argv[4]).toString('hex')
   for(var index=0; index<peers.length; index++) {
     if(!nodeMap[peers[index].publicKey]) {
@@ -351,19 +351,19 @@ app.get('/', async function (req, res) {
     data.snapshot = snapshot;
     if(activeNodes.length){
       data.allNodes = activeNodes;
-      res.render('etheradmin', data);
+      res.render('etheradmin2', data);
     }
     else{
       getAllNodeInfoFromContract()
       .then((allNodes)=>{
         data.allNodes = allNodes;
-        res.render('etheradmin', data);
+        res.render('etheradmin2', data);
       })
     }
   })
   .catch((err) => {
     console.log("error at getting admin list or getSnapshot", err);
-    res.render('etheradmin', data);
+    res.render('etheradmin2', data);
   });
 });
 
@@ -497,7 +497,7 @@ app.post('/istanbul_propose', function (req, res) {
               }
             });
           }else if( !callbackReceipt ) {
-            setTimeout(getTransactionReceipt, 1000, hash);                  
+            setTimeout(getTransactionReceipt, 1000, hash);
           }else if(!callbackReceipt.status){
             console.log("Blockchain Transaction Failed");
             res.status(500).send({ err: "error" });

@@ -67,7 +67,7 @@
             <td> ADD</td>
           {{else}}
             <td> REMOVE </td>
-          {{/if}}  
+          {{/if}}
         </tr>
         {{/each}}
       </table>
@@ -165,7 +165,7 @@
       document.getElementById('adminTab').classList.remove("tabSelected");
       document.getElementById('validatorTab').classList.remove("tabSelected");
     }
-    
+
     const showAdminTab = ()=> {
       document.getElementById('validatorContent').style.display = "none";
       document.getElementById('nodeStatusContent').style.display = "none";
@@ -183,7 +183,7 @@
       document.getElementById('validatorTab').classList.add("tabSelected");
       document.getElementById('nodeStatusTab').classList.remove("tabSelected");
     }
-    
+
     const showError = (errorMessage) => {
       document.getElementById("transactionStatus").style.display = "none";
       document.getElementById("failureStatus").style.display = "block";
@@ -222,11 +222,11 @@
     }
 
     window.addEventListener('load', () => onload(), false);
-    
+
     const onload = async function() {
       const validators = {{{ json this.snapshot.validators }}};
       const nodes      = {{{ json this.nodeRows }}};
-      const votes      = {{{ json this.snapshot.votes }}}
+      const votes      = {{{ json this.snapshot.votes }}};
       if(window.ledgerium){
         //latest
         localWeb3 = new Web3(ledgerium);
@@ -247,7 +247,7 @@
         //throw new Error('Ledgerium Wallet Not fount');
       }
       if (!localWeb3.currentProvider.selectedAddress || !checkValidator(localWeb3.currentProvider.selectedAddress.toLowerCase())) {
-        // show error and return 
+        // show error and return
         showError("Please install and unlock <a href='https://github.com/ledgerium-io/metamask-extension'>Ledgerium Wallet</a> or make sure you are using an admin account");
         disableAllButtons();
         return;
@@ -257,8 +257,8 @@
         // show current meta mask account
         document.getElementById('currentMetaMaskAccount').innerHTML = `Current Ethereum Account: ${localWeb3.currentProvider.selectedAddress}`;
       }
-      var map = {};     
-      
+      var map = {};
+
       for(var i=0; i<validators.length; i++){
         // create a map to access fast
         map[validators[i].toLowerCase()] = true;
@@ -330,15 +330,15 @@
           redirect: "follow", // manual, *follow, error
           referrer: "no-referrer", // no-referrer, *client
           body: JSON.stringify(myBody), // body data type must match "Content-Type" header
-      })   
+      })
       .then((data) => {
         transactionMessage("Transaction Complete, page will refresh in 10 seconds, Your Transaction May take up to 30 seconds to process");
-        console.log("4");        
+        console.log("4");
         localStorage.clear();
         setTimeout(()=>{ location.reload(true); },10000);
       }) // JSON-string from `response.json()` call
       .catch((err) => {
-        console.error(err);        
+        console.error(err);
         localStorage.clear();
         showError("Server Responded with a error message please contact your admin")
       });
