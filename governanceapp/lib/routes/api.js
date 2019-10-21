@@ -51,7 +51,9 @@ router.get('/snapshot', (request, response) => {
 
 router.post('/start-propose', (request, response) => {
   const {proposal, sender, vote} = request.body
-  if(typeof proposal !== 'boolean' || typeof sender !== 'string' || typeof vote !== 'string') return errorResponse(response, 'Wrong typeof request')
+  if(typeof proposal !== 'boolean' || typeof sender !== 'string' || typeof vote !== 'string') return errorResponse(response, 'Wrong type for parameter(s)')
+  
+
 })
 
 router.post('/istanbul-propose', (request, response) => {

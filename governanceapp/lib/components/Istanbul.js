@@ -1,8 +1,10 @@
 const execSync    = require('child_process').execSync;
-const fs          = require('fs')
+const crypto      = require('crypto');
+const fs          = require('fs');
 const ethUtil     = require('ethereumjs-util');
-const logger      = require('../logger')
-const net         = require('net')
+const sigUtil     = require('eth-sig-util');
+const logger      = require('../logger');
+const net         = require('net');
 
 class Instanbul {
 
@@ -12,7 +14,11 @@ class Instanbul {
     this.currentIp                  = ''
     this.nodes                      = []
     this.validators                 = {}
+    this.tokenMap                   = {}
     this.consortiumId               = 2018
+
+    this.gasPrice                   = "0x77359400"
+    this.gasLimit                   = "0x47b760"
 
     this.addresses                  = fs.readFileSync('./lib/keystore/contractsConfig.json', 'utf8')
     this.adminContractABI           = fs.readFileSync('./lib/contracts/build/AdminValidatorSet.abi.json', 'utf8')
@@ -20,8 +26,13 @@ class Instanbul {
     this.refreshInterval            = 60000
     this.hostURL                    = `http://${process.argv[2] || "localhost"}:${process.argv[3] || 8545}`
     this.enodeString                = 'enode://'
-    this.init()
-    this.getPayload()
+
+    this.addressContract            = '0x0000000000000000000000000000000000002023'
+    // this.init()
+    // this.getPayload()
+    this.startProposal()
+      .then()
+      .catch(console.log)
   }
 
   init() {
@@ -54,7 +65,6 @@ class Instanbul {
           payload.nodeCount = data[0].length
           payload.nodes     = data[0]
           payload.snapshot  = data[1]
-          console.log(payload)
           resolve(payload)
         })
         .catch(reject)
@@ -85,14 +95,82 @@ class Instanbul {
     })
   }
 
-  startProposal() {
-    return new Promise( (resolve, reject) => {
-
+  getNonce(address) {
+    return new Promise((resolve, reject) => {
+      Promise.all([
+        this.web3.eth.txpool.content(),
+        this.web3.eth.getTransactionCount(address, 'pending')
+      ])
+        .then(data => {
+          const txpool = data[0]
+          let transactionCount = data[1]
+          if(txpool.pending) {
+            if(txpool.pending[this.publicKey]) {
+              const pendingNonces = Object.keys(txpool.pending[address])
+              transactionCount = parseInt(pendingNonces[pendingNonces.length-1])+1
+            }
+          }
+          logger.debug(`Nounce: ${transactionCount}`)
+          resolve(transactionCount)
+        })
+        .catch(reject)
     })
   }
 
-  istanbulPropose() {
+  generateToken() {
+    return new Promise((resolve, reject) => {
+      resolve(crypto.createHash('sha256').update((Math.random().toString())).digest('hex'));
+    })
+  }
 
+  startProposal(address) {
+    return new Promise( (resolve, reject) => {
+      Promise.all([this.generateToken(), this.getNonce(address)])
+        .then(data => {
+          const token = data[0]
+          const transaction = {
+            nonce: data[1],
+            gasPrice: this.gasPrice,
+            gasLimit: this.gasLimit,
+            from: address,
+            to: this.addressContract,
+            value: this.web3.eth.utils.toHex(0),
+          }
+          this.tokenMap[token] = true
+          resolve({
+            transaction,
+            token
+          })
+        })
+        .catch(console.log)
+    })
+  }
+
+  istanbulPropose(token, transactionHash, signature) {
+    return new Promise( (resolve, reject) => {
+      if(!tokenMap[token] || !transactionHash) reject('Incomplete request');
+      delete tokenMap[token];
+      const recovered = sigUtil.recoverPersonalSignature({ data: token, sig:signature});
+      this.web3.eth.getCoinbase()
+        .then(coinbase => {
+          if(coinbase && coinbase.toLowerCase() === recovered.toLowerCase()) {
+            if(typeof proposal !== 'boolean' || typeof account !== 'string') reject('Wrong request types')
+            this.web3.currentProvider.send({
+              jsonrpc: "2.0",
+              id: new Date().getTime(),
+              method: "istanbul_propose",
+              params: [account, proposal]
+            }, function (error, result) {
+              if(error) {
+                reject(error)
+              } else {
+                resolve(result)
+              }
+            })
+          }
+        })
+        .catch(reject)
+    })
   }
 
 
