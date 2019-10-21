@@ -105,7 +105,7 @@ class Instanbul {
           const txpool = data[0]
           let transactionCount = data[1]
           if(txpool.pending) {
-            if(txpool.pending[this.publicKey]) {
+            if(txpool.pending[address]) {
               const pendingNonces = Object.keys(txpool.pending[address])
               transactionCount = parseInt(pendingNonces[pendingNonces.length-1])+1
             }
