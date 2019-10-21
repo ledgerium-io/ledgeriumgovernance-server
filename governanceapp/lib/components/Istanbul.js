@@ -125,20 +125,10 @@ class Instanbul {
 
   startProposal(address) {
     return new Promise( (resolve, reject) => {
-      Promise.all([this.generateToken(), this.getNonce(address)])
-        .then(data => {
-          const token = data[0]
-          const transaction = {
-            nonce: data[1],
-            gasPrice: this.gasPrice,
-            gasLimit: this.gasLimit,
-            from: address,
-            to: this.addressContract,
-            value: this.web3.eth.utils.toHex(0),
-          }
+      this.generateToken()
+        .then(token => {
           this.tokenMap[token] = true
           resolve({
-            transaction,
             token
           })
         })
@@ -146,9 +136,9 @@ class Instanbul {
     })
   }
 
-  istanbulPropose(token, transactionHash, signature) {
+  istanbulPropose(token, signature) {
     return new Promise( (resolve, reject) => {
-      if(!tokenMap[token] || !transactionHash) reject('Incomplete request');
+      if(!tokenMap[token] || !signature) reject('Incomplete request');
       delete tokenMap[token];
       const recovered = sigUtil.recoverPersonalSignature({ data: token, sig:signature});
       this.web3.eth.getCoinbase()
