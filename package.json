@@ -14,6 +14,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "eth-sig-util": "^2.4.4",
+    "web3": "^1.2.2",
     "winston": "^3.2.1"
   }
 }
