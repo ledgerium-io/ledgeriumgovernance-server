@@ -13,6 +13,7 @@ services:
 addons:
   ssh_known_hosts: 104.210.106.138
 before_install:
+- npm install --unsafe-perm -g keccak
 - npm install
 - echo "Testing Docker Hub credentials"
 - BUILDID="build-$RANDOM"
